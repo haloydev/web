@@ -6,7 +6,6 @@ interface TokensToHtmlProps {
 }
 
 export function TokensToHtml({ tokens, className }: TokensToHtmlProps) {
-  console.log(JSON.stringify(tokens, null, 2));
   return (
     <div className={className}>
       {tokens.map((line, i) => (
