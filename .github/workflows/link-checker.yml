@@ -27,6 +27,7 @@ jobs:
           args: |
             --root-dir $PWD/dist
             --exclude-all-private
+            --html-extension html
             dist/
 
       - name: Create Issue From File
