@@ -10,7 +10,7 @@ import { Navbar } from '@/components/navbar';
 ---
 
 <BaseLayout title="Haloy - Deploy Anywhere" class="bg-background-sky">
-  <div class="relative">
+  <div class="relative overflow-hidden">
     <div class="absolute inset-0 dark:hidden">
       <Image src={pinkBurst} alt="" class="absolute -top-32 left-[10%] w-200" />
       <Image src={pinkBurst} alt="" class="absolute -top-40 left-[40%] w-200" />
@@ -23,13 +23,15 @@ import { Navbar } from '@/components/navbar';
     <div class="relative h-screen">
       <Navbar client:load />
       <div class="flex justify-center">
-        <div class="mt-20 max-w-4xl px-12 sm:mt-32">
+        <div class="mt-28 flex max-w-4xl flex-col items-center px-12 sm:mt-32 sm:block">
           <h1 class="relative inline-block">
-            <CurlewLogo className="absolute -top-12 w-12 sm:-right-8" />
+            <CurlewLogo className="absolute -top-12 w-10 sm:-right-8 sm:w-12" />
             <span class="font-figtree text-left text-4xl font-black sm:text-6xl"> Cloudless Deploys </span>
           </h1>
-          <p class="mt-3 max-w-2xl text-xl sm:leading-10 md:text-2xl">Manage deployments on your own infrastructure.</p>
-          <div class="mt-6">
+          <p class="mt-2 max-w-2xl text-center text-xl sm:leading-10 md:text-2xl">
+            Manage deployments on your own infrastructure.
+          </p>
+          <div class="mt-6 sm:mt-8">
             <ButtonLink href="/docs/quickstart" size="lg">
               <IconRocket />
               Quickstart
