@@ -9,8 +9,7 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://haloydev.github.io',
-  base: '/web',
+  site: 'https://haloy.dev',
   vite: {
     plugins: [tailwindcss()],
   },
