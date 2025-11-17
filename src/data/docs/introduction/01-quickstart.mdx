@@ -1,0 +1,65 @@
+---
+title: 'Quickstart'
+slug: 'quickstart'
+category: introduction
+
+---
+
+import Code from '@/components/code.astro'
+
+## Prerequisites
+- __Server__: Any Linux server with Docker installed
+- __Local__: Docker for building your app
+- __Domain__: To access the Haloy API remotely (optional for local development)
+
+## Install haloy
+The haloy CLI tool will trigger deployments. To get started install it on your local machine:
+
+<Code code={`curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash`} lang="bash" />
+
+ Ensure `~/.local/bin` is in your PATH by adding the following to your `~/.bashrc`, `~/.zshrc`, or equivalent shell profile:
+<Code code={`export PATH="$HOME/.local/bin:$PATH"`} lang="bash" />
+
+
+## Install and initialize haloyd
+The next step is to install `haloyd` on your server.
+
+Install `haloyadm` (requires sudo access):
+<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash`} lang="bash" />
+
+2. Initialize `haloyd` and `HAProxy`:
+<Code code={`sudo haloyadm init`} lang="bash" />
+
+💡 **Recommended but optional**: Secure the Haloy API with a domain during initialization:
+<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
+
+If you don't have a domain now ready, you can set this later with:
+<Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
+For development or non-root installations, you can install in [user mode](#non-root-install).
+
+
+## Add the server on your local machine:
+<Code code={`haloy server add <server-domain> <api-token>  # e.g., haloy.yourserver.com`} lang="bash" />
+
+See [Authentication & Token Management](#authentication--token-management) for more options on how to manage API tokens.
+
+
+Create a `haloy.yaml` file:
+<Code code={`
+name: "my-app"
+server: haloy.yourserver.com
+
+domains:
+  - domain: "my-app.com"
+    aliases:
+      - "www.my-app.com" # Redirects to my-app.com
+`} lang="yaml" />
+
+
+This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form. For all available options, see the full [Configuration Options](#configuration-options) table below.
+
+> [!TIP]
+> See [Architecture](#architecture) for detailed information on how the different components work together.
+
+
+

@@ -1,0 +1,8 @@
+[
+  { "id": "introduction", "title": "Introduction" },
+  { "id": "installation", "title": "Installation" },
+  { "id": "configuration", "title": "Configuration" },
+  { "id": "deployment", "title": "Deployment" },
+  { "id": "faq", "title": "FAQ" },
+  { "id": "guides", "title": "Guides" }
+]

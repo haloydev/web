@@ -1,0 +1,17 @@
+---
+import BaseLayout from '@/layouts/base.astro';
+import { Navbar } from '@/components/navbar';
+---
+
+<BaseLayout title="Haloy - Page not found">
+  <div class="flex min-h-screen flex-col">
+    <Navbar client:load />
+    <div class="flex flex-1 items-center justify-center">
+      <div>
+        <h1 class="text-muted-foreground/20 text-8xl font-bold">404</h1>
+        <h2 class="text-3xl font-semibold sm:text-5xl">Page Not Found</h2>
+        <p class="text-muted-foreground mb-8 text-lg">The page you're looking for doesn't exist or has been moved.</p>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,45 @@
+---
+import type { BundledLanguage, SpecialLanguage, TokensResult } from 'shiki';
+import type { HTMLAttributes } from 'astro/types';
+import { codeToTokens } from 'shiki';
+import { CodeCopyButton } from './code-copy-button.tsx';
+
+interface Props extends Omit<HTMLAttributes<'pre'>, 'lang'> {
+  code: string;
+  lang?: BundledLanguage | SpecialLanguage;
+}
+
+const { code, lang = 'plaintext' } = Astro.props;
+
+const lightTokens = await codeToTokens(code, {
+  lang,
+  theme: 'github-light',
+});
+
+const darkTokens = await codeToTokens(code, {
+  lang,
+  theme: 'github-dark',
+});
+
+function generateHTML(tokens: TokensResult) {
+  return tokens.tokens
+    .map(
+      (line) =>
+        `<span class="block">${line
+          .map((token) => `<span style="color: ${token.color}">${token.content}</span>`)
+          .join('')}</span>`,
+    )
+    .join('');
+}
+
+const lightCodeHtml = generateHTML(lightTokens);
+const darkCodeHtml = generateHTML(darkTokens);
+---
+
+<div class="not-prose relative mb-4 flex rounded-lg bg-gray-100 dark:bg-gray-800">
+  <pre
+    class="flex-1 overflow-x-auto py-4 pr-2 pl-4 text-sm leading-relaxed"><code class="block font-mono text-gray-100" /><div class="hidden dark:block" set:html={darkCodeHtml} /><div class="block dark:hidden" set:html={lightCodeHtml} /></pre>
+  <div class="flex px-2 pt-3">
+    <CodeCopyButton client:load code={code} className="" />
+  </div>
+</div>

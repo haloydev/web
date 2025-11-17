@@ -1,0 +1,39 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Navbar } from '@/components/navbar';
+import { DocsNavigation } from '@/components/docs-navigation';
+import BaseLayout from '@/layouts/base.astro';
+import Prose from '@/components/prose.astro';
+import { getCollection, getEntry } from 'astro:content';
+
+const categories = await getCollection('docCategories');
+const categoriesWithPages = await Promise.all(
+  categories.map(async (category) => {
+    const pages = (await getCollection('docPages', ({ data }) => data.category.id === category.id)).sort((a, b) =>
+      a.id.localeCompare(b.id),
+    );
+    return {
+      ...category,
+      pages,
+    };
+  }),
+);
+interface Props {
+  title: string;
+  activeSlug: string;
+}
+
+const { title, activeSlug } = Astro.props;
+---
+
+<BaseLayout title={`${title} - Haloy Documentation`}>
+  <Navbar client:load />
+  <DocsNavigation activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} client:load>
+    <main class="mx-4 max-w-xl flex-1 pb-20">
+      <Prose>
+        <h1>{title}</h1>
+        <slot />
+      </Prose>
+    </main>
+  </DocsNavigation>
+</BaseLayout>
