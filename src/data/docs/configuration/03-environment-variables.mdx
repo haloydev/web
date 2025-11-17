@@ -1,0 +1,195 @@
+---
+title: 'Environment Variables'
+slug: 'environment-variables'
+category: configuration
+
+---
+
+import Code from '@/components/code.astro'
+
+Configure environment variables for your deployed applications using multiple methods.
+
+## Plain Text Values
+
+The simplest way to set environment variables:
+
+<Code code={`name: "my-app"
+env:
+  - name: "DATABASE_URL"
+    value: "postgres://localhost:5432/myapp"
+  - name: "DEBUG"
+    value: "true"
+  - name: "MAX_CONNECTIONS"
+    value: "100"`} lang="yaml" />
+
+## From Environment Variables
+
+Reference environment variables from your local machine:
+
+<Code code={`name: "my-app"
+env:
+  - name: "DATABASE_URL"
+    from:
+      env: "PRODUCTION_DATABASE_URL"
+  - name: "API_KEY"
+    from:
+      env: "MY_API_KEY"
+  - name: "SECRET_KEY"
+    from:
+      env: "APP_SECRET"`} lang="yaml" />
+
+Set these in your shell before deploying:
+
+<Code code={`export PRODUCTION_DATABASE_URL="postgres://prod-db:5432/myapp"
+export MY_API_KEY="your-api-key-here"
+export APP_SECRET="your-secret-here"
+
+haloy deploy`} lang="bash" />
+
+**Tip:** Instead of manually exporting variables, you can place a `.env` file in the same directory as your Haloy config file. The CLI will automatically load these variables before deployment.
+
+## From Secret Providers
+
+Use external secret management services like 1Password:
+
+<Code code={`name: "my-app"
+secretProviders:
+  onepassword:
+    production-db:
+      vault: "Production"
+      item: "Database Credentials"
+    api-keys:
+      vault: "API Services"
+      item: "Third-party APIs"
+
+env:
+  - name: "DATABASE_PASSWORD"
+    from:
+      secret: "onepassword:production-db.password"
+  - name: "API_SECRET"
+    from:
+      secret: "onepassword:api-keys.secret-key"
+  - name: "STRIPE_KEY"
+    from:
+      secret: "onepassword:api-keys.stripe-key"`} lang="yaml" />
+
+See [Secret Providers](/docs/secret-providers) for more details.
+
+## Environment Files
+
+Haloy automatically loads environment variables from these files (in order):
+
+1. `.env` in the current directory
+2. `.env.{target}` for target-specific variables
+3. `.env` in the Haloy config directory (`~/.config/haloy/`)
+
+### Example .env File
+
+<Code code={`DATABASE_URL=postgres://localhost:5432/myapp
+API_KEY=your-secret-api-key
+DEBUG=true
+MAX_CONNECTIONS=100`} lang="bash" />
+
+### Target-Specific .env Files
+
+For multi-target deployments:
+
+**.env.production:**
+<Code code={`DATABASE_URL=postgres://prod-db:5432/myapp
+DEBUG=false
+NODE_ENV=production`} lang="bash" />
+
+**.env.staging:**
+<Code code={`DATABASE_URL=postgres://staging-db:5432/myapp
+DEBUG=true
+NODE_ENV=staging`} lang="bash" />
+
+## Mixed Approaches
+
+Combine different methods in a single configuration:
+
+<Code code={`name: "my-app"
+env:
+  # Plain text for non-sensitive values
+  - name: "PORT"
+    value: "8080"
+  - name: "LOG_LEVEL"
+    value: "info"
+
+  # From environment variables
+  - name: "DATABASE_URL"
+    from:
+      env: "PRODUCTION_DATABASE_URL"
+
+  # From secret providers
+  - name: "API_SECRET"
+    from:
+      secret: "onepassword:api-keys.secret"`} lang="yaml" />
+
+## Multi-Target Environment Variables
+
+Override environment variables per target:
+
+<Code code={`name: "my-app"
+# Base environment variables
+env:
+  - name: "LOG_LEVEL"
+    value: "info"
+  - name: "FEATURE_FLAG"
+    value: "false"
+
+targets:
+  production:
+    env:  # Completely replaces base env
+      - name: "NODE_ENV"
+        value: "production"
+      - name: "LOG_LEVEL"
+        value: "warn"
+      - name: "DATABASE_URL"
+        from:
+          secret: "onepassword:prod-db.url"
+
+  staging:
+    env:  # Completely replaces base env
+      - name: "NODE_ENV"
+        value: "staging"
+      - name: "LOG_LEVEL"
+        value: "debug"
+      - name: "DATABASE_URL"
+        from:
+          env: "STAGING_DATABASE_URL"`} lang="yaml" />
+
+> **Note:** Environment variable arrays in targets completely replace the base array. There is no merging.
+
+## Best Practices
+
+1. **Never commit secrets**: Use `.env` files or secret providers for sensitive data
+2. **Add .env to .gitignore**: Prevent accidental commits
+
+<Code code={`
+echo ".env" >> .gitignore
+echo ".env.*" >> .gitignore
+`} lang="bash" />
+
+3. **Use secret providers for production**: More secure than plain text or environment variables
+4. **Document required variables**: Keep a `.env.example` file:
+
+<Code code={`DATABASE_URL=postgres://localhost:5432/myapp
+API_KEY=your-api-key-here
+SECRET_KEY=your-secret-here`} lang="bash" />
+
+5. **Validate configuration**: Use `haloy validate-config` to check your setup
+
+## Viewing Resolved Configuration
+
+To see the final configuration with all secrets resolved (use with caution):
+
+<Code code={`haloy validate-config --show-resolved-config`} lang="bash" />
+
+> **Warning:** This will display all secrets in plain text. Only use in secure environments.
+
+## Next Steps
+
+- [Configure Secret Providers](/docs/secret-providers)
+- [Set up Volume Mounts](/docs/volumes)
+- [Learn about Multi-Server Deployments](/docs/multi-server-deployments)

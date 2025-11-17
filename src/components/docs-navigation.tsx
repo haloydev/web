@@ -24,13 +24,13 @@ function NavigationContent({
     <nav className="space-y-6 px-4 py-6">
       {categoriesWithPages.map((category) => (
         <div key={category.id}>
-          <h3 className="text-muted-foreground/70 mb-2 px-4 text-sm font-semibold tracking-tight">
+          <h3 className="text-muted-foreground/70 mb-1 px-3 text-xs font-semibold tracking-tight">
             {category.data.title}
           </h3>
           <ul className="space-y-1">
             {category.pages.map((page) => (
               <li key={page.id}>
-                <Button asChild variant={activeSlug === page.data.slug ? 'secondary' : 'ghost'}>
+                <Button asChild variant={activeSlug === page.data.slug ? 'secondary' : 'ghost'} size="sm">
                   <a href={`/docs/${page.data.slug}`} className="text-sm font-semibold">
                     {page.data.title}
                   </a>

@@ -1,0 +1,386 @@
+---
+title: 'Rollbacks'
+slug: 'rollbacks'
+category: deployment
+
+---
+
+import Code from '@/components/code.astro'
+
+Roll back to previous deployments when issues arise. Haloy supports different rollback strategies based on your needs.
+
+## Rollback Strategies
+
+Haloy supports three rollback strategies:
+
+| Strategy | Description | Rollback Speed | Disk Usage |
+|----------|-------------|----------------|------------|
+| `local` | Keep images locally (default) | Fast | Higher |
+| `registry` | Use registry tags | Moderate | Lower |
+| `none` | No rollback support | N/A | Minimal |
+
+## Local Strategy (Default)
+
+Haloy tags images with deployment IDs and keeps them locally for fast rollbacks.
+
+### Configuration
+
+<Code code={`name: "my-app"
+image:
+  repository: "ghcr.io/my-org/my-app"
+  tag: "latest"
+  history:
+    strategy: "local"
+    count: 5  # Keep 5 previous images
+domains:
+  - domain: "my-app.com"
+acme_email: "you@email.com"`} lang="yaml" />
+
+### How It Works
+
+1. Each deployment tags the image with a unique deployment ID
+2. Images are retained locally on the server
+3. Old images beyond `count` are automatically cleaned up
+4. Rollback pulls from local Docker images (fast)
+
+### Benefits
+
+- **Fast rollbacks**: Images already present locally
+- **No registry dependency**: Works even if registry is unavailable
+- **Simple setup**: No tagging strategy required
+
+### Considerations
+
+- Uses disk space for stored images
+- Images only available on the specific server
+
+## Registry Strategy
+
+Rely on registry tags for rollbacks. Requires disciplined tagging.
+
+### Configuration
+
+<Code code={`name: "my-app"
+image:
+  repository: "ghcr.io/my-org/my-app"
+  tag: "v1.2.3"  # Must use immutable tags
+  history:
+    strategy: "registry"
+    count: 10  # Track 10 deployment versions
+    pattern: "v*"  # Match versioned tags
+domains:
+  - domain: "my-app.com"
+acme_email: "you@email.com"`} lang="yaml" />
+
+### Requirements
+
+- **Immutable tags**: Use version tags like `v1.2.3`, not `latest` or `main`
+- **Tag pattern**: Tags must match the specified pattern
+- **Registry access**: Registry must be accessible during rollback
+
+### How It Works
+
+1. Deployment records the image tag used
+2. Images are pulled from registry during rollback
+3. Haloy tracks the last `count` deployments
+4. Rollback pulls the desired tag from the registry
+
+### Benefits
+
+- **Saves disk space**: Images not stored locally
+- **Centralized images**: Same images across all servers
+- **Long retention**: Can keep more deployment history
+
+### Considerations
+
+- Requires tagging discipline
+- Registry must be available for rollbacks
+- Slower than local (must pull from registry)
+
+## None Strategy
+
+Disables rollback capability entirely.
+
+### Configuration
+
+<Code code={`name: "my-app"
+image:
+  repository: "ghcr.io/my-org/my-app"
+  tag: "latest"
+  history:
+    strategy: "none"
+domains:
+  - domain: "my-app.com"
+acme_email: "you@email.com"`} lang="yaml" />
+
+### Use Cases
+
+- Development/testing environments
+- Applications where rollback is never needed
+- Extremely space-constrained environments
+
+## Performing Rollbacks
+
+### List Available Rollback Targets
+
+<Code code={`# List all available rollback points
+haloy rollback-targets
+
+# For specific config file
+haloy rollback-targets --config path/to/config.yaml
+
+# For specific deployment target
+haloy rollback-targets --target production`} lang="bash" />
+
+### Rollback to Previous Deployment
+
+<Code code={`# Rollback using deployment ID
+haloy rollback <deployment-id>
+
+# Example
+haloy rollback dep_abc123xyz
+
+# With specific config
+haloy rollback --config path/to/config.yaml dep_abc123xyz
+
+# Rollback specific target
+haloy rollback --target production dep_abc123xyz`} lang="bash" />
+
+## Complete Examples
+
+### Local Strategy Example
+
+<Code code={`name: "web-app"
+server: "prod.haloy.com"
+
+image:
+  repository: "my-org/web-app"
+  tag: "latest"
+  history:
+    strategy: "local"
+    count: 5  # Keep last 5 deployments
+
+replicas: 3
+deployment_strategy: "rolling"
+
+domains:
+  - domain: "web-app.com"
+acme_email: "admin@web-app.com"`} lang="yaml" />
+
+**Workflow:**
+<Code code={`# Deploy v1
+haloy deploy
+
+# Deploy v2
+haloy deploy
+
+# Deploy v3 (has issues!)
+haloy deploy
+
+# List rollback targets
+haloy rollback-targets
+# Shows: dep_v3_abc, dep_v2_xyz, dep_v1_def, ...
+
+# Rollback to v2
+haloy rollback dep_v2_xyz`} lang="bash" />
+
+### Registry Strategy Example
+
+<Code code={`name: "api-service"
+server: "prod.haloy.com"
+
+image:
+  repository: "ghcr.io/my-org/api-service"
+  tag: "v2.5.1"  # Use semantic versioning
+  registry:
+    username:
+      from:
+        env: "GITHUB_USERNAME"
+    password:
+      from:
+        env: "GITHUB_TOKEN"
+  history:
+    strategy: "registry"
+    count: 10  # Track 10 versions
+    pattern: "v*"  # Match v1.0.0, v2.3.4, etc.
+
+domains:
+  - domain: "api.example.com"
+acme_email: "devops@example.com"`} lang="yaml" />
+
+**Workflow:**
+<Code code={`# Deploy v2.5.1
+haloy deploy
+
+# Deploy v2.6.0 (change tag in config first)
+haloy deploy
+
+# Deploy v2.7.0 (has issues!)
+haloy deploy
+
+# List rollback targets
+haloy rollback-targets
+# Shows: v2.7.0, v2.6.0, v2.5.1, ...
+
+# Rollback to v2.6.0
+haloy rollback dep_v260_xyz`} lang="bash" />
+
+## Multi-Target Rollbacks
+
+Roll back specific deployment targets independently:
+
+<Code code={`name: "my-app"
+image:
+  repository: "my-org/my-app"
+  tag: "v1.0.0"
+  history:
+    strategy: "local"
+    count: 5
+
+targets:
+  production:
+    server: prod.haloy.com
+    domains:
+      - domain: "my-app.com"
+
+  staging:
+    server: staging.haloy.com
+    domains:
+      - domain: "staging.my-app.com"`} lang="yaml" />
+
+**Independent rollbacks:**
+<Code code={`# Rollback only production
+haloy rollback-targets --target production
+haloy rollback --target production dep_abc123
+
+# Staging remains on latest version
+
+# Later, rollback staging if needed
+haloy rollback-targets --target staging
+haloy rollback --target staging dep_def456`} lang="bash" />
+
+## Rollback Best Practices
+
+1. **Test before rollback**: Verify the issue requires rollback
+2. **Check rollback targets**: Confirm the deployment ID is correct
+3. **Monitor after rollback**: Verify the rollback resolved the issue
+4. **Document rollbacks**: Note why rollback was necessary
+5. **Fix forward when possible**: Consider fixing the issue vs. rolling back
+6. **Keep adequate history**: Set `count` high enough for your needs
+
+## Deployment Safety
+
+Combine rollback capability with other safety measures:
+
+<Code code={`name: "safe-app"
+image:
+  repository: "my-org/safe-app"
+  tag: "v1.5.0"
+  history:
+    strategy: "local"
+    count: 10  # Keep more history
+
+# Rolling deployment for safety
+deployment_strategy: "rolling"
+replicas: 5
+
+# Health checks catch issues
+health_check_path: "/health"
+
+# Test in staging first
+targets:
+  staging:
+    server: staging.haloy.com
+    domains:
+      - domain: "staging.safe-app.com"
+
+  production:
+    server: prod.haloy.com
+    domains:
+      - domain: "safe-app.com"`} lang="yaml" />
+
+**Safe deployment workflow:**
+<Code code={`# 1. Deploy to staging
+haloy deploy --target staging
+
+# 2. Test staging thoroughly
+curl https://staging.safe-app.com/health
+# Run integration tests, manual testing, etc.
+
+# 3. Deploy to production
+haloy deploy --target production
+
+# 4. Monitor production
+haloy logs --target production
+haloy status --target production
+
+# 5. If issues arise, rollback immediately
+haloy rollback --target production dep_previous`} lang="bash" />
+
+## Troubleshooting
+
+### No Rollback Targets Available
+
+**Cause**: History strategy is `none` or insufficient deployments
+
+**Solution**:
+<Code code={`# Check history configuration
+cat haloy.yaml | grep -A 3 "history:"
+
+# Ensure strategy is "local" or "registry"
+# Ensure count > 0`} lang="yaml" />
+
+### Rollback Fails - Image Not Found (Local Strategy)
+
+**Cause**: Image was pruned or count exceeded
+
+**Solution**:
+- Increase `count` to keep more images
+- Deploy fresh if image is gone
+- Consider registry strategy for longer retention
+
+### Rollback Fails - Image Not Found (Registry Strategy)
+
+**Cause**: Tag doesn't exist or registry unavailable
+
+**Solution**:
+<Code code={`# Verify tag exists
+docker pull ghcr.io/my-org/my-app:v1.2.3
+
+# Check registry authentication
+# Ensure credentials are still valid`} lang="bash" />
+
+### Rollback Completes but Issues Persist
+
+**Cause**: Issue may not be related to code
+
+**Solution**:
+- Check database migrations
+- Verify environment variables
+- Review external dependencies
+- Check logs for root cause
+
+## Rollback vs. Fix Forward
+
+Consider both options when issues arise:
+
+### When to Rollback
+
+- Critical production issue
+- Clear that new deployment is problematic
+- Previous version known to work
+- Quick resolution needed
+
+### When to Fix Forward
+
+- Issue is minor
+- Fix is simple and can be deployed quickly
+- Rollback would cause other issues (e.g., database migrations)
+- Issue exists in previous version too
+
+## Next Steps
+
+- [Learn about Deployment Strategies](/docs/deployment-strategies)
+- [Configure Image History](/docs/image-configuration)
+- [Set up Multi-Server Deployments](/docs/multi-server-deployments)
+- [Implement Health Checks](/docs/deployment-strategies#health-checks)

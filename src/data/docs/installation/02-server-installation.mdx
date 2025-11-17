@@ -1,0 +1,102 @@
+---
+title: 'Server Installation'
+slug: 'server-installation'
+category: installation
+
+---
+
+import Code from '@/components/code.astro'
+
+The Haloy daemon (`haloyd`) runs on your server and manages container deployments, service discovery, and HAProxy configuration.
+
+## Prerequisites
+
+- Linux server
+- Docker installed
+- Sudo access (for system installation)
+
+## Installation
+
+Install `haloyadm` on your server:
+
+<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash`} lang="bash" />
+
+## Initialize haloyd
+
+Initialize `haloyd` and `HAProxy`:
+
+<Code code={`sudo haloyadm init`} lang="bash" />
+
+### Secure with a Domain (Recommended)
+
+It's recommended to secure the Haloy API with a domain and SSL certificate during initialization:
+
+<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
+
+If you don't have a domain ready now, you can set this later:
+
+<Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
+
+## Get API Token
+
+Generate an API token to authenticate from your local machine:
+
+<Code code={`sudo haloyadm api token`} lang="bash" />
+
+Save this token securely. You'll use it to configure your local `haloy` CLI.
+
+## Service Management
+
+Start the Haloy services:
+
+<Code code={`sudo haloyadm start`} lang="bash" />
+
+Stop the services:
+
+<Code code={`sudo haloyadm stop`} lang="bash" />
+
+Restart the services:
+
+<Code code={`sudo haloyadm restart`} lang="bash" />
+
+### Development Options
+
+For local development, you can use the local `haloyd` image:
+
+<Code code={`sudo haloyadm start --dev`} lang="bash" />
+
+Enable debug mode:
+
+<Code code={`sudo haloyadm start --debug`} lang="bash" />
+
+## Directory Structure
+
+Haloy uses standard system directories:
+
+**System Installation (default):**
+<Code code={`/etc/haloy/              # Configuration
+├── haloyd.yaml          # Haloyd settings
+├── .env                 # API tokens
+
+/var/lib/haloy/          # Data
+├── haproxy-config/      # HAProxy configs
+├── cert-storage/        # SSL certificates
+└── db/                  # Database files`} lang="bash" />
+
+## Uninstalling
+
+### Remove Admin Tool Only
+
+<Code code={`curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash`} lang="bash" />
+
+### Complete Server Removal
+
+To completely remove Haloy including all data and configurations:
+
+<Code code={`curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash`} lang="bash" />
+
+## Next Steps
+
+- [Configure non-root installation](/docs/non-root-install) for development
+- [Add the server to your local machine](/docs/authentication)
+- [Deploy your first application](/docs/quickstart)

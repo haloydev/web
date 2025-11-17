@@ -1,0 +1,43 @@
+---
+title: 'Client Installation'
+slug: 'client-installation'
+category: installation
+
+---
+
+import Code from '@/components/code.astro'
+
+The Haloy CLI tool runs on your local machine and triggers deployments to your servers.
+
+## Installation
+
+Install the `haloy` CLI tool:
+
+<Code code={`curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash`} lang="bash" />
+
+## Configure PATH
+
+Ensure `~/.local/bin` is in your PATH by adding the following to your `~/.bashrc`, `~/.zshrc`, or equivalent shell profile:
+
+<Code code={`export PATH="$HOME/.local/bin:$PATH"`} lang="bash" />
+
+Then reload your shell configuration:
+
+<Code code={`source ~/.bashrc  # or ~/.zshrc`} lang="bash" />
+
+## Verify Installation
+
+Check that `haloy` is installed correctly:
+
+<Code code={`haloy --version`} lang="bash" />
+
+## Uninstalling
+
+To remove the Haloy CLI tool:
+
+<Code code={`curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash`} lang="bash" />
+
+## Next Steps
+
+- [Install Haloy on your server](/docs/server-installation)
+- [Set up shell completion](/docs/shell-completion)

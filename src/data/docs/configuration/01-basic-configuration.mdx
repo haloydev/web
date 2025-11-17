@@ -1,0 +1,115 @@
+---
+title: 'Basic Configuration'
+slug: 'basic-configuration'
+category: configuration
+
+---
+
+import Code from '@/components/code.astro'
+
+Learn how to create a basic Haloy configuration file to deploy your application.
+
+## Minimal Configuration
+
+The simplest `haloy.yaml` configuration:
+
+<Code code={`name: "my-app"
+server: haloy.yourserver.com
+domains:
+    - domain: "my-app.com"
+      aliases:
+        - "www.my-app.com"`} lang="yaml" />
+
+This configuration:
+- Looks for a Dockerfile in the same directory
+- Builds the image locally
+- Uploads it to your server
+- Deploys with SSL/TLS enabled
+- Redirects www to the main domain
+
+## Format Support
+
+Haloy supports three configuration formats:
+
+### YAML
+<Code code={`
+name: "my-app"
+acme_email: "you@example.com"
+health_check_path: "/health"
+`} lang="yaml" />
+
+### JSON
+<Code code={`{
+    "name": "my-app",
+    "acmeEmail": "you@example.com",
+    "healthCheckPath": "/health"
+}`} lang="json" />
+
+### TOML
+<Code code={`name = "my-app"
+acme_email = "you@example.com"
+health_check_path = "/health"`} lang="toml" />
+
+**Naming Convention:**
+- YAML/TOML: Use `snake_case` (e.g., `acme_email`)
+- JSON: Use `camelCase` (e.g., `acmeEmail`)
+
+## Adding a Domain
+To make your app accessible via a domain:
+
+<Code code={`
+name: "my-app"
+server: haloy.yourserver.com
+domains:
+    - domain: "my-app.com"
+acme_email: "you@email.com"  # Required for SSL certificates
+`} lang="yaml" />
+
+## Multiple Domains and Aliases
+
+<Code code={`
+domains:
+    - domain: "my-app.com"
+      aliases:
+        - "www.my-app.com"
+        - "app.my-app.com"
+    - domain: "another-domain.com"
+acme_email: "you@email.com"`} lang="yaml" />
+
+## Custom Port
+
+If your application listens on a port other than 8080:
+
+<Code code={`name: "my-app"
+server: haloy.yourserver.com
+port: "3000"  # Your app's internal port`} lang="yaml" />
+
+The proxy will route traffic from ports 80/443 to this container port.
+
+## Health Checks
+
+Configure a custom health check endpoint:
+
+<Code code={`name: "my-app"
+server: haloy.yourserver.com
+health_check_path: "/api/health"`} lang="yaml" />
+
+Default: `"/"`
+
+## Configuration File Location
+
+By default, `haloy` looks for configuration in the current directory:
+- `haloy.yaml`
+- `haloy.json`
+- `haloy.toml`
+
+Specify a custom config file:
+
+<Code code={`haloy deploy --config /path/to/config.yaml`} lang="bash" />
+
+## Next Steps
+
+- [Explore all Configuration Options](/docs/configuration-reference)
+- [Set up Environment Variables](/docs/environment-variables)
+- [Configure Volumes](/docs/volumes)
+- [Learn about Image Configuration](/docs/image-configuration)

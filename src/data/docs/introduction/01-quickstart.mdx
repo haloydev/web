@@ -7,59 +7,79 @@ category: introduction
 
 import Code from '@/components/code.astro'
 
-## Prerequisites
-- __Server__: Any Linux server with Docker installed
-- __Local__: Docker for building your app
-- __Domain__: To access the Haloy API remotely (optional for local development)
+Get up and running with Haloy in minutes. This guide will walk you through deploying your first application.
 
-## Install haloy
-The haloy CLI tool will trigger deployments. To get started install it on your local machine:
+## Prerequisites
+- **Server**: Any Linux server with Docker installed
+- **Local**: Docker for building your app
+- **Domain**: To access the Haloy API remotely (optional for local development)
+
+## 1. Install the haloy CLI Tool
+The `haloy` CLI tool will trigger deployments from your local machine.
+
+Install `haloy`:
 
 <Code code={`curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash`} lang="bash" />
 
- Ensure `~/.local/bin` is in your PATH by adding the following to your `~/.bashrc`, `~/.zshrc`, or equivalent shell profile:
+Ensure `~/.local/bin` is in your PATH by adding the following to your `~/.bashrc`, `~/.zshrc`, or equivalent shell profile:
+
 <Code code={`export PATH="$HOME/.local/bin:$PATH"`} lang="bash" />
 
-
-## Install and initialize haloyd
+## 2. Install and Initialize haloyd On Your Server
 The next step is to install `haloyd` on your server.
 
 Install `haloyadm` (requires sudo access):
+
 <Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash`} lang="bash" />
 
-2. Initialize `haloyd` and `HAProxy`:
+Initialize `haloyd` and `HAProxy`:
+
 <Code code={`sudo haloyadm init`} lang="bash" />
 
 💡 **Recommended but optional**: Secure the Haloy API with a domain during initialization:
-<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
 
-If you don't have a domain now ready, you can set this later with:
-<Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
-For development or non-root installations, you can install in [user mode](#non-root-install).
+<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com
 
+# If you don't have a domain now ready, you can set this later with:
+sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
 
-## Add the server on your local machine:
+**Note:** For development or non-root installations, you can install in [user mode](/docs/non-root-install).
+
+## 3. Add the Server
+Add the server on your local machine:
+
 <Code code={`haloy server add <server-domain> <api-token>  # e.g., haloy.yourserver.com`} lang="bash" />
 
-See [Authentication & Token Management](#authentication--token-management) for more options on how to manage API tokens.
+> **Tip:** See Authentication & Token Management for more options on how to manage API tokens.
 
-
+## 4. Create haloy.yaml
 Create a `haloy.yaml` file:
-<Code code={`
-name: "my-app"
+
+<Code code={`name: "my-app"
 server: haloy.yourserver.com
 
 domains:
   - domain: "my-app.com"
     aliases:
-      - "www.my-app.com" # Redirects to my-app.com
-`} lang="yaml" />
+      - "www.my-app.com" # Redirects to my-app.com`} lang="yaml" />
 
+This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form.
 
-This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form. For all available options, see the full [Configuration Options](#configuration-options) table below.
+## 5. Deploy
 
-> [!TIP]
-> See [Architecture](#architecture) for detailed information on how the different components work together.
+<Code code={`haloy deploy
+
+# Check status
+haloy status`} lang="bash" />
+
+That's it! Your application is now deployed and accessible at your configured domain.
+
+## Next Steps
+
+- Learn about [Configuration Options](/docs/gconfiguration-reference)
+- Explore [Multi-Server Deployments](/docs/gmulti-server-deployments)
+- Set up [Authentication & Token Management](/guides/authentication)
+- Understand the [Architecture](/guides/architecture)
 
 
 

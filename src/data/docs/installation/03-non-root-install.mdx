@@ -1,0 +1,66 @@
+---
+title: 'Non-Root Installation'
+slug: 'non-root-install'
+category: installation
+
+---
+
+import Code from '@/components/code.astro'
+
+For development environments or when you don't have root access, you can install Haloy in user mode.
+
+## Prerequisites
+
+- Docker installed
+- Your user must be in the `docker` group
+
+## Installation
+
+Install to your user directory:
+
+<Code code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`} lang="bash" />
+
+## Configure Docker Access
+
+Add your user to the docker group (required for non-root Docker access):
+
+<Code code={`sudo usermod -aG docker $(whoami)`} lang="bash" />
+
+Log out and back in, or run:
+
+<Code code={`newgrp docker`} lang="bash" />
+
+Test Docker access:
+
+<Code code={`docker ps`} lang="bash" />
+
+## Initialize in Local Mode
+
+Initialize Haloy with the `--local-install` flag:
+
+<Code code={`haloyadm init --local-install`} lang="bash" />
+
+## Directory Structure
+
+**User Installation:**
+<Code code={`~/.config/haloy/         # Configuration
+~/.local/share/haloy/    # Data`} lang="bash" />
+
+## User vs System Installation
+
+| Aspect | User Installation | System Installation |
+|--------|-------------------|---------------------|
+| **Config directory** | `~/.config/haloy/` | `/etc/haloy/` |
+| **Data directory** | `~/.local/share/haloy/` | `/var/lib/haloy/` |
+| **Services** | systemd (may require manual setup) | systemd |
+| **Permissions** | User permissions | Root permissions |
+| **Use case** | Development, testing | Production |
+
+## Security Notice
+
+Adding your user to the `docker` group gives root-equivalent access to the system, as the Docker daemon runs with root privileges. Only do this for trusted users in secure environments.
+
+## Next Steps
+
+- [Generate an API token](/docs/server-installation#get-api-token)
+- [Configure your local client](/docs/authentication)
