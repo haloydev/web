@@ -1,5 +1,23 @@
 ---
 import DocsLayout from '@/layouts/docs.astro';
+import { ButtonLink } from '@/components/ui/button-link.tsx';
 ---
 
-<DocsLayout title="Welcome to the Haloy docs"> Welcome to the Haloy documentation </DocsLayout>
+<DocsLayout title="Haloy Documentation" activeSlug="">
+  <div class="space-y-12">
+    <div class="space-y-4 text-center">
+      <p class="text-muted-foreground mx-auto max-w-3xl text-xl">
+        Deploy Docker applications to your own servers with simplicity and reliability. Haloy removes the complexity of
+        traditional DevOps while providing the core features needed for modern deployments.
+      </p>
+    </div>
+
+    <div class="bg-muted not-prose rounded-lg p-6 text-center">
+      <h2 class="text-2xl font-semibold">Get Started in Minutes</h2>
+      <p class="text-muted-foreground mt-4">
+        Start with our quickstart guide and deploy your first application in under 10 minutes.
+      </p>
+      <ButtonLink href="/docs/quickstart" className="mt-4"> Quickstart Guide → </ButtonLink>
+    </div>
+  </div>
+</DocsLayout>

@@ -28,12 +28,15 @@ const { title, activeSlug } = Astro.props;
 
 <BaseLayout title={`${title} - Haloy Documentation`}>
   <Navbar client:load />
-  <DocsNavigation activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} client:load>
-    <main class="mx-4 max-w-xl flex-1 pb-20">
-      <Prose>
-        <h1>{title}</h1>
-        <slot />
-      </Prose>
+  <div class="lg:flex">
+    <DocsNavigation activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} client:load />
+    <main class="flex-1">
+      <div class="px-4 pt-6 pb-20">
+        <Prose>
+          <h1>{title}</h1>
+          <slot />
+        </Prose>
+      </div>
     </main>
-  </DocsNavigation>
+  </div>
 </BaseLayout>
