@@ -27,11 +27,11 @@ function NavigationContent({
           <h3 className="text-muted-foreground/70 mb-1 px-3 text-xs font-semibold tracking-tight">
             {category.data.title}
           </h3>
-          <ul className="space-y-1">
+          <ul className="">
             {category.pages.map((page) => (
               <li key={page.id}>
                 <Button asChild variant={activeSlug === page.data.slug ? 'secondary' : 'ghost'} size="sm">
-                  <a href={`/docs/${page.data.slug}`} className="text-sm font-semibold">
+                  <a href={`/docs/${page.data.slug}`} className="text-sm font-medium">
                     {page.data.title}
                   </a>
                 </Button>
