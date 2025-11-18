@@ -2,19 +2,20 @@
 title: 'Quickstart'
 slug: 'quickstart'
 category: introduction
-
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Get up and running with Haloy in minutes. This guide will walk you through deploying your first application.
 
 ## Prerequisites
+
 - **Server**: Any Linux server with Docker installed
 - **Local**: Docker for building your app
 - **Domain**: To access the Haloy API remotely (optional for local development)
 
 ## 1. Install the haloy CLI Tool
+
 The `haloy` CLI tool will trigger deployments from your local machine.
 
 Install `haloy`:
@@ -26,6 +27,7 @@ Ensure `~/.local/bin` is in your PATH by adding the following to your `~/.bashrc
 <Code code={`export PATH="$HOME/.local/bin:$PATH"`} lang="bash" />
 
 ## 2. Install and Initialize haloyd On Your Server
+
 The next step is to install `haloyd` on your server.
 
 Install `haloyadm` (requires sudo access):
@@ -41,11 +43,13 @@ Initialize `haloyd` and `HAProxy`:
 <Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com
 
 # If you don't have a domain now ready, you can set this later with:
+
 sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
 
 **Note:** For development or non-root installations, you can install in [user mode](/docs/non-root-install).
 
 ## 3. Add the Server
+
 Add the server on your local machine:
 
 <Code code={`haloy server add <server-domain> <api-token>  # e.g., haloy.yourserver.com`} lang="bash" />
@@ -53,15 +57,17 @@ Add the server on your local machine:
 > **Tip:** See Authentication & Token Management for more options on how to manage API tokens.
 
 ## 4. Create haloy.yaml
+
 Create a `haloy.yaml` file:
 
 <Code code={`name: "my-app"
 server: haloy.yourserver.com
 
 domains:
-  - domain: "my-app.com"
-    aliases:
-      - "www.my-app.com" # Redirects to my-app.com`} lang="yaml" />
+
+- domain: "my-app.com"
+  aliases:
+  - "www.my-app.com" # Redirects to my-app.com`} lang="yaml" />
 
 This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form.
 
@@ -70,16 +76,14 @@ This will look for a Dockerfile in the same directory as your config file, build
 <Code code={`haloy deploy
 
 # Check status
+
 haloy status`} lang="bash" />
 
 That's it! Your application is now deployed and accessible at your configured domain.
 
 ## Next Steps
 
-- Learn about [Configuration Options](/docs/gconfiguration-reference)
-- Explore [Multi-Server Deployments](/docs/gmulti-server-deployments)
+- Learn about [Configuration Options](/docs/configuration-reference)
+- Explore [Multi-Server Deployments](/docs/multi-server-deployments)
 - Set up [Authentication & Token Management](/guides/authentication)
 - Understand the [Architecture](/guides/architecture)
-
-
-
