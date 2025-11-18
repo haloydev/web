@@ -20,7 +20,7 @@ function NavigationContent({
   categoriesWithPages: CategoryWithPages[];
 }) {
   return (
-    <nav className="space-y-6 px-4 py-6">
+    <nav className="space-y-6 px-4">
       {categoriesWithPages.map((category) => (
         <div key={category.id}>
           <h3 className="text-muted-foreground/70 mb-1 px-3 text-xs font-semibold tracking-tight">
@@ -49,7 +49,7 @@ export function DocsNavigation({ activeSlug, categoriesWithPages, ...props }: Do
     <>
       {/* Desktop Sidebar */}
       <aside className="bg-background hidden w-64 shrink-0 lg:block">
-        <div className="sticky top-0 h-screen">
+        <div className="sticky top-0 h-screen pt-6">
           <ScrollArea className="h-[calc(100vh-4rem)]">
             <NavigationContent activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} />
           </ScrollArea>
