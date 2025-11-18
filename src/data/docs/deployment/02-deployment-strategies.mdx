@@ -23,11 +23,12 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
 
 ### Configuration
 
-<Code code={`name: "my-app"
-deployment_strategy: "rolling"  # Default, can be omitted
-replicas: 3
-domains:
-  - domain: "my-app.com"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  deployment_strategy: "rolling"  # Default, can be omitted
+  replicas: 3
+  domains:
+    - domain: "my-app.com"`} lang="yaml" />
 
 ### Benefits
 
@@ -43,18 +44,18 @@ domains:
 
 ### Example
 
-<Code code={`name: "high-availability-app"
-deployment_strategy: "rolling"
-replicas: 5
-health_check_path: "/health"
-
-image:
-  repository: "my-org/ha-app"
-  tag: "v2.0.0"
-
-domains:
-  - domain: "ha-app.com"
-acme_email: "admin@ha-app.com"`} lang="yaml" />
+<Code code={`
+  name: "high-availability-app"
+  deployment_strategy: "rolling"
+  replicas: 5
+  health_check_path: "/health"
+  image:
+    repository: "my-org/ha-app"
+    tag: "v2.0.0"
+  domains:
+    - domain: "ha-app.com"
+  acme_email: "admin@ha-app.com"
+`} lang="yaml" />
 
 ## Replace Deployment
 
@@ -69,11 +70,13 @@ Stops all old containers before starting new ones.
 
 ### Configuration
 
-<Code code={`name: "my-app"
-deployment_strategy: "replace"
-replicas: 3
-domains:
-  - domain: "my-app.com"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  deployment_strategy: "replace"
+  replicas: 3
+  domains:
+    - domain: "my-app.com"
+`} lang="yaml" />
 
 ### Benefits
 
@@ -96,18 +99,18 @@ domains:
 
 ### Example
 
-<Code code={`name: "batch-processor"
-deployment_strategy: "replace"
-replicas: 2
-health_check_path: "/status"
-
-image:
-  repository: "my-org/batch-app"
-  tag: "v1.5.0"
-
-env:
-  - name: "BATCH_SIZE"
-    value: "1000"`} lang="yaml" />
+<Code code={`
+  name: "batch-processor"
+  deployment_strategy: "replace"
+  replicas: 2
+  health_check_path: "/status"
+  image:
+    repository: "my-org/batch-app"
+    tag: "v1.5.0"
+  env:
+    - name: "BATCH_SIZE"
+      value: "1000"
+  `} lang="yaml" />
 
 ## Comparison
 
@@ -124,32 +127,31 @@ env:
 
 Use different strategies for different environments:
 
-<Code code={`name: "my-app"
-# Default for all targets
-deployment_strategy: "rolling"
-replicas: 3
-
-targets:
-  production:
-    server: prod.haloy.com
-    deployment_strategy: "rolling"  # High availability
-    replicas: 5
-    domains:
-      - domain: "my-app.com"
-
-  staging:
-    server: staging.haloy.com
-    deployment_strategy: "replace"  # Faster deployments
-    replicas: 2
-    domains:
-      - domain: "staging.my-app.com"
-
-  development:
-    server: dev.haloy.com
-    deployment_strategy: "replace"  # Clean state
-    replicas: 1
-    domains:
-      - domain: "dev.my-app.com"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  # Default for all targets
+  deployment_strategy: "rolling"
+  replicas: 3
+  targets:
+    production:
+      server: prod.haloy.com
+      deployment_strategy: "rolling"  # High availability
+      replicas: 5
+      domains:
+        - domain: "my-app.com"
+    staging:
+      server: staging.haloy.com
+      deployment_strategy: "replace"  # Faster deployments
+      replicas: 2
+      domains:
+        - domain: "staging.my-app.com"
+    development:
+      server: dev.haloy.com
+      deployment_strategy: "replace"  # Clean state
+      replicas: 1
+      domains:
+        - domain: "dev.my-app.com"
+`} lang="yaml" />
 
 ## Health Checks
 

@@ -13,11 +13,13 @@ Haloy supports both Docker named volumes and filesystem bind mounts for persiste
 
 Named volumes are managed by Docker and work consistently across environments:
 
-<Code code={`name: "my-app"
-volumes:
-  - "app-data:/app/data"
-  - "app-logs:/var/log/app"
-  - "postgres-data:/var/lib/postgresql/data"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  volumes:
+    - "app-data:/app/data"
+    - "app-logs:/var/log/app"
+    - "postgres-data:/var/lib/postgresql/data"
+`} lang="yaml" />
 
 ### Benefits
 - Managed by Docker
@@ -29,11 +31,13 @@ volumes:
 
 Mount directories from the host filesystem into containers:
 
-<Code code={`name: "my-app"
-volumes:
-  - "/var/app/data:/app/data"
-  - "/home/user/logs:/app/logs:ro"
-  - "/etc/ssl/certs:/app/certs:ro"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  volumes:
+    - "/var/app/data:/app/data"
+    - "/home/user/logs:/app/logs:ro"
+    - "/etc/ssl/certs:/app/certs:ro"
+`} lang="yaml" />
 
 ### Mount Options
 
@@ -46,11 +50,13 @@ Add options after the second colon:
 
 ## Volume Format
 
-<Code code={`# Named volume
-volume-name:/container/path
+<Code code={`
+  # Named volume
+  volume-name:/container/path
 
-# Bind mount (requires absolute path)
-/absolute/host/path:/container/path[:options]`} lang="yaml" />
+  # Bind mount (requires absolute path)
+  /absolute/host/path:/container/path[:options]
+`} lang="yaml" />
 
 ## Important Restrictions
 
@@ -77,84 +83,25 @@ Since `haloyd` runs inside a Docker container, relative paths would be resolved 
 
 Using absolute paths or named volumes ensures predictable, consistent behavior.
 
-## Real-World Examples
-
-### Web Application with Database
-
-<Code code={`name: "my-web-app"
-volumes:
-  # Application uploads
-  - "app-uploads:/app/public/uploads"
-  # Application logs
-  - "/var/log/my-web-app:/app/logs"
-  # SSL certificates (read-only)
-  - "/etc/ssl/certs:/app/ssl:ro"`} lang="yaml" />
-
-### Database Container
-
-<Code code={`name: "postgres-db"
-volumes:
-  # Database data (persisted across container restarts)
-  - "postgres-data:/var/lib/postgresql/data"
-  # Database backups
-  - "/backup/postgres:/backup"
-  # Custom configuration (read-only)
-  - "/etc/postgresql/postgresql.conf:/etc/postgresql/postgresql.conf:ro"`} lang="yaml" />
-
-### Multi-Container Application
-
-<Code code={`name: "shared-storage-app"
-volumes:
-  # Shared volume between multiple containers
-  - "shared-data:/data"
-  # Container-specific logs
-  - "app-logs:/var/log/app"
-  # Host-mounted configuration
-  - "/etc/myapp/config.yaml:/app/config.yaml:ro"`} lang="yaml" />
-
-## Volume Management
-
-### Listing Volumes
-
-<Code code={`docker volume ls`} lang="bash" />
-
-### Inspecting a Volume
-
-<Code code={`docker volume inspect app-data`} lang="bash" />
-
-### Removing Unused Volumes
-
-<Code code={`docker volume prune`} lang="bash" />
-
-### Backing Up Named Volumes
-
-<Code code={`# Create a temporary container to backup the volume
-docker run --rm -v app-data:/data -v $(pwd):/backup ubuntu tar czf /backup/app-data-backup.tar.gz /data`} lang="bash" />
-
-### Restoring Named Volumes
-
-<Code code={`# Create a temporary container to restore the volume
-docker run --rm -v app-data:/data -v $(pwd):/backup ubuntu tar xzf /backup/app-data-backup.tar.gz -C /`} lang="bash" />
-
 ## Multi-Target Volumes
 
 Override volumes for different deployment targets:
 
-<Code code={`name: "my-app"
-# Base volumes
-volumes:
-  - "app-data:/app/data"
-
-targets:
-  production:
-    volumes:
-      - "prod-app-data:/app/data"
-      - "/var/log/prod-app:/app/logs"
-
-  staging:
-    volumes:
-      - "staging-app-data:/app/data"
-      - "/var/log/staging-app:/app/logs"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  # Base volumes
+  volumes:
+    - "app-data:/app/data"
+  targets:
+    production:
+      volumes:
+        - "prod-app-data:/app/data"
+        - "/var/log/prod-app:/app/logs"
+    staging:
+      volumes:
+        - "staging-app-data:/app/data"
+        - "/var/log/staging-app:/app/logs"
+`} lang="yaml" />
 
 ## Best Practices
 
@@ -164,26 +111,6 @@ targets:
 4. **Mount sensitive files as read-only**: Add `:ro` to prevent accidental modification
 5. **Regular backups**: Especially for named volumes containing critical data
 6. **Document volume requirements**: Keep a list of required volumes in your README
-
-## Troubleshooting
-
-### Permission Issues
-
-If you encounter permission errors:
-
-<Code code={`# Check volume ownership
-docker run --rm -v app-data:/data ubuntu ls -la /data
-
-# Fix ownership (if needed)
-docker run --rm -v app-data:/data ubuntu chown -R 1000:1000 /data`} lang="bash" />
-
-### Volume Not Found
-
-If a named volume doesn't exist, Docker creates it automatically. For bind mounts, ensure the host directory exists:
-
-<Code code={`# Create directory before deploying
-sudo mkdir -p /var/log/my-app
-sudo chown $(whoami):$(whoami) /var/log/my-app`} lang="bash" />
 
 ## Next Steps
 

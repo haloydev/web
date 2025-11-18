@@ -15,7 +15,7 @@ Complete reference for all Haloy configuration options.
 | `name`                | string         | **Yes**  | Unique application name                                                                                           |
 | `image`               | object         | No       | Docker image configuration (see [Image Configuration](/docs/image-configuration))                                 |
 | `server`              | string         | No       | Haloy server API URL                                                                                              |
-| `api_token`           | object         | No       | API token configuration (see [Authentication](/guides/authentication))                                            |
+| `api_token`           | object         | No       | API token configuration (see [Authentication](/docs/authentication))                                            |
 | `deployment_strategy` | string         | No       | Deployment strategy: "rolling" (default) or "replace"                                                             |
 | `domains`             | array          | No       | Domain configuration                                                                                              |
 | `acme_email`          | string         | No       | Let's Encrypt email (required with domains)                                                                       |
@@ -28,7 +28,7 @@ Complete reference for all Haloy configuration options.
 | `post_deploy`         | array          | No       | Commands to run after deploy                                                                                      |
 | `global_pre_deploy`   | array          | No       | Commands to run once before all deployments (multi-target only)                                                   |
 | `global_post_deploy`  | array          | No       | Commands to run once after all deployments (multi-target only)                                                    |
-| `targets`             | object         | No       | Multiple deployment targets with overrides (see [Multi-Server Deployments](/deployment/multi-server-deployments)) |
+| `targets`             | object         | No       | Multiple deployment targets with overrides (see [Multi-Server Deployments](/docs/multi-server-deployments)) |
 | `secret_providers`    | object         | No       | Secret provider configuration (see [Secret Providers](/docs/secret-providers))                                    |
 | `network`             | string         | No       | Docker network for the container. Defaults to `haloy-public`                                                      |
 
@@ -39,10 +39,11 @@ Complete reference for all Haloy configuration options.
 Gradually replaces old containers with new ones, ensuring zero downtime:
 
 <Code
-  code={`name: "my-app"
-deployment_strategy: "rolling"
-replicas: 3`}
-  lang="yaml"
+  code={`
+  name: "my-app"
+  deployment_strategy: "rolling"
+  replicas: 3
+`} lang="yaml"
 />
 
 ### Replace Deployment
@@ -50,45 +51,52 @@ replicas: 3`}
 Stops all old containers before starting new ones:
 
 <Code
-  code={`name: "my-app"
-deployment_strategy: "replace"
-replicas: 3`}
-  lang="yaml"
+  code={`
+  name: "my-app"
+  deployment_strategy: "replace"
+  replicas: 3
+`} lang="yaml"
 />
 
 ## Deployment Hooks
 
+**Important**: All deployment hooks (`pre_deploy`, `post_deploy`, `global_pre_deploy`, and `global_post_deploy`) are executed by the `haloy` CLI tool on the machine where you run the deployment command, **not on the server**. This means:
+
+- Hooks run in your local environment with access to your local filesystem, environment variables, and installed tools
+- They do not have direct access to the server's filesystem or environment
+- Use hooks for local preparation tasks like building assets, running tests, or sending notifications
+- For server-side operations, consider using container initialization scripts or application startup logic
+
 Run custom commands before or after deployment:
 
-<Code code={`name: "my-app"
-pre_deploy:
-  - "npm run migrate"
-  - "echo 'Starting deployment'"
-
-post_deploy:
-
-- "curl -X POST https://status.example.com/notify"
-- "echo 'Deployment complete'"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  pre_deploy:
+    - "npm run migrate"
+    - "echo 'Starting deployment'"
+  post_deploy:
+    - "curl -X POST https://status.example.com/notify"
+    - "echo 'Deployment complete'"
+`} lang="yaml" />
 
 For multi-target deployments, use global hooks:
 
-<Code code={`name: "my-app"
-global_pre_deploy:
-  - "npm run build"
-  - "docker build -t my-app ."
-
-global_post_deploy:
-
-- "echo 'All deployments complete'"
-
-targets:
-production:
-server: prod.haloy.com
-pre_deploy: - "npm run migrate:production"
-
-staging:
-server: staging.haloy.com
-pre_deploy: - "npm run migrate:staging"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  global_pre_deploy:
+    - "npm run build"
+    - "docker build -t my-app ."
+  global_post_deploy:
+    - "echo 'All deployments complete'"
+  targets:
+    production:
+      server: prod.haloy.com
+      pre_deploy:
+        - "npm run test:production"
+    staging:
+      server: staging.haloy.com
+      pre_deploy: - "npm run test:staging"
+`} lang="yaml" />
 
 ## Target Configuration
 
@@ -119,40 +127,53 @@ When using multi-target deployments, each target can override base configuration
 
 ### Example
 
-<Code code={`name: "my-app"
-# Base configuration - inherited by all targets
-image:
-  repository: "ghcr.io/my-org/my-app"
-  tag: "latest"
-replicas: 2
-port: "8080"
-env:
-  - name: "LOG_LEVEL"
-    value: "info"
-
-targets:
-production: # Inherits: replicas=2, port="8080" # Overrides: image.tag, adds domains, overrides env completely
-server: "prod.haloy.com"
-image:
-tag: "v1.2.3"
-domains: - domain: "my-app.com"
-env: # Completely replaces base env - name: "NODE_ENV"
-value: "production"
-
-staging: # Inherits: image (repository + tag), replicas=2, port="8080", env # Overrides: server, adds domains, changes replicas
-server: "staging.haloy.com"
-replicas: 1
-domains: - domain: "staging.my-app.com"`} lang="yaml" />
+<Code code={`
+  # Base configuration - inherited by all targets
+  name: "my-app"
+  image:
+    repository: "ghcr.io/my-org/my-app"
+    tag: "latest"
+  replicas: 2
+  port: "8080"
+  env:
+    - name: "LOG_LEVEL"
+      value: "info"
+# Targets
+  targets:
+    production: # Inherits: replicas=2, port="8080" # Overrides: image.tag, adds domains, overrides env completely
+      server: "prod.haloy.com"
+      image:
+        tag: "v1.2.3"
+      domains:
+        - domain: "my-app.com"
+      env: # Completely replaces base env
+        - name: "NODE_ENV"
+        value: "production"
+    staging: # Inherits: image (repository + tag), replicas=2, port="8080", env # Overrides: server, adds domains, changes replicas
+      server: "staging.haloy.com"
+      replicas: 1
+      domains:
+        - domain: "staging.my-app.com"
+`} lang="yaml" />
 
 ## Custom Docker Network
 
-By default, containers are attached to the `haloy-public` network. You can override this:
+By default, containers are attached to the `haloy` network. You can override this:
 
-<Code
-  code={`name: "my-app"
-network: "my-custom-network"`}
-  lang="yaml"
+<Code code={`
+  name: "my-app"
+  network: "my-custom-network"
+`} lang="yaml"
 />
+
+**Important**: If you override the default network (`haloy`), the Haloy proxy will not be able to discover your containers. This means:
+
+- Your application containers will not be included in the HAProxy configuration
+- Traffic will not be routed to your application
+- Your domains will not work, even though the containers are running
+- The containers will be completely ignored by the routing system after they start
+
+Only change the network if you have a specific networking requirement and understand that you'll need to handle routing separately.
 
 ## Validation
 

@@ -18,88 +18,82 @@ Deploy your application to multiple servers with a single configuration file. Pe
 
 ## Basic Multi-Target Configuration
 
-<Code code={`name: "my-app"
-# Base configuration inherited by all targets
-image:
-  repository: "ghcr.io/your-username/my-app"
-  tag: "latest"
-acme_email: "you@email.com"
+<Code code={`
+  name: "my-app"
+  # Base configuration inherited by all targets
+  image:
+    repository: "ghcr.io/your-username/my-app"
+    tag: "latest"
+  acme_email: "you@email.com"
 
-targets:
-  production:
-    server: production.haloy.com
-    image:
-      tag: "v1.2.3"  # Override with stable release
-    domains:
-      - domain: "my-app.com"
-    replicas: 3
-
-  staging:
-    server: staging.haloy.com
-    image:
-      tag: "main"  # Use latest main branch
-    domains:
-      - domain: "staging.my-app.com"
-    replicas: 1`} lang="yaml" />
+  targets:
+    production:
+      server: production.haloy.com
+      image:
+        tag: "v1.2.3"  # Override with stable release
+      domains:
+        - domain: "my-app.com"
+      replicas: 3
+    staging:
+      server: staging.haloy.com
+      image:
+        tag: "main"  # Use latest main branch
+      domains:
+        - domain: "staging.my-app.com"
+      replicas: 1`} lang="yaml" />
 
 ## Deploying to Targets
 
 ### Deploy to Specific Target
 
-<Code code={`# Deploy to production only
-haloy deploy --target production
-
-# Short form
-haloy deploy -t staging`} lang="bash" />
+<Code code={`
+  # Deploy to production only
+  haloy deploy --target production
+  # Short form
+  haloy deploy -t staging
+`} lang="bash" />
 
 ### Deploy to All Targets
 
 <Code code={`haloy deploy --all`} lang="bash" />
 
-### Interactive Selection
-
-Without flags, you'll be prompted to choose:
-
-<Code code={`haloy deploy
-# Shows available targets for selection`} lang="bash" />
-
 ## Configuration Inheritance
 
 Base configuration provides defaults that targets can override:
 
-<Code code={`name: "my-app"
-# Base configuration - inherited by all targets
-image:
-  repository: "ghcr.io/my-org/my-app"
-  tag: "latest"
-replicas: 2
-port: "8080"
-env:
-  - name: "LOG_LEVEL"
-    value: "info"
-
-targets:
-  production:
-    # Inherits: replicas=2, port="8080"
-    # Overrides: image.tag, adds domains, replaces env
-    server: "prod.haloy.com"
-    image:
-      tag: "v1.2.3"
-    domains:
-      - domain: "my-app.com"
-    env:
-      - name: "NODE_ENV"
-        value: "production"
-      - name: "LOG_LEVEL"
-        value: "warn"
-
-  staging:
-    # Inherits: image (repo + tag), port="8080", env
-    # Overrides: server, replicas, adds domains
-    server: "staging.haloy.com"
-    replicas: 1
-    domains:
-      - domain: "staging.my-app.com"`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  # Base configuration - inherited by all targets
+  image:
+    repository: "ghcr.io/my-org/my-app"
+    tag: "latest"
+  replicas: 2
+  port: "8080"
+  env:
+    - name: "LOG_LEVEL"
+      value: "info"
+  targets:
+    production:
+      # Inherits: replicas=2, port="8080"
+      # Overrides: image.tag, adds domains, replaces env
+      server: "prod.haloy.com"
+      image:
+        tag: "v1.2.3"
+      domains:
+        - domain: "my-app.com"
+      env:
+        - name: "NODE_ENV"
+          value: "production"
+        - name: "LOG_LEVEL"
+          value: "warn"
+    staging:
+      # Inherits: image (repo + tag), port="8080", env
+      # Overrides: server, replicas, adds domains
+      server: "staging.haloy.com"
+      replicas: 1
+      domains:
+        - domain: "staging.my-app.com"
+`} lang="yaml" />
 
 **Inheritance Rules:**
 - Base values provide defaults for all targets

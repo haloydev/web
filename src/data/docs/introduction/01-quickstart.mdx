@@ -38,13 +38,13 @@ Initialize `haloyd` and `HAProxy`:
 
 <Code code={`sudo haloyadm init`} lang="bash" />
 
-💡 **Recommended but optional**: Secure the Haloy API with a domain during initialization:
+**Recommended but optional**: Secure the Haloy API with a domain during initialization:
 
-<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com
+<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
 
-# If you don't have a domain now ready, you can set this later with:
 
-sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
+__If you don't have a domain now ready, you can set this later with:__
+<Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
 
 **Note:** For development or non-root installations, you can install in [user mode](/docs/non-root-install).
 
@@ -54,24 +54,24 @@ Add the server on your local machine:
 
 <Code code={`haloy server add <server-domain> <api-token>  # e.g., haloy.yourserver.com`} lang="bash" />
 
-> **Tip:** See Authentication & Token Management for more options on how to manage API tokens.
+**Tip:** See Authentication & Token Management for more options on how to manage API tokens.
 
 ## 4. Create haloy.yaml
 
 Create a `haloy.yaml` file:
 
-<Code code={`name: "my-app"
-server: haloy.yourserver.com
-
-domains:
-
-- domain: "my-app.com"
-  aliases:
-  - "www.my-app.com" # Redirects to my-app.com`} lang="yaml" />
+<Code code={`
+  name: "my-app"
+  server: haloy.yourserver.com
+  domains:
+    - domain: "my-app.com"
+    aliases:
+    - "www.my-app.com" # Redirects to my-app.com
+`} lang="yaml" />
 
 This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form.
 
-**Want to see real examples?** Check out the [examples repository](https://github.com/haloydev/examples) for complete configurations showing how to deploy common web apps like Next.js, TanStack Start, and more.
+Check out the [examples repository](https://github.com/haloydev/examples) for complete configurations showing how to deploy common web apps like Next.js, TanStack Start, static sites, and more.
 
 ## 5. Deploy
 
