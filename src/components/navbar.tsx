@@ -11,7 +11,12 @@ export function Navbar() {
         </a>
         <div className="flex space-x-2">
           <ModeToggle />
-          <ButtonLink href="https://github.com/haloydev/haloy" variant="outline" size="icon">
+          <ButtonLink
+            href="https://github.com/haloydev/haloy"
+            variant="outline"
+            size="icon"
+            aria-label="View Haloy on GitHub"
+          >
             <IconBrandGithub />
           </ButtonLink>
         </div>
