@@ -25,18 +25,22 @@ import { Navbar } from '@/components/navbar';
       <div class="flex justify-center">
         <div class="mt-28 flex max-w-4xl flex-col items-center px-12 sm:mt-32 sm:block">
           <h1 class="relative inline-block">
-            <CurlewLogo className="absolute -top-12 w-10 sm:-right-8 sm:w-12" />
-            <span class="font-figtree text-left text-4xl font-black sm:text-6xl"> Cloudless Deploys </span>
+            <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
+            <div class="font-figtree text-center text-4xl font-black text-balance sm:text-left sm:text-6xl">
+              Cloudless Deploys
+            </div>
           </h1>
-          <p class="mt-2 max-w-2xl text-center text-xl sm:leading-10 md:text-2xl">
+          <p class="mt-2 max-w-2xl text-center text-lg text-balance sm:leading-10 md:text-2xl">
             Manage deployments on your own infrastructure.
           </p>
           <div class="mt-6 sm:mt-8">
-            <ButtonLink href="/docs/quickstart" size="lg">
+            <ButtonLink href="/docs/quickstart" size="default" className="sm:h-10 sm:has-[>svg]:px-4">
               <IconRocket />
               Quickstart
             </ButtonLink>
-            <ButtonLink href="/docs" size="lg" variant="link"> Documentation </ButtonLink>
+            <ButtonLink href="/docs" variant="link" size="default" className="sm:h1-10 sm:px-6">
+              Documentation
+            </ButtonLink>
           </div>
         </div>
       </div>
