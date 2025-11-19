@@ -23,17 +23,34 @@ Install `haloyadm` on your server:
 
 ## Initialize haloyd
 
-Initialize `haloyd` and `HAProxy`:
+### Standard Setup (Remote Deployment)
 
-<Code code={`sudo haloyadm init`} lang="bash" />
-
-### Secure with a Domain (Recommended)
-
-It's recommended to secure the Haloy API with a domain and SSL certificate during initialization:
+For deploying from your local machine to a remote server, initialize with an API domain. This exposes the Haloy API securely via HTTPS:
 
 <Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
 
-If you don't have a domain ready now, you can set this later:
+**This is required for remote deployments.** Without an API domain, the `haloy` CLI on your local machine cannot communicate with `haloyd` on the server.
+
+### Same-Server Deployment
+
+If you plan to install the `haloy` CLI directly on the server (alongside `haloyd`) and only deploy locally, you can initialize without a domain:
+
+<Code code={`sudo haloyadm init`} lang="bash" />
+
+In this setup:
+- Both `haloy` CLI and `haloyd` run on the same machine
+- API communication uses `localhost`
+- No domain is required
+- You'll add the server as: `haloy server add localhost <api-token>`
+
+This is useful for:
+- Single-server setups
+- Development environments
+- Situations where a domain isn't available
+
+### Adding a Domain Later
+
+If you initialized without a domain and want to enable remote deployments:
 
 <Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
 

@@ -12,7 +12,7 @@ Get up and running with Haloy in minutes. This guide will walk you through deplo
 
 - **Server**: Any Linux server with Docker installed
 - **Local**: Docker for building your app
-- **Domain**: To access the Haloy API remotely (optional for local development)
+- **Domain**: A domain pointing to your server for secure API access
 
 ## 1. Install the haloy CLI Tool
 
@@ -34,19 +34,14 @@ Install `haloyadm` (requires sudo access):
 
 <Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash`} lang="bash" />
 
-Initialize `haloyd` and `HAProxy`:
-
-<Code code={`sudo haloyadm init`} lang="bash" />
-
-**Recommended but optional**: Secure the Haloy API with a domain during initialization:
+Initialize `haloyd` with `haloyadm`:
 
 <Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
 
+The API domain is required for remote deploys. See [Server Installation](/docs/server-installation) for how to set it up without a domain and trigger deploys from the server.
 
-__If you don't have a domain now ready, you can set this later with:__
-<Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
+For development or non-root installations, you can install in [user mode](/docs/non-root-install).
 
-**Note:** For development or non-root installations, you can install in [user mode](/docs/non-root-install).
 
 ## 3. Add the Server
 
