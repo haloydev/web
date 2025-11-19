@@ -1,11 +1,10 @@
 ---
 title: 'Volume Configuration'
 slug: 'volumes'
-category: configuration
-
+section: configuration
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Haloy supports both Docker named volumes and filesystem bind mounts for persistent data storage.
 
@@ -13,15 +12,19 @@ Haloy supports both Docker named volumes and filesystem bind mounts for persiste
 
 Named volumes are managed by Docker and work consistently across environments:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   volumes:
     - "app-data:/app/data"
     - "app-logs:/var/log/app"
     - "postgres-data:/var/lib/postgresql/data"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ### Benefits
+
 - Managed by Docker
 - Portable across environments
 - Better performance on some systems
@@ -31,13 +34,16 @@ Named volumes are managed by Docker and work consistently across environments:
 
 Mount directories from the host filesystem into containers:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   volumes:
     - "/var/app/data:/app/data"
     - "/home/user/logs:/app/logs:ro"
     - "/etc/ssl/certs:/app/certs:ro"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ### Mount Options
 
@@ -54,8 +60,9 @@ Add options after the second colon:
   # Named volume
   volume-name:/container/path
 
-  # Bind mount (requires absolute path)
-  /absolute/host/path:/container/path[:options]
+# Bind mount (requires absolute path)
+
+/absolute/host/path:/container/path[:options]
 `} lang="yaml" />
 
 ## Important Restrictions
@@ -65,18 +72,27 @@ Add options after the second colon:
 Filesystem bind mounts must use absolute paths starting with `/`:
 
 **Valid:**
-<Code code={`volumes:
+
+<Code
+  code={`volumes:
   - "/var/log/myapp:/app/logs"
-  - "/etc/ssl/private:/app/ssl:ro"`} lang="yaml" />
+  - "/etc/ssl/private:/app/ssl:ro"`}
+  lang="yaml"
+/>
 
 **Invalid (will be rejected):**
-<Code code={`volumes:
+
+<Code
+  code={`volumes:
   - "./data:/app/data"        # Relative path
-  - "../config:/app/config"   # Relative path`} lang="yaml" />
+  - "../config:/app/config"   # Relative path`}
+  lang="yaml"
+/>
 
 ### Why No Relative Paths?
 
 Since `haloyd` runs inside a Docker container, relative paths would be resolved relative to the daemon container's filesystem, not your local machine. This causes:
+
 - Unexpected directory creation inside the daemon container
 - Data appearing lost or inaccessible
 - Inconsistent behavior across deployments
@@ -87,7 +103,8 @@ Using absolute paths or named volumes ensures predictable, consistent behavior.
 
 Override volumes for different deployment targets:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   # Base volumes
   volumes:
@@ -101,7 +118,9 @@ Override volumes for different deployment targets:
       volumes:
         - "staging-app-data:/app/data"
         - "/var/log/staging-app:/app/logs"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ## Best Practices
 

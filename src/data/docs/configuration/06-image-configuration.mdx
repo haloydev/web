@@ -1,34 +1,36 @@
 ---
 title: 'Image Configuration'
 slug: 'image-configuration'
-category: configuration
-
+section: configuration
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Configure Docker images, registry authentication, local building, and rollback strategies.
 
 ## Basic Image Configuration
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `repository` | string | **Yes** | Docker image name |
-| `tag` | string | No | Image tag (default: "latest") |
-| `build` | boolean | No | Whether to build the image locally |
-| `registry` | object | No | Private registry authentication |
-| `source` | string | No | Where to get the image: "registry" (default) or "local" |
-| `history` | object | No | Image history and rollback strategy |
-| `build_config` | object | No | Build configuration for local building |
+| Key            | Type    | Required | Description                                             |
+| -------------- | ------- | -------- | ------------------------------------------------------- |
+| `repository`   | string  | **Yes**  | Docker image name                                       |
+| `tag`          | string  | No       | Image tag (default: "latest")                           |
+| `build`        | boolean | No       | Whether to build the image locally                      |
+| `registry`     | object  | No       | Private registry authentication                         |
+| `source`       | string  | No       | Where to get the image: "registry" (default) or "local" |
+| `history`      | object  | No       | Image history and rollback strategy                     |
+| `build_config` | object  | No       | Build configuration for local building                  |
 
 ## Simple Configuration
 
 Pull from a public registry:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "nginx"
-  tag: "alpine"`} lang="yaml" />
+  tag: "alpine"`}
+  lang="yaml"
+/>
 
 ## Registry Authentication
 
@@ -36,7 +38,8 @@ Authenticate with private Docker registries including Docker Hub, GitHub Contain
 
 ### Basic Authentication
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "ghcr.io/your-org/private-app"
   tag: "latest"
@@ -44,11 +47,14 @@ image:
     username:
       value: "your-username"
     password:
-      value: "your-password"`} lang="yaml" />
+      value: "your-password"`}
+  lang="yaml"
+/>
 
 ### With Environment Variables
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "ghcr.io/your-org/private-app"
   tag: "latest"
@@ -58,13 +64,18 @@ image:
         env: "REGISTRY_USERNAME"
     password:
       from:
-        env: "REGISTRY_PASSWORD"`} lang="yaml" />
+        env: "REGISTRY_PASSWORD"`}
+  lang="yaml"
+/>
 
 Then set the environment variables:
 
-<Code code={`export REGISTRY_USERNAME="your-username"
+<Code
+  code={`export REGISTRY_USERNAME="your-username"
 export REGISTRY_PASSWORD="your-token"
-haloy deploy`} lang="bash" />
+haloy deploy`}
+  lang="bash"
+/>
 
 ### With Secret Providers
 
@@ -81,14 +92,15 @@ image:
         secret: "onepassword:registry-credentials.password"
 
 secretProviders:
-  onepassword:
-    registry-credentials:
-      vault: "Infrastructure"
-      item: "GitHub Container Registry"`} lang="yaml" />
+onepassword:
+registry-credentials:
+vault: "Infrastructure"
+item: "GitHub Container Registry"`} lang="yaml" />
 
 ### Custom Registry Server
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "myregistry.example.com/my-app"
   tag: "latest"
@@ -97,9 +109,12 @@ image:
     username:
       value: "your-username"
     password:
-      value: "your-password"`} lang="yaml" />
+      value: "your-password"`}
+  lang="yaml"
+/>
 
 The `server` field is optional. Haloy auto-detects it from your repository:
+
 - `ghcr.io/your-org/app` → `ghcr.io`
 - `myregistry.example.com/my-app` → `myregistry.example.com`
 - `your-username/app` → `index.docker.io` (Docker Hub)
@@ -107,24 +122,32 @@ The `server` field is optional. Haloy auto-detects it from your repository:
 ### Registry Examples
 
 **GitHub Container Registry (GHCR):**
-<Code code={`image:
+
+<Code
+  code={`image:
   repository: "ghcr.io/your-org/my-app"
   tag: "latest"
   registry:
     username:
       value: "your-github-username"
     password:
-      value: "ghp_your_personal_access_token"`} lang="yaml" />
+      value: "ghp_your_personal_access_token"`}
+  lang="yaml"
+/>
 
 **Docker Hub:**
-<Code code={`image:
+
+<Code
+  code={`image:
   repository: "your-dockerhub-username/private-app"
   tag: "latest"
   registry:
     username:
       value: "your-dockerhub-username"
     password:
-      value: "your-dockerhub-token"`} lang="yaml" />
+      value: "your-dockerhub-token"`}
+  lang="yaml"
+/>
 
 ## Local Image Building
 
@@ -132,19 +155,20 @@ Haloy can build Docker images locally and distribute them to your servers, elimi
 
 ### Build Configuration
 
-| Key | Type | Required | Description |
-|-----|------|----------|-------------|
-| `context` | string | No | Build context directory (default: ".") |
-| `dockerfile` | string | No | Path to Dockerfile (default: "Dockerfile") |
-| `platform` | string | No | Target platform (default: "linux/amd64") |
-| `args` | array | No | Build arguments |
-| `push` | string | No | Where to push: "registry" or "server" (auto-detected) |
+| Key          | Type   | Required | Description                                           |
+| ------------ | ------ | -------- | ----------------------------------------------------- |
+| `context`    | string | No       | Build context directory (default: ".")                |
+| `dockerfile` | string | No       | Path to Dockerfile (default: "Dockerfile")            |
+| `platform`   | string | No       | Target platform (default: "linux/amd64")              |
+| `args`       | array  | No       | Build arguments                                       |
+| `push`       | string | No       | Where to push: "registry" or "server" (auto-detected) |
 
 ### Push to Server (No Registry Required)
 
 Build locally and upload directly to your server:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: "haloy.yourserver.com"
 image:
   repository: "my-app"
@@ -156,13 +180,16 @@ image:
     # push: "server" is automatically detected
 domains:
   - domain: "my-app.com"
-acme_email: "you@email.com"`} lang="yaml" />
+acme_email: "you@email.com"`}
+  lang="yaml"
+/>
 
 ### Push to Registry
 
 Build locally and push to a registry:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: "haloy.yourserver.com"
 image:
   repository: "ghcr.io/your-org/my-app"
@@ -181,7 +208,9 @@ image:
     # push: "registry" is automatically detected
 domains:
   - domain: "my-app.com"
-acme_email: "you@email.com"`} lang="yaml" />
+acme_email: "you@email.com"`}
+  lang="yaml"
+/>
 
 ### Build Arguments
 
@@ -223,38 +252,38 @@ image:
     platform: "linux/amd64"
 
 targets:
-  production:
-    server: "prod.haloy.com"
-    image:
-      builder:
-        push: "server"  # Push directly to production server
-    domains:
-      - domain: "my-app.com"
+production:
+server: "prod.haloy.com"
+image:
+builder:
+push: "server" # Push directly to production server
+domains: - domain: "my-app.com"
 
-  staging:
-    server: "staging.haloy.com"
-    image:
-      registry:
-        username:
-          from:
-            env: "GITHUB_USERNAME"
-        password:
-          from:
-            env: "GITHUB_TOKEN"
-      builder:
-        push: "registry"  # Push to registry for staging
-    domains:
-      - domain: "staging.my-app.com"`} lang="yaml" />
+staging:
+server: "staging.haloy.com"
+image:
+registry:
+username:
+from:
+env: "GITHUB_USERNAME"
+password:
+from:
+env: "GITHUB_TOKEN"
+builder:
+push: "registry" # Push to registry for staging
+domains: - domain: "staging.my-app.com"`} lang="yaml" />
 
 ### When to Use Each Method
 
 **Push to Server (`push: "server"`):**
+
 - No Docker registry required
 - Faster for small deployments
 - Simpler setup for single-server deployments
 - Ideal for personal projects and development
 
 **Push to Registry (`push: "registry"`):**
+
 - Better for multi-server deployments
 - Images cached in registry for faster subsequent deploys
 - Supports external image inspection and scanning
@@ -266,17 +295,18 @@ Configure how Haloy manages image history for rollbacks.
 
 ### Rollback Strategies
 
-| Strategy | Description | Use Case |
-|----------|-------------|----------|
-| `local` | Keep images locally (default) | Fast rollbacks, local development |
-| `registry` | Rely on registry tags | Save disk space, versioned releases |
-| `none` | No rollback support | Minimal storage, no rollback needs |
+| Strategy   | Description                   | Use Case                            |
+| ---------- | ----------------------------- | ----------------------------------- |
+| `local`    | Keep images locally (default) | Fast rollbacks, local development   |
+| `registry` | Rely on registry tags         | Save disk space, versioned releases |
+| `none`     | No rollback support           | Minimal storage, no rollback needs  |
 
 ### Local Strategy (Default)
 
 Haloy tags images with deployment IDs and keeps them locally:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "ghcr.io/my-org/my-app"
   tag: "latest"
@@ -284,7 +314,9 @@ image:
     strategy: "local"
     count: 5  # Keep 5 images locally
 domains:
-  - domain: "my-app.com"`} lang="yaml" />
+  - domain: "my-app.com"`}
+  lang="yaml"
+/>
 
 **Pros:** Fast rollbacks, no registry required
 **Cons:** Uses disk space
@@ -293,7 +325,8 @@ domains:
 
 Rely on registry tags for rollbacks:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "ghcr.io/my-org/my-app"
   tag: "v1.2.3"  # Must use immutable tags
@@ -302,9 +335,12 @@ image:
     count: 10  # Track 10 deployment versions
     pattern: "v*"  # Match versioned tags for rollbacks
 domains:
-  - domain: "my-app.com"`} lang="yaml" />
+  - domain: "my-app.com"`}
+  lang="yaml"
+/>
 
 **Requirements:**
+
 - Use immutable tags (no "latest", "main", etc.)
 - Tags must match the pattern
 - Registry must be accessible
@@ -316,14 +352,17 @@ domains:
 
 Disable rollback capability:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 image:
   repository: "ghcr.io/my-org/my-app"
   tag: "latest"
   history:
     strategy: "none"
 domains:
-  - domain: "my-app.com"`} lang="yaml" />
+  - domain: "my-app.com"`}
+  lang="yaml"
+/>
 
 **Pros:** Minimal resource usage
 **Cons:** No rollback capability
@@ -332,16 +371,20 @@ domains:
 
 Use images already present on the server (don't pull from registry):
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: "haloy.yourserver.com"
 image:
   repository: "my-app"
   tag: "latest"
   source: "local"  # Only look for images on the server
 domains:
-  - domain: "my-app.com"`} lang="yaml" />
+  - domain: "my-app.com"`}
+  lang="yaml"
+/>
 
 Useful when:
+
 - Images are built directly on the server
 - Using custom build processes
 - Testing local development images
@@ -352,51 +395,52 @@ Useful when:
 server: "prod.haloy.com"
 
 image:
-  repository: "ghcr.io/my-org/production-app"
-  tag: "v1.5.2"
+repository: "ghcr.io/my-org/production-app"
+tag: "v1.5.2"
 
-  # Registry authentication
-  registry:
-    username:
-      from:
-        secret: "onepassword:registry.username"
-    password:
-      from:
-        secret: "onepassword:registry.token"
+# Registry authentication
 
-  # Local build configuration
-  builder:
-    context: "."
-    dockerfile: "Dockerfile.prod"
-    platform: "linux/amd64"
-    push: "registry"
-    args:
-      - name: "NODE_ENV"
-        value: "production"
-      - name: "BUILD_VERSION"
-        value: "v1.5.2"
-      - name: "NPM_TOKEN"
-        from:
-          secret: "onepassword:build.npm-token"
+registry:
+username:
+from:
+secret: "onepassword:registry.username"
+password:
+from:
+secret: "onepassword:registry.token"
 
-  # Rollback configuration
-  history:
-    strategy: "registry"
-    count: 10
-    pattern: "v*"
+# Local build configuration
+
+builder:
+context: "."
+dockerfile: "Dockerfile.prod"
+platform: "linux/amd64"
+push: "registry"
+args: - name: "NODE_ENV"
+value: "production" - name: "BUILD_VERSION"
+value: "v1.5.2" - name: "NPM_TOKEN"
+from:
+secret: "onepassword:build.npm-token"
+
+# Rollback configuration
+
+history:
+strategy: "registry"
+count: 10
+pattern: "v\*"
 
 secretProviders:
-  onepassword:
-    registry:
-      vault: "Infrastructure"
-      item: "GitHub Registry"
-    build:
-      vault: "Development"
-      item: "Build Tokens"
+onepassword:
+registry:
+vault: "Infrastructure"
+item: "GitHub Registry"
+build:
+vault: "Development"
+item: "Build Tokens"
 
 domains:
-  - domain: "production-app.com"
-acme_email: "admin@production-app.com"`} lang="yaml" />
+
+- domain: "production-app.com"
+  acme_email: "admin@production-app.com"`} lang="yaml" />
 
 ## Security Best Practices
 

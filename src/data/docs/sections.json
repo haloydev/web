@@ -1,8 +1,8 @@
 [
   { "id": "introduction", "title": "Introduction" },
   { "id": "installation", "title": "Installation" },
+  { "id": "reference", "title": "Reference" },
   { "id": "configuration", "title": "Configuration" },
   { "id": "deployment", "title": "Deployment" },
-  { "id": "reference", "title": "Reference" },
   { "id": "guides", "title": "Guides" }
 ]

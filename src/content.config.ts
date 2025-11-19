@@ -2,8 +2,8 @@ import { defineCollection, reference, z } from 'astro:content';
 
 import { glob, file } from 'astro/loaders';
 
-const docCategories = defineCollection({
-  loader: file('./src/data/docs/categories.json'),
+const docSections = defineCollection({
+  loader: file('./src/data/docs/sections.json'),
   schema: z.object({
     id: z.string(),
     title: z.string(),
@@ -15,8 +15,8 @@ const docPages = defineCollection({
   schema: z.object({
     title: z.string(),
     slug: z.string(),
-    category: reference('docCategories'),
+    section: reference('docSections'),
   }),
 });
 
-export const collections = { docCategories, docPages };
+export const collections = { docSections, docPages };

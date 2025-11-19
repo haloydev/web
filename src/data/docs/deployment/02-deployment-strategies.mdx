@@ -1,11 +1,10 @@
 ---
 title: 'Deployment Strategies'
 slug: 'deployment-strategies'
-category: deployment
-
+section: deployment
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Haloy supports two deployment strategies: rolling deployment (default) and replace deployment.
 
@@ -23,12 +22,15 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
 
 ### Configuration
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   deployment_strategy: "rolling"  # Default, can be omitted
   replicas: 3
   domains:
-    - domain: "my-app.com"`} lang="yaml" />
+    - domain: "my-app.com"`}
+  lang="yaml"
+/>
 
 ### Benefits
 
@@ -44,7 +46,8 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
 
 ### Example
 
-<Code code={`
+<Code
+  code={`
   name: "high-availability-app"
   deployment_strategy: "rolling"
   replicas: 5
@@ -55,7 +58,9 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
   domains:
     - domain: "ha-app.com"
   acme_email: "admin@ha-app.com"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ## Replace Deployment
 
@@ -70,13 +75,16 @@ Stops all old containers before starting new ones.
 
 ### Configuration
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   deployment_strategy: "replace"
   replicas: 3
   domains:
     - domain: "my-app.com"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ### Benefits
 
@@ -99,7 +107,8 @@ Stops all old containers before starting new ones.
 
 ### Example
 
-<Code code={`
+<Code
+  code={`
   name: "batch-processor"
   deployment_strategy: "replace"
   replicas: 2
@@ -110,24 +119,27 @@ Stops all old containers before starting new ones.
   env:
     - name: "BATCH_SIZE"
       value: "1000"
-  `} lang="yaml" />
+  `}
+  lang="yaml"
+/>
 
 ## Comparison
 
-| Aspect | Rolling | Replace |
-|--------|---------|---------|
-| **Downtime** | Zero | Brief (during swap) |
-| **Resource usage** | Higher (overlapping containers) | Lower |
-| **Risk** | Lower (gradual rollout) | Higher (all at once) |
-| **Rollback** | Automatic on failure | Manual |
-| **Complexity** | Higher | Lower |
-| **Best for** | Production HA services | Dev/staging, batch jobs |
+| Aspect             | Rolling                         | Replace                 |
+| ------------------ | ------------------------------- | ----------------------- |
+| **Downtime**       | Zero                            | Brief (during swap)     |
+| **Resource usage** | Higher (overlapping containers) | Lower                   |
+| **Risk**           | Lower (gradual rollout)         | Higher (all at once)    |
+| **Rollback**       | Automatic on failure            | Manual                  |
+| **Complexity**     | Higher                          | Lower                   |
+| **Best for**       | Production HA services          | Dev/staging, batch jobs |
 
 ## Per-Target Strategies
 
 Use different strategies for different environments:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   # Default for all targets
   deployment_strategy: "rolling"
@@ -151,7 +163,9 @@ Use different strategies for different environments:
       replicas: 1
       domains:
         - domain: "dev.my-app.com"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ## Health Checks
 
@@ -162,16 +176,23 @@ health_check_path: "/api/health"
 port: "8080"
 
 # Your app should respond with 200 OK when healthy
+
 # Example health endpoint response:
+
 # {
-#   "status": "healthy",
-#   "uptime": 42,
-#   "database": "connected"
+
+# "status": "healthy",
+
+# "uptime": 42,
+
+# "database": "connected"
+
 # }`} lang="yaml" />
 
 ### Health Check Requirements
 
 Your application should:
+
 1. Respond to GET requests at the health check path
 2. Return HTTP 200 when healthy
 3. Return non-200 when unhealthy or not ready
@@ -180,6 +201,7 @@ Your application should:
 ### Example Health Check Implementation
 
 **Node.js/Express:**
+
 <Code code={`app.get('/health', async (req, res) => {
   try {
     // Check database connection
@@ -193,12 +215,14 @@ Your application should:
     } else {
       res.status(503).json({ status: 'unhealthy', reason: 'cache unavailable' });
     }
-  } catch (error) {
-    res.status(503).json({ status: 'unhealthy', reason: error.message });
-  }
+
+} catch (error) {
+res.status(503).json({ status: 'unhealthy', reason: error.message });
+}
 });`} lang="javascript" />
 
 **Go:**
+
 <Code code={`func healthHandler(w http.ResponseWriter, r *http.Request) {
     // Check database
     if err := db.Ping(); err != nil {
@@ -214,6 +238,7 @@ Your application should:
     json.NewEncoder(w).Encode(map[string]string{
         "status": "healthy",
     })
+
 }`} lang="go" />
 
 ## Deployment Process
@@ -224,12 +249,15 @@ Monitor your deployment:
 haloy deploy
 
 # Deploy without logs (faster)
+
 haloy deploy --no-logs
 
 # Check status after deployment
+
 haloy status
 
 # View application logs
+
 haloy logs`} lang="bash" />
 
 ## Troubleshooting
@@ -239,9 +267,11 @@ haloy logs`} lang="bash" />
 If a rolling deployment gets stuck:
 
 1. Check health check endpoint:
+
    <Code code={`curl https://my-app.com/health`} lang="bash" />
 
 2. View application logs:
+
    <Code code={`haloy logs`} lang="bash" />
 
 3. Verify health check path is correct in config

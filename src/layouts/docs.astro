@@ -7,14 +7,14 @@ import BaseLayout from '@/layouts/base.astro';
 import Prose from '@/components/prose.astro';
 import { getCollection } from 'astro:content';
 
-const categories = await getCollection('docCategories');
-const categoriesWithPages = await Promise.all(
-  categories.map(async (category) => {
-    const pages = (await getCollection('docPages', ({ data }) => data.category.id === category.id)).sort((a, b) =>
+const sections = await getCollection('docSections');
+const sectionsWithPages = await Promise.all(
+  sections.map(async (section) => {
+    const pages = (await getCollection('docPages', ({ data }) => data.section.id === section.id)).sort((a, b) =>
       a.id.localeCompare(b.id),
     );
     return {
-      ...category,
+      ...section,
       pages,
     };
   }),
@@ -32,7 +32,7 @@ const { title, activeSlug, headings } = Astro.props;
 <BaseLayout title={`${title} - Haloy Documentation`}>
   <Navbar client:load />
   <div class="lg:flex">
-    <DocsNavigation activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} client:load />
+    <DocsNavigation activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} client:load />
     <main class="flex-1 lg:flex">
       <div class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
         <Prose>

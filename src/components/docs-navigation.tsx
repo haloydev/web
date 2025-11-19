@@ -6,28 +6,28 @@ import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Menu } from 'lucide-react';
 
-type CategoryWithPages = CollectionEntry<'docCategories'> & { pages: CollectionEntry<'docPages'>[] };
+type SectionWithPages = CollectionEntry<'docSections'> & { pages: CollectionEntry<'docPages'>[] };
 type DocsNavigationProps = {
   activeSlug: string;
-  categoriesWithPages: CategoryWithPages[];
+  sectionsWithPages: SectionWithPages[];
 };
 
 function NavigationContent({
   activeSlug,
-  categoriesWithPages,
+  sectionsWithPages,
 }: {
   activeSlug: string;
-  categoriesWithPages: CategoryWithPages[];
+  sectionsWithPages: SectionWithPages[];
 }) {
   return (
     <nav className="space-y-6 px-4">
-      {categoriesWithPages.map((category) => (
-        <div key={category.id}>
+      {sectionsWithPages.map((section) => (
+        <div key={section.id}>
           <h3 className="text-muted-foreground/70 mb-1 px-3 text-xs font-semibold tracking-tight">
-            {category.data.title}
+            {section.data.title}
           </h3>
           <ul className="space-y-0.5">
-            {category.pages.map((page) => (
+            {section.pages.map((page) => (
               <li key={page.id}>
                 <Button asChild variant={activeSlug === page.data.slug ? 'secondary' : 'ghost'} size="sm">
                   <a href={`/docs/${page.data.slug}`} className="text-sm font-medium">
@@ -43,7 +43,7 @@ function NavigationContent({
   );
 }
 
-export function DocsNavigation({ activeSlug, categoriesWithPages, ...props }: DocsNavigationProps) {
+export function DocsNavigation({ activeSlug, sectionsWithPages, ...props }: DocsNavigationProps) {
   const [open, setOpen] = React.useState(false);
   return (
     <>
@@ -51,7 +51,7 @@ export function DocsNavigation({ activeSlug, categoriesWithPages, ...props }: Do
       <aside className="bg-background hidden w-64 shrink-0 lg:block">
         <div className="sticky top-0 h-screen pt-6">
           <ScrollArea className="h-[calc(100vh-4rem)]">
-            <NavigationContent activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} />
+            <NavigationContent activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />
           </ScrollArea>
         </div>
       </aside>
@@ -68,7 +68,7 @@ export function DocsNavigation({ activeSlug, categoriesWithPages, ...props }: Do
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
             <ScrollArea className="h-[calc(100vh-4rem)]">
-              <NavigationContent activeSlug={activeSlug} categoriesWithPages={categoriesWithPages} />
+              <NavigationContent activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />
             </ScrollArea>
           </SheetContent>
         </Sheet>

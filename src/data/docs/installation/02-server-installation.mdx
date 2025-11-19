@@ -1,11 +1,10 @@
 ---
 title: 'Server Installation'
 slug: 'server-installation'
-category: installation
-
+section: installation
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 The Haloy daemon (`haloyd`) runs on your server and manages container deployments, service discovery, and HAProxy configuration.
 
@@ -38,12 +37,14 @@ If you plan to install the `haloy` CLI directly on the server (alongside `haloyd
 <Code code={`sudo haloyadm init`} lang="bash" />
 
 In this setup:
+
 - Both `haloy` CLI and `haloyd` run on the same machine
 - API communication uses `localhost`
 - No domain is required
 - You'll add the server as: `haloy server add localhost <api-token>`
 
 This is useful for:
+
 - Single-server setups
 - Development environments
 - Situations where a domain isn't available
@@ -91,14 +92,15 @@ Enable debug mode:
 Haloy uses standard system directories:
 
 **System Installation (default):**
+
 <Code code={`/etc/haloy/              # Configuration
 ├── haloyd.yaml          # Haloyd settings
 ├── .env                 # API tokens
 
-/var/lib/haloy/          # Data
-├── haproxy-config/      # HAProxy configs
-├── cert-storage/        # SSL certificates
-└── db/                  # Database files`} lang="bash" />
+/var/lib/haloy/ # Data
+├── haproxy-config/ # HAProxy configs
+├── cert-storage/ # SSL certificates
+└── db/ # Database files`} lang="bash" />
 
 ## Uninstalling
 

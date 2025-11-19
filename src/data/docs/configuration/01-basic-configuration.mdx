@@ -1,11 +1,10 @@
 ---
 title: 'Basic Configuration'
 slug: 'basic-configuration'
-category: configuration
-
+section: configuration
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Learn how to create a basic Haloy configuration file to deploy your application.
 
@@ -13,14 +12,18 @@ Learn how to create a basic Haloy configuration file to deploy your application.
 
 The simplest `haloy.yaml` configuration:
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: haloy.yourserver.com
 domains:
     - domain: "my-app.com"
       aliases:
-        - "www.my-app.com"`} lang="yaml" />
+        - "www.my-app.com"`}
+  lang="yaml"
+/>
 
 This configuration:
+
 - Looks for a Dockerfile in the same directory
 - Builds the image locally
 - Uploads it to your server
@@ -32,46 +35,64 @@ This configuration:
 Haloy supports three configuration formats:
 
 ### YAML
-<Code code={`
+
+<Code
+  code={`
   name: "my-app"
   acme_email: "you@example.com"
   health_check_path: "/health"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ### JSON
-<Code code={`
+
+<Code
+  code={`
   {
     "name": "my-app",
     "acmeEmail": "you@example.com",
     "healthCheckPath": "/health"
   }
-`} lang="json" />
+`}
+  lang="json"
+/>
 
 ### TOML
-<Code code={`
+
+<Code
+  code={`
   name = "my-app"
   acme_email = "you@example.com"
   health_check_path = "/health"
-`} lang="toml" />
+`}
+  lang="toml"
+/>
 
 **Naming Convention:**
+
 - YAML/TOML: Use `snake_case` (e.g., `acme_email`)
 - JSON: Use `camelCase` (e.g., `acmeEmail`)
 
 ## Adding a Domain
+
 To make your app accessible via a domain:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   domains:
     - domain: "my-app.com"
   acme_email: "you@email.com"  # If not added haloy will use email configured when setting up the api domain
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ## Multiple Domains and Aliases
 
-<Code code={`
+<Code
+  code={`
   domains:
     - domain: "my-app.com"
       aliases:
@@ -79,17 +100,22 @@ To make your app accessible via a domain:
         - "app.my-app.com"
     - domain: "another-domain.com"
   acme_email: "you@email.com"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ## Custom Port
 
 If your application listens on a port other than 8080:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   port: "3000"  # Your app's internal port
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 The proxy will route traffic from ports 80/443 to this container port.
 
@@ -97,17 +123,21 @@ The proxy will route traffic from ports 80/443 to this container port.
 
 Configure a custom health check endpoint:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   health_check_path: "/api/health"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 Default: `"/"`
 
 ## Configuration File Location
 
 By default, `haloy` looks for configuration in the current directory:
+
 - `haloy.yaml`
 - `haloy.yml`
 - `haloy.json`

@@ -1,7 +1,7 @@
 ---
 title: 'Quickstart'
 slug: 'quickstart'
-category: introduction
+section: introduction
 ---
 
 import Code from '@/components/code.astro';
@@ -42,7 +42,6 @@ The API domain is required for remote deploys. See [Server Installation](/docs/s
 
 For development or non-root installations, you can install in [user mode](/docs/non-root-install).
 
-
 ## 3. Add the Server
 
 Add the server on your local machine:
@@ -55,14 +54,17 @@ Add the server on your local machine:
 
 Create a `haloy.yaml` file:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   domains:
     - domain: "my-app.com"
     aliases:
     - "www.my-app.com" # Redirects to my-app.com
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form.
 

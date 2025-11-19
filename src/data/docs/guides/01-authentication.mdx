@@ -1,11 +1,10 @@
 ---
 title: 'Authentication'
 slug: 'authentication'
-category: guides
-
+section: guides
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Haloy supports managing multiple servers, each with their own API tokens. Learn how to configure and manage authentication.
 
@@ -26,6 +25,7 @@ Get API tokens from each server and add them to your local client:
 sudo haloyadm api token
 
 # Add server on your local machine
+
 haloy server add production.haloy.com <production-token>
 haloy server add staging.haloy.com <staging-token>
 haloy server add dev.haloy.com <dev-token>`} lang="bash" />
@@ -46,22 +46,29 @@ When you run `haloy server add`, Haloy creates two files:
 
 **`~/.config/haloy/client.yaml`** - Server references:
 
-<Code code={`servers:
+<Code
+  code={`servers:
   "production.haloy.com":
     token_env: "HALOY_API_TOKEN_PRODUCTION_HALOY_COM"
   "staging.haloy.com":
-    token_env: "HALOY_API_TOKEN_STAGING_HALOY_COM"`} lang="yaml" />
+    token_env: "HALOY_API_TOKEN_STAGING_HALOY_COM"`}
+  lang="yaml"
+/>
 
 ### Environment Variables
 
 **`~/.config/haloy/.env`** - Actual tokens:
 
-<Code code={`HALOY_API_TOKEN_PRODUCTION_HALOY_COM=abc123token456
-HALOY_API_TOKEN_STAGING_HALOY_COM=def789token012`} lang="bash" />
+<Code
+  code={`HALOY_API_TOKEN_PRODUCTION_HALOY_COM=abc123token456
+HALOY_API_TOKEN_STAGING_HALOY_COM=def789token012`}
+  lang="bash"
+/>
 
 ### Deployment Flow
 
 When you deploy, Haloy:
+
 1. Loads `.env` files from current directory and config directory
 2. Gets server URL from your config
 3. Resolves the API token from configuration
@@ -81,38 +88,50 @@ Alternative to `haloy server add` - set tokens directly in your app config.
 
 ### Environment Variable Reference (Recommended)
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: "api.haloy.dev"
 api_token:
   from:
     env: "PRODUCTION_DEPLOY_TOKEN"
 image:
   repository: "my-app"
-  tag: "latest"`} lang="yaml" />
+  tag: "latest"`}
+  lang="yaml"
+/>
 
 Set the token in your environment:
 
-<Code code={`export PRODUCTION_DEPLOY_TOKEN="your_token_here"
-haloy deploy`} lang="bash" />
+<Code
+  code={`export PRODUCTION_DEPLOY_TOKEN="your_token_here"
+haloy deploy`}
+  lang="bash"
+/>
 
 ### Legacy Style (Simplified)
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: "api.haloy.dev"
 api_token: "PRODUCTION_DEPLOY_TOKEN"  # References environment variable
 image:
   repository: "my-app"
-  tag: "latest"`} lang="yaml" />
+  tag: "latest"`}
+  lang="yaml"
+/>
 
 ### Direct Value (Not Recommended)
 
-<Code code={`name: "my-app"
+<Code
+  code={`name: "my-app"
 server: "api.haloy.dev"
 api_token:
   value: "your_token_here"  # Avoid in production!
 image:
   repository: "my-app"
-  tag: "latest"`} lang="yaml" />
+  tag: "latest"`}
+  lang="yaml"
+/>
 
 > **Warning**: Never commit tokens directly in config files. Use environment variables or secret providers.
 
@@ -125,14 +144,14 @@ api_token:
     secret: "onepassword:api-tokens.production"
 
 secretProviders:
-  onepassword:
-    api-tokens:
-      vault: "Infrastructure"
-      item: "Haloy API Tokens"
+onepassword:
+api-tokens:
+vault: "Infrastructure"
+item: "Haloy API Tokens"
 
 image:
-  repository: "my-app"
-  tag: "latest"`} lang="yaml" />
+repository: "my-app"
+tag: "latest"`} lang="yaml" />
 
 ## Use Cases
 
@@ -145,10 +164,11 @@ api_token:
     env: "PROD_TOKEN"
 
 # staging.haloy.yaml
+
 server: staging.haloy.com
 api_token:
-  from:
-    env: "STAGING_TOKEN"`} lang="yaml" />
+from:
+env: "STAGING_TOKEN"`} lang="yaml" />
 
 Deploy to different environments:
 
@@ -166,22 +186,25 @@ export PROJECT_A_STAGING_TOKEN="token_a_staging"
 export PROJECT_B_TOKEN="token_b"
 
 # project-a/production.haloy.yaml
+
 server: project-a-prod.haloy.com
 api_token:
-  from:
-    env: "PROJECT_A_PROD_TOKEN"
+from:
+env: "PROJECT_A_PROD_TOKEN"
 
 # project-a/staging.haloy.yaml
+
 server: project-a-staging.haloy.com
 api_token:
-  from:
-    env: "PROJECT_A_STAGING_TOKEN"
+from:
+env: "PROJECT_A_STAGING_TOKEN"
 
 # project-b/haloy.yaml
+
 server: project-b.haloy.com
 api_token:
-  from:
-    env: "PROJECT_B_TOKEN"`} lang="yaml" />
+from:
+env: "PROJECT_B_TOKEN"`} lang="yaml" />
 
 ### Single Server, Multiple Projects
 
@@ -189,14 +212,17 @@ api_token:
 # Each has a unique app name
 
 # app1.haloy.yaml
+
 server: shared.haloy.com
 name: "app1"
 
 # app2.haloy.yaml
+
 server: shared.haloy.com
 name: "app2"
 
 # Both use the same token (from haloy server add)
+
 # Or specify different tokens if needed`} lang="yaml" />
 
 ### Multi-Target with Different Tokens
@@ -207,27 +233,25 @@ image:
   tag: "latest"
 
 targets:
-  production:
-    server: prod.haloy.com
-    api_token:
-      from:
-        secret: "onepassword:prod-tokens.haloy-api"
-    domains:
-      - domain: "my-app.com"
+production:
+server: prod.haloy.com
+api_token:
+from:
+secret: "onepassword:prod-tokens.haloy-api"
+domains: - domain: "my-app.com"
 
-  staging:
-    server: staging.haloy.com
-    api_token:
-      from:
-        env: "STAGING_API_TOKEN"
-    domains:
-      - domain: "staging.my-app.com"
+staging:
+server: staging.haloy.com
+api_token:
+from:
+env: "STAGING_API_TOKEN"
+domains: - domain: "staging.my-app.com"
 
 secretProviders:
-  onepassword:
-    prod-tokens:
-      vault: "Production"
-      item: "API Tokens"`} lang="yaml" />
+onepassword:
+prod-tokens:
+vault: "Production"
+item: "API Tokens"`} lang="yaml" />
 
 ## Security
 
@@ -254,32 +278,45 @@ secretProviders:
 !.env.example
 
 # Don't commit local client config
+
 .haloy/`} lang="bash" />
 
 ### Example .env.example
 
 Create a template for required tokens:
 
-<Code code={`# .env.example
+<Code
+  code={`# .env.example
 PRODUCTION_API_TOKEN=your_production_token_here
 STAGING_API_TOKEN=your_staging_token_here
-GITHUB_TOKEN=your_github_token_here`} lang="bash" />
+GITHUB_TOKEN=your_github_token_here`}
+  lang="bash"
+/>
 
 ## Server Domain Format
 
 When adding servers:
+
 - Use just the domain name (e.g., `haloy.example.com`)
 - Don't include `https://` - Haloy adds it automatically
 - For local development: `localhost` or `127.0.0.1`
 
 **Valid:**
-<Code code={`haloy server add haloy.example.com <token>
+
+<Code
+  code={`haloy server add haloy.example.com <token>
 haloy server add 192.168.1.100 <token>
-haloy server add localhost <token>`} lang="bash" />
+haloy server add localhost <token>`}
+  lang="bash"
+/>
 
 **Invalid:**
-<Code code={`haloy server add https://haloy.example.com <token>  # Remove https://
-haloy server add haloy.example.com:443 <token>        # Remove port`} lang="bash" />
+
+<Code
+  code={`haloy server add https://haloy.example.com <token>  # Remove https://
+haloy server add haloy.example.com:443 <token>        # Remove port`}
+  lang="bash"
+/>
 
 ## Troubleshooting
 
@@ -288,10 +325,12 @@ haloy server add haloy.example.com:443 <token>        # Remove port`} lang="bash
 **Cause**: Invalid or expired token
 
 **Solution**:
+
 <Code code={`# Generate new token on server
 sudo haloyadm api token
 
 # Update local config
+
 haloy server add <server-domain> <new-token> --force`} lang="bash" />
 
 ### Server Not Found
@@ -299,10 +338,12 @@ haloy server add <server-domain> <new-token> --force`} lang="bash" />
 **Cause**: Server not added to local config
 
 **Solution**:
+
 <Code code={`# List configured servers
 haloy server list
 
 # Add missing server
+
 haloy server add <server-domain> <token>`} lang="bash" />
 
 ### Environment Variable Not Found
@@ -310,13 +351,16 @@ haloy server add <server-domain> <token>`} lang="bash" />
 **Cause**: Token environment variable not set
 
 **Solution**:
+
 <Code code={`# Check if variable is set
 echo $PRODUCTION_API_TOKEN
 
 # Set the variable
+
 export PRODUCTION_API_TOKEN="your_token"
 
 # Or add to .env file
+
 echo "PRODUCTION_API_TOKEN=your_token" >> .env`} lang="bash" />
 
 ### Multiple Servers, No Server Specified
@@ -324,8 +368,12 @@ echo "PRODUCTION_API_TOKEN=your_token" >> .env`} lang="bash" />
 **Cause**: Multiple servers configured but no `server` in config
 
 **Solution**:
-<Code code={`# Add server to your haloy.yaml
-server: production.haloy.com`} lang="yaml" />
+
+<Code
+  code={`# Add server to your haloy.yaml
+server: production.haloy.com`}
+  lang="yaml"
+/>
 
 ## Next Steps
 

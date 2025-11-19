@@ -1,11 +1,10 @@
 ---
 title: 'Build Locally with Hooks'
 slug: 'build-with-hooks'
-category: guides
-
+section: guides
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 For advanced scenarios where you need custom build processes beyond Haloy's built-in builder, use deployment hooks to implement your own build and upload workflow.
 
@@ -45,13 +44,15 @@ domains:
 acme_email: "acme@my-app.com"
 
 pre_deploy:
-  - "docker build --platform linux/amd64 -t my-app ."
-  - "docker save -o my-app.tar my-app"
-  - "scp my-app.tar $(whoami)@server-ip:/tmp/my-app.tar"
-  - "ssh $(whoami)@server-ip \\"docker load -i /tmp/my-app.tar && rm /tmp/my-app.tar\\""
-  - "rm my-app.tar"`} lang="yaml" />
+
+- "docker build --platform linux/amd64 -t my-app ."
+- "docker save -o my-app.tar my-app"
+- "scp my-app.tar $(whoami)@server-ip:/tmp/my-app.tar"
+- "ssh $(whoami)@server-ip \\"docker load -i /tmp/my-app.tar && rm /tmp/my-app.tar\\""
+- "rm my-app.tar"`} lang="yaml" />
 
 **Process**:
+
 1. Build Docker image locally for server architecture
 2. Save image to tar file
 3. Upload tar to server via SCP
@@ -70,32 +71,31 @@ image:
   tag: "latest"
 
 # Build once before all deployments
+
 global_pre_deploy:
-  - "docker build --platform linux/amd64 -t my-app ."
-  - "docker save -o my-app.tar my-app"
+
+- "docker build --platform linux/amd64 -t my-app ."
+- "docker save -o my-app.tar my-app"
 
 # Cleanup after all deployments
+
 global_post_deploy:
-  - "rm my-app.tar"
+
+- "rm my-app.tar"
 
 targets:
-  production:
-    server: "prod.haloy.com"
-    domains:
-      - domain: "my-app.com"
-    pre_deploy:
-      - "scp my-app.tar $(whoami)@prod-server-ip:/tmp/my-app.tar"
-      - "ssh $(whoami)@prod-server-ip \\"docker load -i /tmp/my-app.tar && rm /tmp/my-app.tar\\""
+production:
+server: "prod.haloy.com"
+domains: - domain: "my-app.com"
+pre_deploy: - "scp my-app.tar $(whoami)@prod-server-ip:/tmp/my-app.tar" - "ssh $(whoami)@prod-server-ip \\"docker load -i /tmp/my-app.tar && rm /tmp/my-app.tar\\""
 
-  staging:
-    server: "staging.haloy.com"
-    domains:
-      - domain: "staging.my-app.com"
-    pre_deploy:
-      - "scp my-app.tar $(whoami)@staging-server-ip:/tmp/my-app.tar"
-      - "ssh $(whoami)@staging-server-ip \\"docker load -i /tmp/my-app.tar && rm /tmp/my-app.tar\\""`} lang="yaml" />
+staging:
+server: "staging.haloy.com"
+domains: - domain: "staging.my-app.com"
+pre_deploy: - "scp my-app.tar $(whoami)@staging-server-ip:/tmp/my-app.tar" - "ssh $(whoami)@staging-server-ip \\"docker load -i /tmp/my-app.tar && rm /tmp/my-app.tar\\""`} lang="yaml" />
 
 **Process**:
+
 1. Global pre-deploy builds image once
 2. Saves to tar file
 3. Each target uploads to its server
@@ -113,35 +113,40 @@ image:
   tag: "latest"
 
 global_pre_deploy:
-  # 1. Run tests
-  - "npm run test"
-  - "npm run lint"
 
-  # 2. Build optimized production bundle
-  - "npm run build"
+# 1. Run tests
 
-  # 3. Build Docker image with build args
-  - "docker build --platform linux/amd64 --build-arg VERSION=$(git rev-parse --short HEAD) -t complex-app ."
+- "npm run test"
+- "npm run lint"
 
-  # 4. Run security scan
-  - "docker scan complex-app || echo 'Security scan completed'"
+# 2. Build optimized production bundle
 
-  # 5. Save image
-  - "docker save -o complex-app.tar complex-app"
+- "npm run build"
+
+# 3. Build Docker image with build args
+
+- "docker build --platform linux/amd64 --build-arg VERSION=$(git rev-parse --short HEAD) -t complex-app ."
+
+# 4. Run security scan
+
+- "docker scan complex-app || echo 'Security scan completed'"
+
+# 5. Save image
+
+- "docker save -o complex-app.tar complex-app"
 
 global_post_deploy:
-  # Cleanup
-  - "rm complex-app.tar"
-  - "docker image prune -f"
+
+# Cleanup
+
+- "rm complex-app.tar"
+- "docker image prune -f"
 
 targets:
-  production:
-    server: "prod.haloy.com"
-    domains:
-      - domain: "complex-app.com"
-    pre_deploy:
-      - "scp complex-app.tar deploy@prod-server:/tmp/"
-      - "ssh deploy@prod-server \\"docker load -i /tmp/complex-app.tar && rm /tmp/complex-app.tar\\"`} lang="yaml" />
+production:
+server: "prod.haloy.com"
+domains: - domain: "complex-app.com"
+pre_deploy: - "scp complex-app.tar deploy@prod-server:/tmp/" - "ssh deploy@prod-server \\"docker load -i /tmp/complex-app.tar && rm /tmp/complex-app.tar\\"`} lang="yaml" />
 
 ## Custom Registry Push
 
@@ -153,25 +158,33 @@ image:
   tag: "v1.2.3"
 
 pre_deploy:
-  # 1. Build image
-  - "docker build --platform linux/amd64 -t registry.example.com/my-app:v1.2.3 ."
 
-  # 2. Login to custom registry
-  - "echo $REGISTRY_PASSWORD | docker login registry.example.com -u $REGISTRY_USERNAME --password-stdin"
+# 1. Build image
 
-  # 3. Push to registry
-  - "docker push registry.example.com/my-app:v1.2.3"
+- "docker build --platform linux/amd64 -t registry.example.com/my-app:v1.2.3 ."
 
-  # 4. Also push as latest
-  - "docker tag registry.example.com/my-app:v1.2.3 registry.example.com/my-app:latest"
-  - "docker push registry.example.com/my-app:latest"
+# 2. Login to custom registry
 
-  # 5. Logout
-  - "docker logout registry.example.com"
+- "echo $REGISTRY_PASSWORD | docker login registry.example.com -u $REGISTRY_USERNAME --password-stdin"
+
+# 3. Push to registry
+
+- "docker push registry.example.com/my-app:v1.2.3"
+
+# 4. Also push as latest
+
+- "docker tag registry.example.com/my-app:v1.2.3 registry.example.com/my-app:latest"
+- "docker push registry.example.com/my-app:latest"
+
+# 5. Logout
+
+- "docker logout registry.example.com"
 
 post_deploy:
-  # Send notification
-  - "curl -X POST https://hooks.slack.com/services/... -d '{\\"text\\": \\"Deployed v1.2.3\\"}'"`} lang="yaml" />
+
+# Send notification
+
+- "curl -X POST https://hooks.slack.com/services/... -d '{\\"text\\": \\"Deployed v1.2.3\\"}'"`} lang="yaml" />
 
 ## SSH Configuration
 
@@ -183,9 +196,11 @@ For reliable SSH connections in hooks:
 ssh-keygen -t ed25519 -C "deploy@local"
 
 # Copy to server
+
 ssh-copy-id user@server-ip
 
 # Test connection
+
 ssh user@server-ip "echo 'Connection successful'"`} lang="bash" />
 
 ### SSH Config File
@@ -200,17 +215,20 @@ Create `~/.ssh/config`:
     UserKnownHostsFile=/dev/null
 
 Host staging-server
-    HostName 203.0.113.20
-    User deploy
-    IdentityFile ~/.ssh/id_ed25519
-    StrictHostKeyChecking no
-    UserKnownHostsFile=/dev/null`} lang="text" />
+HostName 203.0.113.20
+User deploy
+IdentityFile ~/.ssh/id_ed25519
+StrictHostKeyChecking no
+UserKnownHostsFile=/dev/null`} lang="text" />
 
 Then use in hooks:
 
-<Code code={`pre_deploy:
+<Code
+  code={`pre_deploy:
   - "scp my-app.tar prod-server:/tmp/"
-  - "ssh prod-server \\"docker load -i /tmp/my-app.tar\\""`} lang="yaml" />
+  - "ssh prod-server \\"docker load -i /tmp/my-app.tar\\""`}
+  lang="yaml"
+/>
 
 ## Environment Variables in Hooks
 
@@ -222,17 +240,22 @@ image:
   source: "local"
 
 pre_deploy:
-  # Use environment variables
-  - "echo \\"Building version $BUILD_VERSION\\""
-  - "docker build --build-arg VERSION=$BUILD_VERSION -t my-app ."
 
-  # Use secrets from environment
-  - "echo $REGISTRY_TOKEN | docker login ghcr.io -u $REGISTRY_USERNAME --password-stdin"
-  - "docker push ghcr.io/my-org/my-app:$BUILD_VERSION"
+# Use environment variables
+
+- "echo \\"Building version $BUILD_VERSION\\""
+- "docker build --build-arg VERSION=$BUILD_VERSION -t my-app ."
+
+# Use secrets from environment
+
+- "echo $REGISTRY_TOKEN | docker login ghcr.io -u $REGISTRY_USERNAME --password-stdin"
+- "docker push ghcr.io/my-org/my-app:$BUILD_VERSION"
 
 post_deploy:
-  # Send notification with webhook URL from environment
-  - "curl -X POST $SLACK_WEBHOOK_URL -d '{\\"text\\": \\"Deployed $BUILD_VERSION\\"}'"`} lang="yaml" />
+
+# Send notification with webhook URL from environment
+
+- "curl -X POST $SLACK_WEBHOOK_URL -d '{\\"text\\": \\"Deployed $BUILD_VERSION\\"}'"`} lang="yaml" />
 
 Set before deploying:
 
@@ -247,19 +270,25 @@ haloy deploy`} lang="bash" />
 
 ### Using Docker Compose
 
-<Code code={`pre_deploy:
+<Code
+  code={`pre_deploy:
   - "docker-compose build app"
   - "docker save -o app.tar project_app:latest"
   - "scp app.tar server:/tmp/"
-  - "ssh server \\"docker load -i /tmp/app.tar && rm /tmp/app.tar\\""`} lang="yaml" />
+  - "ssh server \\"docker load -i /tmp/app.tar && rm /tmp/app.tar\\""`}
+  lang="yaml"
+/>
 
 ### Using Buildx for Multi-Platform
 
-<Code code={`pre_deploy:
+<Code
+  code={`pre_deploy:
   - "docker buildx build --platform linux/amd64,linux/arm64 -t my-app --load ."
   - "docker save -o my-app.tar my-app"
   - "scp my-app.tar server:/tmp/"
-  - "ssh server \\"docker load -i /tmp/my-app.tar\\""`} lang="yaml" />
+  - "ssh server \\"docker load -i /tmp/my-app.tar\\""`}
+  lang="yaml"
+/>
 
 ### Using Makefile
 
@@ -269,7 +298,8 @@ haloy deploy`} lang="bash" />
   - "make upload SERVER=prod-server"
 
 post_deploy:
-  - "make cleanup"`} lang="yaml" />
+
+- "make cleanup"`} lang="yaml" />
 
 ## Notifications
 
@@ -279,17 +309,24 @@ post_deploy:
   - "curl -X POST $SLACK_WEBHOOK -d '{\\"text\\": \\"Starting deployment of my-app\\"}'"
 
 post_deploy:
-  - "curl -X POST $SLACK_WEBHOOK -d '{\\"text\\": \\"Successfully deployed my-app\\"}'"`} lang="yaml" />
+
+- "curl -X POST $SLACK_WEBHOOK -d '{\\"text\\": \\"Successfully deployed my-app\\"}'"`} lang="yaml" />
 
 ### Discord Notifications
 
-<Code code={`post_deploy:
-  - "curl -H \\"Content-Type: application/json\\" -d '{\\"content\\": \\"Deployment complete!\\"}' $DISCORD_WEBHOOK"`} lang="yaml" />
+<Code
+  code={`post_deploy:
+  - "curl -H \\"Content-Type: application/json\\" -d '{\\"content\\": \\"Deployment complete!\\"}' $DISCORD_WEBHOOK"`}
+  lang="yaml"
+/>
 
 ### Email Notifications
 
-<Code code={`post_deploy:
-  - "echo 'Deployment successful' | mail -s 'Deployment Status' admin@example.com"`} lang="yaml" />
+<Code
+  code={`post_deploy:
+  - "echo 'Deployment successful' | mail -s 'Deployment Status' admin@example.com"`}
+  lang="yaml"
+/>
 
 ## Error Handling
 
@@ -299,11 +336,13 @@ Hooks stop execution on first error. Use `|| true` to continue on errors:
   # Critical - must succeed
   - "npm run test"
 
-  # Optional - continue if fails
-  - "npm run lint || echo 'Lint warnings present'"
+# Optional - continue if fails
 
-  # Required again
-  - "docker build -t my-app ."`} lang="yaml" />
+- "npm run lint || echo 'Lint warnings present'"
+
+# Required again
+
+- "docker build -t my-app ."`} lang="yaml" />
 
 ## Best Practices
 
@@ -324,9 +363,11 @@ Hooks stop execution on first error. Use `|| true` to continue on errors:
 ssh user@server "echo 'Connected'"
 
 # Check SSH config
+
 cat ~/.ssh/config
 
 # Verify key permissions
+
 chmod 600 ~/.ssh/id_ed25519
 chmod 644 ~/.ssh/id_ed25519.pub`} lang="bash" />
 
@@ -336,9 +377,11 @@ chmod 644 ~/.ssh/id_ed25519.pub`} lang="bash" />
 docker build --platform linux/amd64 -t my-app .
 
 # Check Docker daemon
+
 docker ps
 
 # Check disk space
+
 df -h`} lang="bash" />
 
 ### Image Load Failures on Server
@@ -347,9 +390,11 @@ df -h`} lang="bash" />
 ssh server "docker load -i /tmp/my-app.tar"
 
 # Check server disk space
+
 ssh server "df -h"
 
 # Check Docker on server
+
 ssh server "docker ps"`} lang="bash" />
 
 ## Next Steps

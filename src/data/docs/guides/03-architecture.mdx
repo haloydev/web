@@ -1,11 +1,10 @@
 ---
 title: 'Architecture'
 slug: 'architecture'
-category: guides
-
+section: guides
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Understand how Haloy's components work together to manage your deployments.
 
@@ -28,6 +27,7 @@ Haloy consists of several components working in harmony:
 **Purpose**: Trigger deployments and manage applications
 
 **Key Functions**:
+
 - Read and validate configuration files
 - Build Docker images locally (optional)
 - Upload images to servers
@@ -43,6 +43,7 @@ Haloy consists of several components working in harmony:
 **Purpose**: Set up and administrate the Haloy daemon
 
 **Key Functions**:
+
 - Initialize `haloyd` and HAProxy
 - Start/stop/restart services
 - Generate API tokens
@@ -57,6 +58,7 @@ Haloy consists of several components working in harmony:
 **Purpose**: Container orchestration and service discovery
 
 **Key Functions**:
+
 - Accept deployment commands via REST API
 - Pull or load Docker images
 - Start and stop application containers
@@ -78,6 +80,7 @@ Haloy consists of several components working in harmony:
 **Purpose**: Load balancing and SSL termination
 
 **Key Functions**:
+
 - Route external traffic to application containers
 - SSL/TLS termination
 - HTTP to HTTPS redirects
@@ -105,7 +108,8 @@ Haloy consists of several components working in harmony:
 
 ## Architecture Diagram
 
-<Code code={`┌─────────────────────┐
+<Code
+  code={`┌─────────────────────┐
 │  Developer Machine  │
 │                     │
 │  ┌──────────────┐   │
@@ -142,13 +146,16 @@ Haloy consists of several components working in harmony:
 │  │ (8080) │ │ (8080) │ │ (8080) │      │
 │  └────────┘ └────────┘ └────────┘      │
 │   Replica 1  Replica 2  Replica 3      │
-└─────────────────────────────────────────┘`} lang="text" />
+└─────────────────────────────────────────┘`}
+  lang="text"
+/>
 
 ## Traffic Flow
 
 ### Incoming Requests
 
-<Code code={`1. Internet
+<Code
+  code={`1. Internet
    │
    ├─ HTTP (port 80)
    │  └─► HAProxy → Redirects to HTTPS
@@ -160,11 +167,14 @@ Haloy consists of several components working in harmony:
           └─► Load Balance
               ├─► App Container 1 (port 8080)
               ├─► App Container 2 (port 8080)
-              └─► App Container 3 (port 8080)`} lang="text" />
+              └─► App Container 3 (port 8080)`}
+  lang="text"
+/>
 
 ### Deployment Flow
 
-<Code code={`1. Developer: haloy deploy
+<Code
+  code={`1. Developer: haloy deploy
    │
    └─► Build image locally (if configured)
        │
@@ -177,19 +187,25 @@ Haloy consists of several components working in harmony:
                ├─► haloyd waits for health checks
                ├─► haloyd updates HAProxy config
                ├─► HAProxy routes to new containers
-               └─► haloyd stops old containers`} lang="text" />
+               └─► haloyd stops old containers`}
+  lang="text"
+/>
 
 ## Service Discovery
 
 Haloy uses Docker labels for service discovery:
 
-<Code code={`# Example container labels
+<Code
+  code={`# Example container labels
 haloy.app=my-app
 haloy.domain=my-app.com
 haloy.port=8080
-haloy.health_check_path=/health`} lang="text" />
+haloy.health_check_path=/health`}
+  lang="text"
+/>
 
 **Process**:
+
 1. `haloyd` monitors Docker for labeled containers
 2. Extracts routing information from labels
 3. Generates HAProxy configuration
@@ -211,9 +227,10 @@ Haloy creates and uses Docker networks:
   - 443:443 (HTTPS)
 
 Application Containers:
-  - No direct port exposure
-  - Internal network only
-  - HAProxy routes traffic`} lang="text" />
+
+- No direct port exposure
+- Internal network only
+- HAProxy routes traffic`} lang="text" />
 
 ## Data Storage
 
@@ -224,9 +241,9 @@ Application Containers:
 └── .env                 # API tokens
 
 /var/lib/haloy/
-├── haproxy-config/      # HAProxy configurations
-├── cert-storage/        # SSL certificates
-└── db/                  # Deployment database`} lang="text" />
+├── haproxy-config/ # HAProxy configurations
+├── cert-storage/ # SSL certificates
+└── db/ # Deployment database`} lang="text" />
 
 ### User Installation
 
@@ -235,19 +252,21 @@ Application Containers:
 └── .env                 # API tokens
 
 ~/.local/share/haloy/
-├── haproxy-config/      # HAProxy configurations
-├── cert-storage/        # SSL certificates
-└── db/                  # Deployment database`} lang="text" />
+├── haproxy-config/ # HAProxy configurations
+├── cert-storage/ # SSL certificates
+└── db/ # Deployment database`} lang="text" />
 
 ## SSL/TLS Certificates
 
 **Certificate Management**:
+
 - Automatic via ACME (Let's Encrypt)
 - Certificates stored in `cert-storage/`
 - Auto-renewal before expiration
 - Per-domain certificates
 
 **Process**:
+
 1. Domain configured in `haloy.yaml`
 2. `haloyd` requests certificate from Let's Encrypt
 3. ACME challenge validation (HTTP-01)
@@ -258,16 +277,21 @@ Application Containers:
 ## Health Checks
 
 **Flow**:
-<Code code={`HAProxy → Health Check → App Container (/health endpoint)
+
+<Code
+  code={`HAProxy → Health Check → App Container (/health endpoint)
    │                              │
    │                              ├─ 200 OK → Healthy
    │                              └─ Other → Unhealthy
    │
-   └─ Routes traffic only to healthy containers`} lang="text" />
+   └─ Routes traffic only to healthy containers`}
+  lang="text"
+/>
 
 **Check Frequency**: Every few seconds
 
 **Actions on Failure**:
+
 - Container marked unhealthy
 - Traffic stops routing to container
 - Container visible in `haloy status` as unhealthy
@@ -286,7 +310,8 @@ Haloy achieves HA through:
 
 ### Rolling Deployment
 
-<Code code={`Old containers: [1] [2] [3]
+<Code
+  code={`Old containers: [1] [2] [3]
                  │   │   │
 Step 1:          │   │   │  New [1] starts
 Step 2:          │   │   │  New [1] healthy → Old [1] stops
@@ -295,31 +320,39 @@ Step 4:          │   │   │  New [2] healthy → Old [2] stops
 Step 5:          │   │   │  New [3] starts
 Step 6:          │   │   │  New [3] healthy → Old [3] stops
                  ▼   ▼   ▼
-New containers: [1] [2] [3]`} lang="text" />
+New containers: [1] [2] [3]`}
+  lang="text"
+/>
 
 ### Replace Deployment
 
-<Code code={`Old containers: [1] [2] [3]
+<Code
+  code={`Old containers: [1] [2] [3]
                  │   │   │
 Step 1:          Stop all old containers
 Step 2:          Start all new containers
 Step 3:          Wait for health checks
                  ▼   ▼   ▼
-New containers: [1] [2] [3]`} lang="text" />
+New containers: [1] [2] [3]`}
+  lang="text"
+/>
 
 ## Security
 
 **API Authentication**:
+
 - API tokens generated by `haloyadm`
 - Tokens stored securely with restrictive permissions
 - HTTPS for all API communication (when domain configured)
 
 **Container Isolation**:
+
 - Docker network isolation
 - No direct container exposure to internet
 - All traffic through HAProxy
 
 **SSL/TLS**:
+
 - Automatic certificate management
 - Strong cipher suites
 - HTTP to HTTPS redirect
@@ -327,11 +360,13 @@ New containers: [1] [2] [3]`} lang="text" />
 ## Scalability
 
 **Horizontal Scaling**:
+
 - Add more replicas in configuration
 - Load balanced automatically
 - Linear scaling for stateless apps
 
 **Multi-Server**:
+
 - Deploy to multiple servers
 - Independent server scaling
 - Geographic distribution
@@ -339,12 +374,14 @@ New containers: [1] [2] [3]`} lang="text" />
 ## Monitoring
 
 **Built-in Monitoring**:
+
 - Container health checks
 - Deployment status tracking
 - Application logs via `haloy logs`
 - Service status via `haloy status`
 
 **External Monitoring**:
+
 - Expose health check endpoints
 - Monitor via Prometheus/Grafana
 - Alert on health check failures

@@ -1,11 +1,10 @@
 ---
 title: 'Non-Root Installation'
 slug: 'non-root-install'
-category: installation
-
+section: installation
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 For development environments or when you don't have root access, you can install Haloy in user mode.
 
@@ -18,7 +17,10 @@ For development environments or when you don't have root access, you can install
 
 Install to your user directory:
 
-<Code code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`} lang="bash" />
+<Code
+  code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`}
+  lang="bash"
+/>
 
 ## Configure Docker Access
 
@@ -43,18 +45,22 @@ Initialize Haloy with the `--local-install` flag:
 ## Directory Structure
 
 **User Installation:**
-<Code code={`~/.config/haloy/         # Configuration
-~/.local/share/haloy/    # Data`} lang="bash" />
+
+<Code
+  code={`~/.config/haloy/         # Configuration
+~/.local/share/haloy/    # Data`}
+  lang="bash"
+/>
 
 ## User vs System Installation
 
-| Aspect | User Installation | System Installation |
-|--------|-------------------|---------------------|
-| **Config directory** | `~/.config/haloy/` | `/etc/haloy/` |
-| **Data directory** | `~/.local/share/haloy/` | `/var/lib/haloy/` |
-| **Services** | systemd (may require manual setup) | systemd |
-| **Permissions** | User permissions | Root permissions |
-| **Use case** | Development, testing | Production |
+| Aspect               | User Installation                  | System Installation |
+| -------------------- | ---------------------------------- | ------------------- |
+| **Config directory** | `~/.config/haloy/`                 | `/etc/haloy/`       |
+| **Data directory**   | `~/.local/share/haloy/`            | `/var/lib/haloy/`   |
+| **Services**         | systemd (may require manual setup) | systemd             |
+| **Permissions**      | User permissions                   | Root permissions    |
+| **Use case**         | Development, testing               | Production          |
 
 ## Security Notice
 

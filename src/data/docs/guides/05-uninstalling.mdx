@@ -1,11 +1,10 @@
 ---
 title: 'Uninstalling'
 slug: 'uninstalling'
-category: guides
-
+section: guides
 ---
 
-import Code from '@/components/code.astro'
+import Code from '@/components/code.astro';
 
 Instructions for removing Haloy components from your system.
 
@@ -18,10 +17,12 @@ Remove the Haloy CLI from your local machine.
 <Code code={`curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash`} lang="bash" />
 
 This removes:
+
 - The `haloy` CLI tool from `~/.local/bin/`
 - Shell completion scripts (if installed)
 
 This does NOT remove:
+
 - Client configuration (`~/.config/haloy/`)
 - Server configurations and tokens
 
@@ -33,6 +34,7 @@ To also remove configuration files:
 rm -rf ~/.config/haloy/
 
 # Remove client data
+
 rm -rf ~/.local/share/haloy/`} lang="bash" />
 
 ## Server Uninstallation
@@ -46,9 +48,11 @@ Remove `haloyadm` but keep `haloyd` and deployed applications running:
 <Code code={`curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash`} lang="bash" />
 
 This removes:
+
 - The `haloyadm` CLI tool from `/usr/local/bin/`
 
 This does NOT remove:
+
 - `haloyd` daemon
 - HAProxy
 - Application containers
@@ -63,6 +67,7 @@ Remove all Haloy components, data, and configurations:
 <Code code={`curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash`} lang="bash" />
 
 This removes:
+
 - `haloyd` daemon
 - HAProxy container
 - All Haloy configuration files
@@ -71,6 +76,7 @@ This removes:
 - Docker network
 
 This does NOT remove:
+
 - Your application containers (must be stopped/removed separately)
 - Docker volumes created by your applications
 - `haloyadm` CLI tool
@@ -83,6 +89,7 @@ Before complete server removal, stop your applications:
 haloy stop --all --remove-containers
 
 # Or on the server
+
 docker ps --filter "label=haloy.app" -q | xargs docker stop
 docker ps --filter "label=haloy.app" -qa | xargs docker rm`} lang="bash" />
 
@@ -96,19 +103,26 @@ For a full cleanup of everything Haloy-related:
 curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash
 
 # 2. Remove configuration
+
 rm -rf ~/.config/haloy/
 rm -rf ~/.local/share/haloy/
 
 # 3. Remove shell completion (if installed)
+
 # Bash (Linux)
+
 sudo rm -f /etc/bash_completion.d/haloy
+
 # Bash (macOS)
+
 sudo rm -f /usr/local/etc/bash_completion.d/haloy
 
 # Zsh
-rm -f ~/.local/share/zsh/site-functions/_haloy
+
+rm -f ~/.local/share/zsh/site-functions/\_haloy
 
 # Fish
+
 rm -f ~/.config/fish/completions/haloy.fish`} lang="bash" />
 
 ### On Server
@@ -118,15 +132,19 @@ docker ps --filter "label=haloy.app" -q | xargs docker stop
 docker ps --filter "label=haloy.app" -qa | xargs docker rm
 
 # 2. Remove server components
+
 curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash
 
 # 3. Remove admin tool
+
 curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash
 
 # 4. Optional: Remove application data volumes
+
 docker volume ls --filter "label=haloy.app" -q | xargs docker volume rm
 
 # 5. Optional: Clean up unused Docker resources
+
 docker system prune -a --volumes`} lang="bash" />
 
 ## Selective Removal
@@ -139,10 +157,13 @@ Stop services but preserve data for later reinstallation:
 sudo haloyadm stop
 
 # Remove only the admin tool and systemd services
+
 curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash
 
 # Data remains in /var/lib/haloy/ and /etc/haloy/
+
 # Can be restored by reinstalling and running:
+
 # sudo haloyadm init`} lang="bash" />
 
 ### Remove Everything Except Applications
@@ -156,12 +177,15 @@ Remove Haloy but keep applications running:
 # - Direct access to container ports needed
 
 # Stop Haloy services
+
 sudo haloyadm stop
 
 # Remove Haloy components
+
 curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash
 
 # Applications still running
+
 docker ps --filter "label=haloy.app"`} lang="bash" />
 
 > **Warning**: Applications will lose HAProxy routing and SSL. You'll need alternative routing.
@@ -170,26 +194,26 @@ docker ps --filter "label=haloy.app"`} lang="bash" />
 
 ### Client Uninstallation
 
-| Item | Location | Removed |
-|------|----------|---------|
-| `haloy` CLI | `~/.local/bin/haloy` | ✅ Yes |
-| Shell completion | `/etc/bash_completion.d/` or similar | ✅ Yes |
-| Client config | `~/.config/haloy/` | ❌ No (manual) |
-| Client data | `~/.local/share/haloy/` | ❌ No (manual) |
+| Item             | Location                             | Removed        |
+| ---------------- | ------------------------------------ | -------------- |
+| `haloy` CLI      | `~/.local/bin/haloy`                 | ✅ Yes         |
+| Shell completion | `/etc/bash_completion.d/` or similar | ✅ Yes         |
+| Client config    | `~/.config/haloy/`                   | ❌ No (manual) |
+| Client data      | `~/.local/share/haloy/`              | ❌ No (manual) |
 
 ### Server Uninstallation (Complete)
 
-| Item | Location | Removed |
-|------|----------|---------|
-| `haloyadm` CLI | `/usr/local/bin/haloyadm` | ❌ No (separate script) |
-| `haloyd` daemon | Docker container | ✅ Yes |
-| HAProxy | Docker container | ✅ Yes |
-| systemd services | `/etc/systemd/system/` | ✅ Yes |
-| Configuration | `/etc/haloy/` | ✅ Yes |
-| Data | `/var/lib/haloy/` | ✅ Yes |
-| Docker network | `haloy-public` | ✅ Yes |
-| Application containers | User-deployed | ❌ No (manual) |
-| Application volumes | User-created | ❌ No (manual) |
+| Item                   | Location                  | Removed                 |
+| ---------------------- | ------------------------- | ----------------------- |
+| `haloyadm` CLI         | `/usr/local/bin/haloyadm` | ❌ No (separate script) |
+| `haloyd` daemon        | Docker container          | ✅ Yes                  |
+| HAProxy                | Docker container          | ✅ Yes                  |
+| systemd services       | `/etc/systemd/system/`    | ✅ Yes                  |
+| Configuration          | `/etc/haloy/`             | ✅ Yes                  |
+| Data                   | `/var/lib/haloy/`         | ✅ Yes                  |
+| Docker network         | `haloy-public`            | ✅ Yes                  |
+| Application containers | User-deployed             | ❌ No (manual)          |
+| Application volumes    | User-created              | ❌ No (manual)          |
 
 ## Reinstallation
 
@@ -205,9 +229,11 @@ After uninstallation, you can reinstall Haloy:
 curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash
 
 # Initialize
+
 sudo haloyadm init
 
 # Optionally restore configuration
+
 # (if you preserved /etc/haloy/ and /var/lib/haloy/)`} lang="bash" />
 
 ## Troubleshooting
@@ -221,10 +247,12 @@ sudo systemctl disable haloyd
 sudo systemctl disable haproxy-haloy
 
 # Remove service files
+
 sudo rm -f /etc/systemd/system/haloyd.service
 sudo rm -f /etc/systemd/system/haproxy-haloy.service
 
 # Reload systemd
+
 sudo systemctl daemon-reload`} lang="bash" />
 
 ### Docker Containers Won't Stop
@@ -233,6 +261,7 @@ sudo systemctl daemon-reload`} lang="bash" />
 docker stop $(docker ps -q --filter "label=haloy.app")
 
 # Force remove
+
 docker rm -f $(docker ps -qa --filter "label=haloy.app")`} lang="bash" />
 
 ### Permission Denied Errors
@@ -241,14 +270,18 @@ docker rm -f $(docker ps -qa --filter "label=haloy.app")`} lang="bash" />
 sudo su
 
 # Then run uninstall script
+
 curl -sL https://sh.haloy.dev/uninstall-server.sh | bash`} lang="bash" />
 
 ### Files Still Remain
 
-<Code code={`# Manually remove remaining files
+<Code
+  code={`# Manually remove remaining files
 sudo rm -rf /etc/haloy/
 sudo rm -rf /var/lib/haloy/
-sudo rm -rf /usr/local/bin/haloyadm`} lang="bash" />
+sudo rm -rf /usr/local/bin/haloyadm`}
+  lang="bash"
+/>
 
 ## Data Backup Before Removal
 
@@ -258,11 +291,13 @@ If you want to preserve data before removal:
 sudo tar -czf haloy-config-backup.tar.gz /etc/haloy/
 
 # Backup data
+
 sudo tar -czf haloy-data-backup.tar.gz /var/lib/haloy/
 
 # Backup application volumes
+
 docker volume ls --filter "label=haloy.app" -q | while read vol; do
-    docker run --rm -v $vol:/data -v $(pwd):/backup ubuntu tar czf /backup/$vol.tar.gz /data
+docker run --rm -v $vol:/data -v $(pwd):/backup ubuntu tar czf /backup/$vol.tar.gz /data
 done`} lang="bash" />
 
 ## Alternative: Disable Instead of Uninstall
@@ -273,16 +308,20 @@ If you're unsure about uninstalling, just disable the services:
 sudo haloyadm stop
 
 # Disable auto-start
+
 sudo systemctl disable haloyd
 sudo systemctl disable haproxy-haloy
 
 # Services stopped but can be restarted later with:
+
 # sudo systemctl start haloyd
+
 # sudo systemctl start haproxy-haloy`} lang="bash" />
 
 ## Next Steps
 
 After uninstallation:
+
 - [Reinstall Haloy](/docs/server-installation) if needed
 - Switch to alternative deployment solutions
 - Export your configurations for future reference
