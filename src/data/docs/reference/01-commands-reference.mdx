@@ -1,7 +1,7 @@
 ---
 title: 'Commands Reference'
 slug: 'commands-reference'
-category: guides
+category: reference
 
 ---
 
@@ -9,7 +9,7 @@ import Code from '@/components/code.astro'
 
 Complete reference for Haloy CLI commands.
 
-## Client Commands (haloy)
+## `haloy` Commands
 
 Commands run on your local machine to manage deployments.
 
@@ -214,6 +214,17 @@ haloy server delete staging.haloy.com`} lang="bash" />
 **Arguments:**
 - `<server-domain>` - Server domain to remove
 
+### version
+
+Display version information for the CLI and connected servers.
+
+<Code code={`haloy version`} lang="bash" />
+
+This shows:
+- Local CLI version
+- Connected server versions (from configured servers)
+- Build information
+
 ### completion
 
 Generate shell completion scripts.
@@ -232,7 +243,7 @@ haloy completion powershell`} lang="bash" />
 
 See [Shell Completion](/installation/shell-completion) for setup instructions.
 
-## Server Administration Commands (haloyadm)
+## `haloyadm` Commands
 
 Commands run on the server to manage the Haloy daemon and services.
 
