@@ -25,7 +25,7 @@ const darkTokens = await codeToTokens(code, {
 
 <div class="not-prose relative mb-4 flex rounded-lg bg-gray-100 dark:bg-gray-800">
   <pre
-    class="flex-1 overflow-x-auto py-4 pr-2 pl-4 text-sm leading-relaxed whitespace-pre"><code class="block font-mono text-gray-100"><TokensToHtml tokens={darkTokens.tokens} className="hidden dark:block" /><TokensToHtml tokens={lightTokens.tokens} className="block dark:hidden" /></code></pre>
+    class="flex-1 overflow-x-auto py-4 pr-2 pl-4 text-sm leading-relaxed whitespace-pre"><code class="block font-mono"><TokensToHtml tokens={darkTokens.tokens} className="hidden dark:block" /><TokensToHtml tokens={lightTokens.tokens} className="block dark:hidden" /></code></pre>
   <div class="flex px-2 pt-3">
     <CodeCopyButton client:load code={code} className="" />
   </div>

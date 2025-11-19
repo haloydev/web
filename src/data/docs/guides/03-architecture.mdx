@@ -109,7 +109,8 @@ Haloy consists of several components working in harmony:
 ## Architecture Diagram
 
 <Code
-  code={`┌─────────────────────┐
+  code={`
+┌─────────────────────┐
 │  Developer Machine  │
 │                     │
 │  ┌──────────────┐   │
@@ -123,7 +124,7 @@ Haloy consists of several components working in harmony:
 │              Server                     │
 │                                         │
 │  ┌──────────────────┐                   │
-│  │ haloyd (Docker)  │◄──systemd         │
+│  │ haloyd (Docker)  │                   │
 │  │                  │                   │
 │  │ - API Server     │                   │
 │  │ - Orchestration  │                   │
@@ -133,7 +134,7 @@ Haloy consists of several components working in harmony:
 │       │ config                          │
 │       ▼                                 │
 │  ┌──────────────────┐                   │
-│  │ HAProxy (Docker) │◄──systemd         │
+│  │ HAProxy (Docker) │                   │
 │  │                  │                   │
 │  │ Ports: 80, 443   │                   │
 │  └────┬─────────────┘                   │
@@ -141,12 +142,13 @@ Haloy consists of several components working in harmony:
 │       │                                 │
 │       ├──────────┬──────────┐           │
 │       ▼          ▼          ▼           │
-│  ┌────────┐ ┌────────┐ ┌────────┐      │
-│  │ App    │ │ App    │ │ App    │      │
-│  │ (8080) │ │ (8080) │ │ (8080) │      │
-│  └────────┘ └────────┘ └────────┘      │
-│   Replica 1  Replica 2  Replica 3      │
-└─────────────────────────────────────────┘`}
+│  ┌────────┐ ┌────────┐ ┌────────┐       │
+│  │ App    │ │ App    │ │ App    │       │
+│  │ (8080) │ │ (8080) │ │ (8080) │       │
+│  └────────┘ └────────┘ └────────┘       │
+│   Replica 1  Replica 2  Replica 3       │
+└─────────────────────────────────────────┘
+`}
   lang="text"
 />
 
@@ -167,8 +169,8 @@ Haloy consists of several components working in harmony:
           └─► Load Balance
               ├─► App Container 1 (port 8080)
               ├─► App Container 2 (port 8080)
-              └─► App Container 3 (port 8080)`}
-  lang="text"
+              └─► App Container 3 (port 8080)`
+} lang="text"
 />
 
 ### Deployment Flow
