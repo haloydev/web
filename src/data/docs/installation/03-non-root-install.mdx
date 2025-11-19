@@ -17,10 +17,7 @@ For development environments or when you don't have root access, you can install
 
 Install to your user directory:
 
-<Code
-  code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`}
-  lang="bash"
-/>
+<Code code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`} lang="bash" />
 
 ## Configure Docker Access
 
@@ -58,7 +55,6 @@ Initialize Haloy with the `--local-install` flag:
 | -------------------- | ---------------------------------- | ------------------- |
 | **Config directory** | `~/.config/haloy/`                 | `/etc/haloy/`       |
 | **Data directory**   | `~/.local/share/haloy/`            | `/var/lib/haloy/`   |
-| **Services**         | systemd (may require manual setup) | systemd             |
 | **Permissions**      | User permissions                   | Root permissions    |
 | **Use case**         | Development, testing               | Production          |
 

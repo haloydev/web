@@ -72,7 +72,6 @@ This removes:
 - HAProxy container
 - All Haloy configuration files
 - All Haloy data (databases, certificates, configs)
-- systemd service files
 - Docker network
 
 This does NOT remove:
@@ -85,13 +84,13 @@ This does NOT remove:
 
 Before complete server removal, stop your applications:
 
-<Code code={`# From your local machine
-haloy stop --all --remove-containers
-
-# Or on the server
-
-docker ps --filter "label=haloy.app" -q | xargs docker stop
-docker ps --filter "label=haloy.app" -qa | xargs docker rm`} lang="bash" />
+<Code code={`
+  # From your local machine
+  haloy stop --all --remove-containers
+  # Or on the server
+  docker ps --filter "label=haloy.app" -q | xargs docker stop
+  docker ps --filter "label=haloy.app" -qa | xargs docker rm
+`} lang="bash" />
 
 ## Complete Cleanup
 
@@ -156,7 +155,7 @@ Stop services but preserve data for later reinstallation:
 <Code code={`# Stop services
 sudo haloyadm stop
 
-# Remove only the admin tool and systemd services
+# Remove only the admin tool
 
 curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash
 
@@ -208,10 +207,9 @@ docker ps --filter "label=haloy.app"`} lang="bash" />
 | `haloyadm` CLI         | `/usr/local/bin/haloyadm` | ❌ No (separate script) |
 | `haloyd` daemon        | Docker container          | ✅ Yes                  |
 | HAProxy                | Docker container          | ✅ Yes                  |
-| systemd services       | `/etc/systemd/system/`    | ✅ Yes                  |
 | Configuration          | `/etc/haloy/`             | ✅ Yes                  |
 | Data                   | `/var/lib/haloy/`         | ✅ Yes                  |
-| Docker network         | `haloy-public`            | ✅ Yes                  |
+| Docker network         | `haloy`                   | ✅ Yes                  |
 | Application containers | User-deployed             | ❌ No (manual)          |
 | Application volumes    | User-created              | ❌ No (manual)          |
 
@@ -237,23 +235,6 @@ sudo haloyadm init
 # (if you preserved /etc/haloy/ and /var/lib/haloy/)`} lang="bash" />
 
 ## Troubleshooting
-
-### Cannot Remove systemd Services
-
-<Code code={`# Manually stop and disable services
-sudo systemctl stop haloyd
-sudo systemctl stop haproxy-haloy
-sudo systemctl disable haloyd
-sudo systemctl disable haproxy-haloy
-
-# Remove service files
-
-sudo rm -f /etc/systemd/system/haloyd.service
-sudo rm -f /etc/systemd/system/haproxy-haloy.service
-
-# Reload systemd
-
-sudo systemctl daemon-reload`} lang="bash" />
 
 ### Docker Containers Won't Stop
 
