@@ -17,7 +17,7 @@ Haloy consists of three main parts:
 - You write a **haloy.yaml** (or whatever you want to call it) file describing how your app should be built and deployed.
 - The Haloy CLI builds your image (if configured), uploads or pushes it, and triggers deployment on the server.
 - haloyd launches and monitors your application containers, updates routing automatically, and manages SSL with Let's Encrypt.
-- HAProxy (managed by haloyd ) handles load balancing and HTTPS termination.
+- [HAProxy](https://www.haproxy.org/) (managed by haloyd ) handles load balancing and HTTPS termination.
 
 ## Key Features
 

@@ -5,11 +5,11 @@ import pinkBurst from '../assets/pink-burst.svg';
 import blueBurst from '../assets/blue-burst.svg';
 import { CurlewLogo } from '@/components/curlew-logo';
 import { ButtonLink } from '@/components/ui/button-link';
-import { IconRocket, IconArrowRight } from '@tabler/icons-react';
+import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
 ---
 
-<BaseLayout title="Haloy - Deploy Anywhere" class="bg-background-sky">
+<BaseLayout title="Haloy - Cloudfless Deploys" class="bg-background-sky">
   <div class="relative overflow-hidden">
     <div class="absolute inset-0 dark:hidden">
       <Image src={pinkBurst} alt="" class="absolute -top-32 left-[10%] w-200" />
@@ -26,11 +26,11 @@ import { Navbar } from '@/components/navbar';
         <div class="mt-28 flex max-w-4xl flex-col items-center px-12 sm:mt-32 sm:block">
           <h1 class="relative inline-block">
             <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
-            <div class="font-figtree text-center text-4xl font-black text-balance sm:text-left sm:text-6xl">
+            <div class="font-figtree text-center text-5xl font-black text-balance sm:text-left sm:text-6xl">
               Cloudless Deploys
             </div>
           </h1>
-          <p class="mt-2 max-w-2xl text-center text-lg text-balance sm:leading-10 md:text-2xl">
+          <p class="mt-2 max-w-2xl text-center text-xl text-balance sm:text-left sm:leading-10 md:text-2xl">
             Manage deployments on your own infrastructure.
           </p>
           <div class="mt-6 sm:mt-8">

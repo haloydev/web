@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import type { CollectionEntry } from 'astro:content';
-import { ScrollArea } from './scroll-area';
 import { Button } from './ui/button';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Menu } from 'lucide-react';
+import { ScrollArea } from './ui/scroll-area';
 
 type SectionWithPages = CollectionEntry<'docSections'> & { pages: CollectionEntry<'docPages'>[] };
 type DocsNavigationProps = {
