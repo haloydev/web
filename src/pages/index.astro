@@ -5,7 +5,7 @@ import pinkBurst from '../assets/pink-burst.svg';
 import blueBurst from '../assets/blue-burst.svg';
 import { CurlewLogo } from '@/components/curlew-logo';
 import { ButtonLink } from '@/components/ui/button-link';
-import { IconRocket } from '@tabler/icons-react';
+import { IconRocket, IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
 ---
 
@@ -35,11 +35,11 @@ import { Navbar } from '@/components/navbar';
           </p>
           <div class="mt-6 sm:mt-8">
             <ButtonLink href="/docs/quickstart" size="default" className="sm:h-10 sm:has-[>svg]:px-4">
-              <IconRocket />
-              Quickstart
+              Read docs
+              <IconArrowRight />
             </ButtonLink>
-            <ButtonLink href="/docs" variant="link" size="default" className="sm:h1-10 sm:px-6">
-              Documentation
+            <ButtonLink href="/docs/what-is-haloy" variant="link" size="default" className="sm:h1-10 sm:px-6">
+              What is Haloy?
             </ButtonLink>
           </div>
         </div>

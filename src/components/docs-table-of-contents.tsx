@@ -2,6 +2,10 @@ import type { MarkdownHeading } from 'astro';
 import * as React from 'react';
 
 export function DocsTableOfContents({ headings }: { headings: MarkdownHeading[] }) {
+  if (headings.length === 0) {
+    return null;
+  }
+
   const [activeId, setActiveId] = React.useState<string>('');
 
   React.useEffect(() => {
@@ -32,9 +36,7 @@ export function DocsTableOfContents({ headings }: { headings: MarkdownHeading[] 
       });
     };
   }, [headings]);
-  if (headings.length === 0) {
-    return null;
-  }
+
   return (
     <div className="sticky top-0 pt-6">
       <span className="text-muted-foreground text-xs font-medium">On This Page</span>

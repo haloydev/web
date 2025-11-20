@@ -14,6 +14,9 @@ export default defineConfig({
   build: {
     format: 'file',
   },
+  redirects: {
+    '/docs': '/docs/quickstart',
+  },
   vite: {
     plugins: [tailwindcss()],
   },
