@@ -15,7 +15,6 @@ Get up and running with Haloy in minutes. This guide will walk you through deplo
 - **Domain**: A domain pointing to your server for secure API access
 
 ## 1. Install the haloy CLI Tool
-
 The `haloy` CLI tool will trigger deployments from your local machine.
 
 Install `haloy`:
@@ -61,9 +60,7 @@ Create a `haloy.yaml` file:
     - domain: "my-app.com"
       aliases:
         - "www.my-app.com" # Redirects to my-app.com
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 This will look for a Dockerfile in the same directory as your config file, build it and upload it to the server. This is the Haloy configuration in its simplest form.
 
