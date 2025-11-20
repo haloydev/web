@@ -124,20 +124,19 @@ View logs from your deployed application.
 
 Validate your configuration file.
 
-<Code code={`# Validate config
-haloy validate-config
+<Code code={`
+  # Validate config
+  haloy validate-config
 
-# Specify config file
+  # Specify config file
+  haloy validate-config --config path/to/config.yaml
 
-haloy validate-config --config path/to/config.yaml
+  # Show resolved configuration with secrets (use with caution)
+  haloy validate-config --show-resolved-config
 
-# Show resolved configuration with secrets (use with caution)
-
-haloy validate-config --show-resolved-config
-
-# Both options combined
-
-haloy validate-config --config path/to/config.yaml --show-resolved-config`} lang="bash" />
+  # Both options combined
+  haloy validate-config --config path/to/config.yaml --show-resolved-config
+`} lang="bash" />
 
 **Options:**
 
@@ -150,16 +149,16 @@ haloy validate-config --config path/to/config.yaml --show-resolved-config`} lang
 
 List available rollback targets.
 
-<Code code={`# List rollback targets
-haloy rollback-targets
+<Code code={`
+  # List rollback targets
+  haloy rollback-targets
 
-# Specify config file
+  # Specify config file
+  haloy rollback-targets --config path/to/config.yaml
 
-haloy rollback-targets --config path/to/config.yaml
-
-# Targets for specific deployment
-
-haloy rollback-targets --target production`} lang="bash" />
+  # Targets for specific deployment
+  haloy rollback-targets --target production
+`} lang="bash" />
 
 **Options:**
 
@@ -173,20 +172,19 @@ haloy rollback-targets --target production`} lang="bash" />
 
 Rollback to a specific deployment.
 
-<Code code={`# Rollback using deployment ID
-haloy rollback <deployment-id>
+<Code code={`
+  # Rollback using deployment ID
+  haloy rollback <deployment-id>
 
-# Example
+  # Example
+  haloy rollback dep_abc123xyz
 
-haloy rollback dep_abc123xyz
+  # Specify config file
+  haloy rollback --config path/to/config.yaml <deployment-id>
 
-# Specify config file
-
-haloy rollback --config path/to/config.yaml <deployment-id>
-
-# Rollback specific target
-
-haloy rollback --target production <deployment-id>`} lang="bash" />
+  # Rollback specific target
+  haloy rollback --target production <deployment-id>
+`} lang="bash" />
 
 **Options:**
 
@@ -202,16 +200,16 @@ haloy rollback --target production <deployment-id>`} lang="bash" />
 
 Add a server to your local configuration.
 
-<Code code={`# Add server
-haloy server add <server-domain> <token>
+<Code code={`
+  # Add server
+  haloy server add <server-domain> <token>
 
-# Example
+  # Example
+  haloy server add haloy.example.com abc123token456
 
-haloy server add haloy.example.com abc123token456
-
-# Force overwrite if exists
-
-haloy server add haloy.example.com abc123token456 --force`} lang="bash" />
+  # Force overwrite if exists
+  haloy server add haloy.example.com abc123token456 --force
+`} lang="bash" />
 
 **Arguments:**
 
@@ -305,20 +303,19 @@ haloyadm init --local-install`} lang="bash" />
 
 Start haloyd and HAProxy services.
 
-<Code code={`# Start services
-sudo haloyadm start
+<Code code={`
+  # Start services
+  sudo haloyadm start
 
-# Start with local development image
+  # Start with local development image
+  sudo haloyadm start --dev
 
-sudo haloyadm start --dev
+  # Start with debug logging
+  sudo haloyadm start --debug
 
-# Start with debug logging
-
-sudo haloyadm start --debug
-
-# Combine options
-
-sudo haloyadm start --dev --debug`} lang="bash" />
+  # Combine options
+  sudo haloyadm start --dev --debug
+`} lang="bash" />
 
 **Options:**
 
@@ -335,16 +332,7 @@ Stop haloyd and HAProxy services.
 
 Restart haloyd and HAProxy services.
 
-<Code code={`# Restart services
-sudo haloyadm restart
-
-# Restart with dev image
-
-sudo haloyadm restart --dev
-
-# Restart with debug logging
-
-sudo haloyadm restart --debug`} lang="bash" />
+<Code code={`sudo haloyadm restart`} lang="bash" />
 
 **Options:**
 
@@ -363,12 +351,13 @@ Returns a token that can be used with `haloy server add` on local machines.
 
 Set or update the API domain and SSL configuration.
 
-<Code code={`# Set API domain with automatic SSL
-sudo haloyadm api domain <domain> <email>
+<Code code={`
+  # Set API domain with automatic SSL
+  sudo haloyadm api domain <domain> <email>
 
-# Example
-
-sudo haloyadm api domain haloy.example.com admin@example.com`} lang="bash" />
+  # Example
+  sudo haloyadm api domain haloy.example.com admin@example.com
+`} lang="bash" />
 
 **Arguments:**
 
@@ -403,65 +392,60 @@ You can also specify a directory:
 
 ### Complete Deployment Workflow
 
-<Code code={`# 1. Validate configuration
-haloy validate-config
+<Code code={`
+  # 1. Validate configuration
+  haloy validate-config
 
-# 2. Deploy to staging first
+  # 2. Deploy to staging first
+  haloy deploy --target staging
 
-haloy deploy --target staging
+  # 3. Check staging status
+  haloy status --target staging
 
-# 3. Check staging status
+  # 4. View staging logs
+  haloy logs --target staging
 
-haloy status --target staging
+  # 5. If good, deploy to production
+  haloy deploy --target production
 
-# 4. View staging logs
-
-haloy logs --target staging
-
-# 5. If good, deploy to production
-
-haloy deploy --target production
-
-# 6. Monitor production
-
-haloy status --target production
-haloy logs --target production`} lang="bash" />
+  # 6. Monitor production
+  haloy status --target production
+  haloy logs --target production
+`} lang="bash" />
 
 ### Emergency Rollback
 
-<Code code={`# 1. List available rollback targets
-haloy rollback-targets --target production
+<Code code={`
+  # 1. List available rollback targets
+  haloy rollback-targets --target production
 
-# 2. Rollback to previous deployment
+  # 2. Rollback to previous deployment
+  haloy rollback --target production dep_abc123xyz
 
-haloy rollback --target production dep_abc123xyz
-
-# 3. Verify rollback succeeded
-
-haloy status --target production`} lang="bash" />
+  # 3. Verify rollback succeeded
+  haloy status --target production
+`} lang="bash" />
 
 ### Multi-Server Setup
 
-<Code code={`# On each server, generate token
-sudo haloyadm api token
+<Code code={`
+  # On each server, generate token
+  sudo haloyadm api token
 
-# On local machine, add all servers
+  # On local machine, add all servers
+  haloy server add prod.haloy.com <prod-token>
+  haloy server add staging.haloy.com <staging-token>
+  haloy server add dev.haloy.com <dev-token>
 
-haloy server add prod.haloy.com <prod-token>
-haloy server add staging.haloy.com <staging-token>
-haloy server add dev.haloy.com <dev-token>
+  # List all servers
+  haloy server list
 
-# List all servers
+  # Deploy to all environments
+  haloy deploy --all
 
-haloy server list
-
-# Deploy to all environments
-
-haloy deploy --all
-
-# Check status of all environments
-
-haloy status --all`} lang="bash" />
+  # Check status of all environments
+  haloy status --all
+`} lang="bash" />
 
 ## Exit Codes
 
