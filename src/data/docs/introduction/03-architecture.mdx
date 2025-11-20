@@ -1,7 +1,7 @@
 ---
 title: 'Architecture'
 slug: 'architecture'
-section: guides
+section: introduction
 ---
 
 import Code from '@/components/code.astro';
@@ -22,7 +22,7 @@ Haloy consists of several components working in harmony:
 
 ### Haloy CLI (haloy)
 
-**Runs on**: Your local development machine
+**Runs on**: Your local development machine, CI/CD systems, or any machine that can reach your server's API
 
 **Purpose**: Trigger deployments and manage applications
 
@@ -36,9 +36,7 @@ Haloy consists of several components working in harmony:
 
 **Location**: `~/.local/bin/haloy`
 
-**Common commands**: [`deploy`](/docs/commands-reference#deploy), [`status`](/docs/commands-reference#status), [`logs`](/docs/commands-reference#logs), [`rollback`](/docs/commands-reference#rollback)
-
-See the [full command reference](/docs/commands-reference) for all available commands.
+See the [full command reference](/docs/commands-reference) for available commands.
 
 ### Haloy Admin CLI (haloyadm)
 
@@ -55,9 +53,7 @@ See the [full command reference](/docs/commands-reference) for all available com
 
 **Location**: `/usr/local/bin/haloyadm` (system) or `~/.local/bin/haloyadm` (user)
 
-**Common commands**: [`init`](/docs/commands-reference#init), [`start`](/docs/commands-reference#start-1), [`api token`](/docs/commands-reference#api-token), [`api domain`](/docs/commands-reference#api-domain)
-
-See the [full command reference](/docs/commands-reference#haloyadm-commands) for all available commands.
+See the [full command reference](/docs/commands-reference#haloyadm-commands) for available commands.
 
 ### Haloy Daemon (haloyd)
 
@@ -228,8 +224,7 @@ docker run -d \\
   lang="bash"
 />
 
-<Code
-  code={`
+<Code code={`
   # Docker Compose example
   services:
     my-app:

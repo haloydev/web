@@ -71,3 +71,7 @@ Infrastructure has become complicated. Many developers don’t need Kubernetes, 
 - Easy to reason about
 
 All while still being powerful enough for production workloads.
+
+## Next Steps
+- [Learn about The Architecture](/docs/architecture)
+- [Commands Reference](/docs/command-reference)

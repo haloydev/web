@@ -10,12 +10,15 @@ import { getCollection } from 'astro:content';
 const sections = await getCollection('docSections');
 const sectionsWithPages = await Promise.all(
   sections.map(async (section) => {
-    const pages = (await getCollection('docPages', ({ data }) => data.section.id === section.id)).sort((a, b) =>
-      a.id.localeCompare(b.id),
-    );
+    const pages = await getCollection('docPages', ({ data }) => data.section.id === section.id);
+    const sortedPages = pages.sort((a, b) => {
+      const fa = a.filePath?.split('/').pop() ?? '';
+      const fb = b.filePath?.split('/').pop() ?? '';
+      return fa.localeCompare(fb);
+    });
     return {
       ...section,
-      pages,
+      pages: sortedPages,
     };
   }),
 );
