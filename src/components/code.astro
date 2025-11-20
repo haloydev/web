@@ -11,13 +11,13 @@ interface Props extends Omit<HTMLAttributes<'pre'>, 'lang'> {
 }
 
 const { code, lang = 'plaintext' } = Astro.props;
-
-const lightTokens = await codeToTokens(code, {
+const trimmedCode = code.trim(); // remove whitespace from start and end
+const lightTokens = await codeToTokens(trimmedCode, {
   lang,
   theme: 'github-light',
 });
 
-const darkTokens = await codeToTokens(code, {
+const darkTokens = await codeToTokens(trimmedCode, {
   lang,
   theme: 'github-dark',
 });

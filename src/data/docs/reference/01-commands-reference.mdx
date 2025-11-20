@@ -16,27 +16,25 @@ Commands run on your local machine to manage deployments.
 
 Deploy your application to configured servers.
 
-<Code code={`# Deploy with default config
-haloy deploy
+<Code code={`
+  # Deploy with default config
+  haloy deploy
 
-# Specify config file
+  # Specify config file
+  haloy deploy --config path/to/config.yaml
+  haloy deploy -c path/to/config.yaml
 
-haloy deploy --config path/to/config.yaml
-haloy deploy -c path/to/config.yaml
+  # Deploy to specific target
+  haloy deploy --target production
+  haloy deploy -t staging
 
-# Deploy to specific target
+  # Deploy to all targets
+  haloy deploy --all
+  haloy deploy -a
 
-haloy deploy --target production
-haloy deploy -t staging
-
-# Deploy to all targets
-
-haloy deploy --all
-haloy deploy -a
-
-# Deploy without showing logs
-
-haloy deploy --no-logs`} lang="bash" />
+  # Deploy without showing logs
+  haloy deploy --no-logs
+`} lang="bash" />
 
 **Options:**
 
@@ -50,21 +48,20 @@ haloy deploy --no-logs`} lang="bash" />
 
 Check the status of your deployed applications.
 
-<Code code={`# Check status with default config
-haloy status
+<Code code={`
+  # Check status with default config
+  haloy status
 
-# Specify config file
+  # Specify config file
+  haloy status --config path/to/config.yaml
 
-haloy status --config path/to/config.yaml
+  # Check specific target
+  haloy status --target production
+  haloy status -t staging
 
-# Check specific target
-
-haloy status --target production
-haloy status -t staging
-
-# Check all targets
-
-haloy status --all`} lang="bash" />
+  # Check all targets
+  haloy status --all
+`} lang="bash" />
 
 **Options:**
 
@@ -77,24 +74,22 @@ haloy status --all`} lang="bash" />
 
 Stop running application containers.
 
-<Code code={`# Stop application
-haloy stop
+<Code code={`
+  # Stop application
+  haloy stop
 
-# Specify config file
+  # Specify config file
+  haloy stop --config path/to/config.yaml
 
-haloy stop --config path/to/config.yaml
+  # Stop specific target
+  haloy stop --target production
 
-# Stop specific target
+  # Stop all targets
+  haloy stop --all
 
-haloy stop --target production
-
-# Stop all targets
-
-haloy stop --all
-
-# Remove containers after stopping
-
-haloy stop --remove-containers`} lang="bash" />
+  # Remove containers after stopping
+  haloy stop --remove-containers
+`} lang="bash" />
 
 **Options:**
 
@@ -108,16 +103,16 @@ haloy stop --remove-containers`} lang="bash" />
 
 View logs from your deployed application.
 
-<Code code={`# View logs
-haloy logs
+<Code code={`
+  # View logs
+  haloy logs
 
-# Specify config file
+  # Specify config file
+  haloy logs --config path/to/config.yaml
 
-haloy logs --config path/to/config.yaml
-
-# Logs from specific target
-
-haloy logs --target staging`} lang="bash" />
+  # Logs from specific target
+  haloy logs --target staging
+`} lang="bash" />
 
 **Options:**
 
@@ -149,7 +144,7 @@ haloy validate-config --config path/to/config.yaml --show-resolved-config`} lang
 - `--config, -c <path>` - Path to config file
 - `--show-resolved-config` - Display resolved config with secrets (displays secrets in plain text!)
 
-> **Warning**: `--show-resolved-config` displays all secrets in plain text. Only use in secure environments.
+**Warning**: `--show-resolved-config` displays all secrets in plain text. Only use in secure environments.
 
 ### rollback-targets
 
@@ -172,7 +167,7 @@ haloy rollback-targets --target production`} lang="bash" />
 - `--target, -t <name>` - Rollback targets for specific target
 - `--server, -s <url>` - Override server URL
 
-> **Note**: Rollback availability depends on `image.history.strategy` configuration.
+**Note**: Rollback availability depends on `image.history.strategy` configuration.
 
 ### rollback
 
@@ -237,12 +232,13 @@ List all configured servers.
 
 Remove a server from your local configuration.
 
-<Code code={`# Remove server
-haloy server delete <server-domain>
+<Code code={`
+  # Remove server
+  haloy server delete <server-domain>
 
-# Example
-
-haloy server delete staging.haloy.com`} lang="bash" />
+  # Example
+  haloy server delete staging.haloy.com
+`} lang="bash" />
 
 **Arguments:**
 
@@ -264,20 +260,19 @@ This shows:
 
 Generate shell completion scripts.
 
-<Code code={`# Bash
-haloy completion bash
+<Code code={`
+  # Bash
+  haloy completion bash
 
-# Zsh
+  # Zsh
+  haloy completion zsh
 
-haloy completion zsh
+  # Fish
+  haloy completion fish
 
-# Fish
-
-haloy completion fish
-
-# PowerShell
-
-haloy completion powershell`} lang="bash" />
+  # PowerShell
+  haloy completion powershell
+`} lang="bash" />
 
 See [Shell Completion](/installation/shell-completion) for setup instructions.
 
@@ -493,7 +488,7 @@ fi`}
 
 ## Next Steps
 
-- [Learn about Authentication](/docs/authentication)
+- [Learn about Authentication](/docs/server-authentication)
 - [Understand the Architecture](/docs/architecture)
 - [Set up Multi-Server Deployments](/docs/multi-server-deployments)
 - [Configure Shell Completion](/docs/shell-completion)

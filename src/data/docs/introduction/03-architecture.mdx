@@ -108,8 +108,7 @@ See the [full command reference](/docs/commands-reference#haloyadm-commands) for
 
 ## Architecture Diagram
 
-<Code
-  code={`
+<Code code={`
 ┌─────────────────────┐
 │  Developer Machine  │
 │                     │
@@ -156,8 +155,8 @@ See the [full command reference](/docs/commands-reference#haloyadm-commands) for
 
 ### Incoming Requests
 
-<Code
-  code={`1. Internet
+<Code code={`
+   Internet
    │
    ├─ HTTP (port 80)
    │  └─► HAProxy → Redirects to HTTPS
@@ -169,14 +168,15 @@ See the [full command reference](/docs/commands-reference#haloyadm-commands) for
           └─► Load Balance
               ├─► App Container 1 (port 8080)
               ├─► App Container 2 (port 8080)
-              └─► App Container 3 (port 8080)`
-} lang="text"
+              └─► App Container 3 (port 8080)`}
+  lang="text"
 />
 
 ### Deployment Flow
 
 <Code
-  code={`1. Developer: haloy deploy
+  code={`
+   Developer: haloy deploy
    │
    └─► Build image locally (if configured)
        │
@@ -208,20 +208,20 @@ The standard approach is to use `haloy deploy` which handles labeling automatica
 
 You can start containers manually (using `docker run`, Docker Compose, or other orchestration tools) and `haloyd` will automatically discover and route traffic to them:
 
-<Code
-  code={`# Start a container with Haloy labels
-docker run -d \\
-  --name my-app \\
-  --network haloy \\
-  --label dev.haloy.appName=my-app \\
-  --label dev.haloy.deployment-id=manual-001 \\
-  --label dev.haloy.role=app \\
-  --label dev.haloy.domain.0=example.com \\
-  --label dev.haloy.domain.0.alias.0=www.example.com \\
-  --label dev.haloy.port=8080 \\
-  --label dev.haloy.health-check-path=/health \\
-  my-image:latest`}
-  lang="bash"
+<Code code={`
+  # Start a container with Haloy labels
+  docker run -d \\
+    --name my-app \\
+    --network haloy \\
+    --label dev.haloy.appName=my-app \\
+    --label dev.haloy.deployment-id=manual-001 \\
+    --label dev.haloy.role=app \\
+    --label dev.haloy.domain.0=example.com \\
+    --label dev.haloy.domain.0.alias.0=www.example.com \\
+    --label dev.haloy.port=8080 \\
+    --label dev.haloy.health-check-path=/health \\
+    my-image:latest
+`} lang="bash"
 />
 
 <Code code={`
@@ -233,7 +233,7 @@ docker run -d \\
         - haloy
       labels:
         dev.haloy.appName: my-app
-        dev.haloy.deployment-id: manual-001
+        dev.haloy.deployment-id: manual-001 # Make sure to increment this manually for the changes to take effect
         dev.haloy.role: app
         dev.haloy.domain.0: example.com
         dev.haloy.domain.0.alias.0: www.example.com
@@ -279,39 +279,45 @@ Haloy creates and uses Docker networks:
 
 ### Port Mapping
 
-<Code code={`HAProxy:
-  - 80:80   (HTTP)
-  - 443:443 (HTTPS)
+<Code code={`
+  HAProxy:
+    - 80:80   (HTTP)
+    - 443:443 (HTTPS)
 
-Application Containers:
+  Application Containers:
 
-- No direct port exposure
-- Internal network only
-- HAProxy routes traffic`} lang="text" />
+  - No direct port exposure
+  - Internal network only
+  - HAProxy routes traffic
+`} lang="text" />
 
 ## Data Storage
 
 ### System Installation
 
-<Code code={`/etc/haloy/
-├── haloyd.yaml          # Daemon configuration
-└── .env                 # API tokens
+<Code code={`
+  /etc/haloy/
+  ├── haloyd.yaml          # Daemon configuration
+  └── .env                 # API tokens
 
-/var/lib/haloy/
-├── haproxy-config/ # HAProxy configurations
-├── cert-storage/ # SSL certificates
-└── db/ # Deployment database`} lang="text" />
+  /var/lib/haloy/
+  ├── haproxy-config/ # HAProxy configurations
+  ├── cert-storage/ # SSL certificates
+  └── db/ # Deployment database
+`} lang="text" />
 
 ### User Installation
 
-<Code code={`~/.config/haloy/
-├── haloyd.yaml          # Daemon configuration
-└── .env                 # API tokens
+<Code code={`
+  ~/.config/haloy/
+  ├── haloyd.yaml          # Daemon configuration
+  └── .env                 # API tokens
 
-~/.local/share/haloy/
-├── haproxy-config/ # HAProxy configurations
-├── cert-storage/ # SSL certificates
-└── db/ # Deployment database`} lang="text" />
+  ~/.local/share/haloy/
+  ├── haproxy-config/ # HAProxy configurations
+  ├── cert-storage/ # SSL certificates
+  └── db/ # Deployment database
+`} lang="text" />
 
 ## SSL/TLS Certificates
 
@@ -335,14 +341,14 @@ Application Containers:
 
 **Flow**:
 
-<Code
-  code={`HAProxy → Health Check → App Container (/health endpoint)
-   │                              │
-   │                              ├─ 200 OK → Healthy
-   │                              └─ Other → Unhealthy
-   │
-   └─ Routes traffic only to healthy containers`}
-  lang="text"
+<Code code={`
+  HAProxy → Health Check → App Container (/health endpoint)
+     │                              │
+     │                              ├─ 200 OK → Healthy
+     │                              └─ Other → Unhealthy
+     │
+     └─ Routes traffic only to healthy containers
+`} lang="text"
 />
 
 **Check Frequency**: Every few seconds
@@ -367,31 +373,31 @@ Haloy achieves HA through:
 
 ### Rolling Deployment
 
-<Code
-  code={`Old containers: [1] [2] [3]
-                 │   │   │
-Step 1:          │   │   │  New [1] starts
-Step 2:          │   │   │  New [1] healthy → Old [1] stops
-Step 3:          │   │   │  New [2] starts
-Step 4:          │   │   │  New [2] healthy → Old [2] stops
-Step 5:          │   │   │  New [3] starts
-Step 6:          │   │   │  New [3] healthy → Old [3] stops
-                 ▼   ▼   ▼
-New containers: [1] [2] [3]`}
-  lang="text"
+<Code code={`
+  Old containers: [1] [2] [3]
+                   │   │   │
+  Step 1:          │   │   │  New [1] starts
+  Step 2:          │   │   │  New [1] healthy → Old [1] stops
+  Step 3:          │   │   │  New [2] starts
+  Step 4:          │   │   │  New [2] healthy → Old [2] stops
+  Step 5:          │   │   │  New [3] starts
+  Step 6:          │   │   │  New [3] healthy → Old [3] stops
+                   ▼   ▼   ▼
+  New containers: [1] [2] [3]
+`} lang="text"
 />
 
 ### Replace Deployment
 
-<Code
-  code={`Old containers: [1] [2] [3]
-                 │   │   │
-Step 1:          Stop all old containers
-Step 2:          Start all new containers
-Step 3:          Wait for health checks
-                 ▼   ▼   ▼
-New containers: [1] [2] [3]`}
-  lang="text"
+<Code code={`
+  Old containers: [1] [2] [3]
+                   │   │   │
+  Step 1:          Stop all old containers
+  Step 2:          Start all new containers
+  Step 3:          Wait for health checks
+                   ▼   ▼   ▼
+  New containers: [1] [2] [3]
+`} lang="text"
 />
 
 ## Security
@@ -457,4 +463,4 @@ New containers: [1] [2] [3]`}
 - [Learn about Multi-Server Deployments](/docs/multi-server-deployments)
 - [Configure Health Checks](/docs/deployment-strategies#health-checks)
 - [Set up Horizontal Scaling](/docs/scaling)
-- [Understand Authentication](/docs/authentication)
+- [Understand Authentication](/docs/server-authentication)

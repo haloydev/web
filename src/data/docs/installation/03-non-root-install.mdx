@@ -17,7 +17,10 @@ For development environments or when you don't have root access, you can install
 
 Install to your user directory:
 
-<Code code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`} lang="bash" />
+<Code
+  code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`}
+  lang="bash"
+/>
 
 ## Configure Docker Access
 
@@ -51,12 +54,12 @@ Initialize Haloy with the `--local-install` flag:
 
 ## User vs System Installation
 
-| Aspect               | User Installation                  | System Installation |
-| -------------------- | ---------------------------------- | ------------------- |
-| **Config directory** | `~/.config/haloy/`                 | `/etc/haloy/`       |
-| **Data directory**   | `~/.local/share/haloy/`            | `/var/lib/haloy/`   |
-| **Permissions**      | User permissions                   | Root permissions    |
-| **Use case**         | Development, testing               | Production          |
+| Aspect               | User Installation       | System Installation |
+| -------------------- | ----------------------- | ------------------- |
+| **Config directory** | `~/.config/haloy/`      | `/etc/haloy/`       |
+| **Data directory**   | `~/.local/share/haloy/` | `/var/lib/haloy/`   |
+| **Permissions**      | User permissions        | Root permissions    |
+| **Use case**         | Development, testing    | Production          |
 
 ## Security Notice
 
@@ -65,4 +68,4 @@ Adding your user to the `docker` group gives root-equivalent access to the syste
 ## Next Steps
 
 - [Generate an API token](/docs/server-installation#get-api-token)
-- [Configure your local client](/docs/authentication)
+- [Configure your local client](/docs/server-authentication)

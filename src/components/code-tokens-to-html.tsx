@@ -15,6 +15,7 @@ export function TokensToHtml({ tokens, className }: TokensToHtmlProps) {
               {token.content}
             </span>
           ))}
+          {'\n'}
         </span>
       ))}
     </div>

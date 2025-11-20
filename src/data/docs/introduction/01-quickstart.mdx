@@ -48,20 +48,19 @@ Add the server on your local machine:
 
 <Code code={`haloy server add <server-domain> <api-token>  # e.g., haloy.yourserver.com`} lang="bash" />
 
-**Tip:** See Authentication & Token Management for more options on how to manage API tokens.
+See [Server Authentication](/docs/server-authentication) for more options on how to manage server API tokens.
 
 ## 4. Create haloy.yaml
 
 Create a `haloy.yaml` file:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   server: haloy.yourserver.com
   domains:
     - domain: "my-app.com"
-    aliases:
-    - "www.my-app.com" # Redirects to my-app.com
+      aliases:
+        - "www.my-app.com" # Redirects to my-app.com
 `}
   lang="yaml"
 />
@@ -72,11 +71,12 @@ Check out the [examples repository](https://github.com/haloydev/examples) for co
 
 ## 5. Deploy
 
-<Code code={`haloy deploy
+<Code code={`
+  haloy deploy
 
-# Check status
-
-haloy status`} lang="bash" />
+  # Check status
+  haloy status
+`} lang="bash" />
 
 That's it! Your application is now deployed and accessible at your configured domain.
 
