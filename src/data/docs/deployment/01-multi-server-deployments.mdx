@@ -75,8 +75,8 @@ Base configuration provides defaults that targets can override:
       value: "info"
   targets:
     production:
-      # Inherits: replicas=2, port="8080"
-      # Overrides: image.tag, adds domains, replaces env
+      # Inherits: replicas=2, port="8080", base env (LOG_LEVEL)
+      # Overrides: image.tag, adds domains, adds/overrides env variables
       server: "prod.haloy.com"
       image:
         tag: "v1.2.3"
@@ -86,14 +86,16 @@ Base configuration provides defaults that targets can override:
         - name: "NODE_ENV"
           value: "production"
         - name: "LOG_LEVEL"
-          value: "warn"
+          value: "warn"  # Overrides base LOG_LEVEL
+        # Base LOG_LEVEL would be inherited if not overridden
     staging:
-      # Inherits: image (repo + tag), port="8080", env
+      # Inherits: image (repo + tag), port="8080", base env (LOG_LEVEL)
       # Overrides: server, replicas, adds domains
       server: "staging.haloy.com"
       replicas: 1
       domains:
         - domain: "staging.my-app.com"
+      # Inherits all base env variables (LOG_LEVEL="info")
 `}
   lang="yaml"
 />
@@ -101,9 +103,10 @@ Base configuration provides defaults that targets can override:
 **Inheritance Rules:**
 
 - Base values provide defaults for all targets
-- Target values completely override base values (no merging)
+- Most target values completely override base values (no merging)
 - Only specified fields in targets override the base
-- Arrays (like `env`) are replaced entirely, not merged
+- **Exception:** Environment variables (`env`) are merged - target values override base values with the same name, while preserving other base variables
+- Other arrays (like `domains`, `volumes`) are replaced entirely, not merged
 
 ## Multi-Environment Example
 

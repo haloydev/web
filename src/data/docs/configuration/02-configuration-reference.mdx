@@ -129,8 +129,9 @@ When using multi-target deployments, each target can override base configuration
 **Inheritance Rules:**
 
 - Base configuration provides defaults for all targets
-- Target-specific values completely override base values (no merging)
+- Most target-specific values completely override base values (no merging)
 - Only specified fields in targets override the base
+- **Exception:** Environment variables (`env`) are merged - target values override base values with the same name, while preserving other base variables
 - `global_pre_deploy` and `global_post_deploy` run once regardless of targets
 
 ### Example
@@ -149,20 +150,25 @@ When using multi-target deployments, each target can override base configuration
       value: "info"
 # Targets
   targets:
-    production: # Inherits: replicas=2, port="8080" # Overrides: image.tag, adds domains, overrides env completely
+    production: # Inherits: replicas=2, port="8080", base env (LOG_LEVEL) # Overrides: image.tag, adds domains, adds/overrides env variables
       server: "prod.haloy.com"
       image:
         tag: "v1.2.3"
       domains:
         - domain: "my-app.com"
-      env: # Completely replaces base env
+      env: # Merges with base env
         - name: "NODE_ENV"
-        value: "production"
-    staging: # Inherits: image (repository + tag), replicas=2, port="8080", env # Overrides: server, adds domains, changes replicas
+          value: "production"
+        # LOG_LEVEL="info" is inherited from base
+    staging: # Inherits: image (repository + tag), replicas=2, port="8080", base env # Overrides: server, changes replicas, adds domains, overrides LOG_LEVEL
       server: "staging.haloy.com"
       replicas: 1
       domains:
         - domain: "staging.my-app.com"
+      env:
+        - name: "LOG_LEVEL"
+          value: "debug"
+        # FEATURE_FLAG is inherited from base
 `}
   lang="yaml"
 />

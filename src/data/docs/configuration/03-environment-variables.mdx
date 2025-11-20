@@ -165,7 +165,7 @@ Combine different methods in a single configuration:
 
 ## Multi-Target Environment Variables
 
-Override environment variables per target:
+Merge environment variables per target:
 
 <Code
   code={`
@@ -178,28 +178,30 @@ Override environment variables per target:
       value: "false"
   targets:
     production:
-      env:  # Completely replaces base env
+      env:  # Merges with base env
         - name: "NODE_ENV"
           value: "production"
         - name: "LOG_LEVEL"
-          value: "warn"
+          value: "warn"  # Overrides base LOG_LEVEL
         - name: "DATABASE_URL"
           from:
             secret: "onepassword:prod-db.url"
+      # Result: NODE_ENV=production, LOG_LEVEL=warn, FEATURE_FLAG=false, DATABASE_URL=<from secret>
     staging:
-      env:  # Completely replaces base env
+      env:  # Merges with base env
         - name: "NODE_ENV"
           value: "staging"
         - name: "LOG_LEVEL"
-          value: "debug"
+          value: "debug"  # Overrides base LOG_LEVEL
         - name: "DATABASE_URL"
           from:
             env: "STAGING_DATABASE_URL"
+      # Result: NODE_ENV=staging, LOG_LEVEL=debug, FEATURE_FLAG=false, DATABASE_URL=<from env>
 `}
   lang="yaml"
 />
 
-**Note:** Environment variable arrays in targets completely replace the base array. There is no merging.
+**Note:** Environment variables defined in targets are merged with base environment variables. Target-specific values override base values with the same name, while other base values are preserved.
 
 ## Best Practices
 
