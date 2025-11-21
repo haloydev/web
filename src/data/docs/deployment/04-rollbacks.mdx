@@ -24,19 +24,18 @@ Haloy tags images with deployment IDs and keeps them locally for fast rollbacks.
 
 ### Configuration
 
-<Code
-  code={`name: "my-app"
-image:
-  repository: "ghcr.io/my-org/my-app"
-  tag: "latest"
-  history:
-    strategy: "local"
-    count: 5  # Keep 5 previous images
-domains:
-  - domain: "my-app.com"
-acme_email: "you@email.com"`}
-  lang="yaml"
-/>
+<Code code={`
+  name: "my-app"
+  image:
+    repository: "ghcr.io/my-org/my-app"
+    tag: "latest"
+    history:
+      strategy: "local"
+      count: 5  # Keep 5 previous images
+  domains:
+    - domain: "my-app.com"
+  acme_email: "you@email.com"
+`} lang="yaml" />
 
 ### How It Works
 
@@ -62,20 +61,19 @@ Rely on registry tags for rollbacks. Requires disciplined tagging.
 
 ### Configuration
 
-<Code
-  code={`name: "my-app"
-image:
-  repository: "ghcr.io/my-org/my-app"
-  tag: "v1.2.3"  # Must use immutable tags
-  history:
-    strategy: "registry"
-    count: 10  # Track 10 deployment versions
-    pattern: "v*"  # Match versioned tags
-domains:
-  - domain: "my-app.com"
-acme_email: "you@email.com"`}
-  lang="yaml"
-/>
+<Code code={`
+  name: "my-app"
+  image:
+    repository: "ghcr.io/my-org/my-app"
+    tag: "v1.2.3"  # Must use immutable tags
+    history:
+      strategy: "registry"
+      count: 10  # Track 10 deployment versions
+      pattern: "v*"  # Match versioned tags
+  domains:
+    - domain: "my-app.com"
+  acme_email: "you@email.com"
+`} lang="yaml" />
 
 ### Requirements
 

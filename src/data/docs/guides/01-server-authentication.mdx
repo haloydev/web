@@ -60,8 +60,7 @@ When you run `haloy server add`, Haloy creates two files:
 
 **`~/.config/haloy/.env`** - Actual tokens:
 
-<Code
-  code={`
+<Code code={`
   HALOY_API_TOKEN_PRODUCTION_HALOY_COM=abc123token456
   HALOY_API_TOKEN_STAGING_HALOY_COM=def789token012
 `} lang="bash"
@@ -120,17 +119,16 @@ You can also use [environment files](/docs/environment-variables#environment-fil
   api_token:
     from:
       secret: "onepassword:api-tokens.production"
+
   secretProviders:
     onepassword:
       api-tokens:
         vault: "Infrastructure"
         item: "Haloy API Tokens"
-  image:
+ image:
     repository: "my-app"
     tag: "latest"
 `} lang="yaml" />
-
-
 
 ### Direct Value (Not Recommended)
 
@@ -142,12 +140,9 @@ You can also use [environment files](/docs/environment-variables#environment-fil
   image:
     repository: "my-app"
     tag: "latest"
-`} lang="yaml"
-/>
+`} lang="yaml" />
 
-> **Warning**: Never commit tokens directly in config files. Use environment variables or secret providers.
-
-
+**Warning**: Never commit tokens directly in config files. Use environment variables or secret providers.
 
 ## Use Cases
 
@@ -286,20 +281,18 @@ Deploy to different environments:
 
 Create a template for required tokens:
 
-<Code
-  code={`
+<Code code={`
   # .env.example
   PRODUCTION_API_TOKEN=your_production_token_here
   STAGING_API_TOKEN=your_staging_token_here
   GITHUB_TOKEN=your_github_token_here
-`} lang="bash"
-/>
+`} lang="bash" />
 
 ## Server Domain Format
 
 When adding servers:
 - Use just the domain name (e.g., `haloy.example.com`)
-- Don't include `https://` - Haloy adds it automatically
+- You don't need to include `https://` - Haloy adds it automatically
 - For local development: `localhost` or `127.0.0.1`
 
 **Valid:**
@@ -313,10 +306,10 @@ When adding servers:
 
 **Invalid:**
 
-<Code
-  code={`haloy server add https://haloy.example.com <token>  # Remove https://
-haloy server add haloy.example.com:443 <token>        # Remove port`}
-  lang="bash"
+<Code code={`
+  haloy server add https://haloy.example.com <token>  # Remove https://
+  haloy server add haloy.example.com:443 <token>        # Remove port
+`} lang="bash"
 />
 
 ## Troubleshooting
@@ -332,7 +325,7 @@ haloy server add haloy.example.com:443 <token>        # Remove port`}
   sudo haloyadm api token
 
   # Update local config
-  haloy server add <server-domain> <new-token>
+  haloy server add <server-domain> <new-token> --force
 `} lang="bash" />
 
 ### Server Not Found
@@ -342,11 +335,11 @@ haloy server add haloy.example.com:443 <token>        # Remove port`}
 **Solution**:
 
 <Code code={`
-# List configured servers
-haloy server list
+  # List configured servers
+  haloy server list
 
-# Add missing server
-haloy server add <server-domain> <token>
+  # Add missing server
+  haloy server add <server-domain> <token>
 `} lang="bash" />
 
 ### Environment Variable Not Found
@@ -355,16 +348,16 @@ haloy server add <server-domain> <token>
 
 **Solution**:
 
-<Code code={`# Check if variable is set
-echo $PRODUCTION_API_TOKEN
+<Code code={`
+  # Check if variable is set
+  echo $PRODUCTION_API_TOKEN
 
-# Set the variable
+  # Set the variable
+  export PRODUCTION_API_TOKEN="your_token"
 
-export PRODUCTION_API_TOKEN="your_token"
-
-# Or add to .env file
-
-echo "PRODUCTION_API_TOKEN=your_token" >> .env`} lang="bash" />
+  # Or add to .env file
+  echo "PRODUCTION_API_TOKEN=your_token" >> .env
+`} lang="bash" />
 
 ### Multiple Servers, No Server Specified
 
@@ -372,10 +365,10 @@ echo "PRODUCTION_API_TOKEN=your_token" >> .env`} lang="bash" />
 
 **Solution**:
 
-<Code
-  code={`# Add server to your haloy.yaml
-server: production.haloy.com`}
-  lang="yaml"
+<Code code={`
+  # Add server to your haloy.yaml
+  server: production.haloy.com
+`} lang="yaml"
 />
 
 ## Next Steps

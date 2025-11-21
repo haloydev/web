@@ -47,7 +47,6 @@ export function DocsNavigation({ activeSlug, sectionsWithPages, ...props }: Docs
   const [open, setOpen] = React.useState(false);
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="bg-background hidden w-64 shrink-0 lg:block">
         <div className="sticky top-0 h-screen pt-6">
           <ScrollArea className="h-[calc(100vh-4rem)]">
@@ -60,14 +59,14 @@ export function DocsNavigation({ activeSlug, sectionsWithPages, ...props }: Docs
       <header className="bg-background sticky top-0 z-10 mx-2 flex items-center gap-4 lg:hidden">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="default">
+            <Button variant="ghost" size="default" className="my-1">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
               <span className="font-bold">Documentation</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
-            <ScrollArea className="h-[calc(100vh-4rem)]">
+            <ScrollArea className="h-screen pt-8 pb-32">
               <NavigationContent activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />
             </ScrollArea>
           </SheetContent>
