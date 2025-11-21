@@ -12,16 +12,13 @@ Haloy supports both Docker named volumes and filesystem bind mounts for persiste
 
 Named volumes are managed by Docker and work consistently across environments:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   volumes:
     - "app-data:/app/data"
     - "app-logs:/var/log/app"
     - "postgres-data:/var/lib/postgresql/data"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ### Benefits
 
@@ -34,16 +31,13 @@ Named volumes are managed by Docker and work consistently across environments:
 
 Mount directories from the host filesystem into containers:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   volumes:
     - "/var/app/data:/app/data"
     - "/home/user/logs:/app/logs:ro"
     - "/etc/ssl/certs:/app/certs:ro"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ### Mount Options
 
@@ -60,9 +54,8 @@ Add options after the second colon:
   # Named volume
   volume-name:/container/path
 
-# Bind mount (requires absolute path)
-
-/absolute/host/path:/container/path[:options]
+  # Bind mount (requires absolute path)
+  /absolute/host/path:/container/path[:options]
 `} lang="yaml" />
 
 ## Important Restrictions
@@ -73,21 +66,19 @@ Filesystem bind mounts must use absolute paths starting with `/`:
 
 **Valid:**
 
-<Code
-  code={`volumes:
-  - "/var/log/myapp:/app/logs"
-  - "/etc/ssl/private:/app/ssl:ro"`}
-  lang="yaml"
-/>
+<Code code={`
+  volumes:
+    - "/var/log/myapp:/app/logs"
+    - "/etc/ssl/private:/app/ssl:ro"
+`} lang="yaml" />
 
 **Invalid (will be rejected):**
 
-<Code
-  code={`volumes:
-  - "./data:/app/data"        # Relative path
-  - "../config:/app/config"   # Relative path`}
-  lang="yaml"
-/>
+<Code code={`
+  volumes:
+    - "./data:/app/data"        # Relative path
+    - "../config:/app/config"   # Relative path`}
+lang="yaml" />
 
 ### Why No Relative Paths?
 
@@ -103,8 +94,7 @@ Using absolute paths or named volumes ensures predictable, consistent behavior.
 
 Override volumes for different deployment targets:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   # Base volumes
   volumes:
@@ -118,9 +108,7 @@ Override volumes for different deployment targets:
       volumes:
         - "staging-app-data:/app/data"
         - "/var/log/staging-app:/app/logs"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Best Practices
 
