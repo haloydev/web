@@ -106,18 +106,17 @@ Disables rollback capability entirely.
 
 ### Configuration
 
-<Code
-  code={`name: "my-app"
-image:
-  repository: "ghcr.io/my-org/my-app"
-  tag: "latest"
-  history:
-    strategy: "none"
-domains:
-  - domain: "my-app.com"
-acme_email: "you@email.com"`}
-  lang="yaml"
-/>
+<Code code={`
+  name: "my-app"
+  image:
+    repository: "ghcr.io/my-org/my-app"
+    tag: "latest"
+    history:
+      strategy: "none"
+  domains:
+    - domain: "my-app.com"
+  acme_email: "you@email.com"
+`} lang="yaml" />
 
 ### Use Cases
 
@@ -129,33 +128,32 @@ acme_email: "you@email.com"`}
 
 ### List Available Rollback Targets
 
-<Code code={`# List all available rollback points
-haloy rollback-targets
+<Code code={`
+  # List all available rollback points
+  haloy rollback-targets
 
-# For specific config file
+  # For specific config file
+  haloy rollback-targets --config path/to/config.yaml
 
-haloy rollback-targets --config path/to/config.yaml
-
-# For specific deployment target
-
-haloy rollback-targets --target production`} lang="bash" />
+  # For specific deployment target
+  haloy rollback-targets --target production
+`} lang="bash" />
 
 ### Rollback to Previous Deployment
 
-<Code code={`# Rollback using deployment ID
-haloy rollback <deployment-id>
+<Code code={`
+  # Rollback using deployment ID
+  haloy rollback <deployment-id>
 
-# Example
+  # Example
+  haloy rollback dep_abc123xyz
 
-haloy rollback dep_abc123xyz
+  # With specific config
+  haloy rollback --config path/to/config.yaml 01k99q0xv74s3h8r0z8z44vf3y
 
-# With specific config
-
-haloy rollback --config path/to/config.yaml dep_abc123xyz
-
-# Rollback specific target
-
-haloy rollback --target production dep_abc123xyz`} lang="bash" />
+  # Rollback specific target
+  haloy rollback --target production 01k99q0xv74s3h8r0z8z44vf3y
+`} lang="bash" />
 
 ## Complete Examples
 
