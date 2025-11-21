@@ -32,7 +32,13 @@ export function CodeCopyButton({ code, className }: CopyButtonProps) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon-sm" className={cn('cursor-pointer', className)} onClick={handleCopy}>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className={cn('cursor-pointer', className)}
+          onClick={handleCopy}
+          aria-label={copied ? 'Code copied' : 'Copy code'}
+        >
           {copied ? <CheckIcon className="size-4" /> : <CopyIcon className="size-4" />}
         </Button>
       </PopoverTrigger>
