@@ -20,17 +20,15 @@ import { Navbar } from '@/components/navbar';
       <Image src={blueBurst} alt="" class="absolute -top-24 left-[70%] w-140" />
     </div>
 
-    <div class="relative h-screen">
+    <div class="relative min-h-screen pb-20">
       <Navbar client:load />
       <div class="flex justify-center">
-        <div class="mt-28 flex max-w-4xl flex-col items-center px-12 sm:mt-32 sm:block">
+        <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
           <h1 class="relative inline-block">
             <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
-            <div class="font-figtree text-center text-5xl font-black text-balance sm:text-left sm:text-6xl">
-              Cloudless Deploys
-            </div>
+            <div class="font-figtree text-center text-5xl font-black text-balance sm:text-6xl">Cloudless Deploys</div>
           </h1>
-          <p class="mt-2 max-w-2xl text-center text-xl text-balance sm:text-left sm:leading-10 md:text-2xl">
+          <p class="mt-2 max-w-2xl text-center text-xl text-balance sm:leading-10 md:text-2xl">
             Manage deployments on your own infrastructure.
           </p>
           <div class="mt-6 sm:mt-8">
@@ -42,6 +40,9 @@ import { Navbar } from '@/components/navbar';
               What is Haloy?
             </ButtonLink>
           </div>
+          <video autoplay muted loop playsinline preload="auto" class="mt-12 h-auto w-full rounded sm:mt-22">
+            <source src="/haloy-deploy-demo.webm" type="video/webm" />
+          </video>
         </div>
       </div>
     </div>
