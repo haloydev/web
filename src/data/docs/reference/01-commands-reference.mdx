@@ -242,17 +242,28 @@ Remove a server from your local configuration.
 
 - `<server-domain>` - Server domain to remove
 
+### server version
+
+Get the version from a haloyd server.
+
+<Code code={`haloy server version`} lang="bash" />
+
+**Flags:**
+
+- `--server, -s` - Server URL (overrides config file)
+- `--config, -c` - Path to config file or directory
+- `--targets, -t` - Get version for specific targets (comma-separated)
+- `--all, -a` - Get version for all targets
+
 ### version
 
-Display version information for the CLI and connected servers.
+Display the CLI version.
 
 <Code code={`haloy version`} lang="bash" />
 
-This shows:
+Outputs only the CLI version number in plaintext (e.g., `0.1.0`).
 
-- Local CLI version
-- Connected server versions (from configured servers)
-- Build information
+
 
 ### completion
 
@@ -449,11 +460,10 @@ You can also specify a directory:
 
 ## Exit Codes
 
-All commands follow standard exit code conventions:
+Both `haloy` and `haloyadm` CLI tools use consistent exit codes:
 
 - `0` - Success
-- `1` - General error
-- `2` - Usage error (invalid flags, arguments)
+- `1` - Any error
 
 Use in scripts:
 
