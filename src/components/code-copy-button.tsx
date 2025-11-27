@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Button } from './ui/button';
 import { CheckIcon, CopyIcon } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { cn } from '@/lib/utils';
 
 type CopyButtonProps = {
   code: string;
@@ -35,7 +34,7 @@ export function CodeCopyButton({ code, className }: CopyButtonProps) {
         <Button
           variant="ghost"
           size="icon-sm"
-          className={cn('cursor-pointer', className)}
+          className={className}
           onClick={handleCopy}
           aria-label={copied ? 'Code copied' : 'Copy code'}
         >

@@ -1,0 +1,64 @@
+---
+export interface Props {
+  defaultValue: string;
+}
+
+const { defaultValue } = Astro.props;
+const id = `tabs-${Math.random().toString(36).substr(2, 9)}`;
+---
+
+<div data-tabs={id} data-default={defaultValue}>
+  <div class="flex space-x-3" role="tablist">
+    <slot name="tabs" />
+  </div>
+  <div class="mt-4">
+    <slot />
+  </div>
+</div>
+
+<script>
+  function initCodeTabs() {
+    document.querySelectorAll('[data-tabs]:not([data-initialized])').forEach((tabsEl) => {
+      tabsEl.setAttribute('data-initialized', 'true');
+      const defaultValue = tabsEl.getAttribute('data-default');
+      const triggers = tabsEl.querySelectorAll('[data-tab-trigger]');
+      const panels = tabsEl.querySelectorAll('[data-tab-panel]');
+
+      panels.forEach((panel) => {
+        const value = panel.getAttribute('data-value');
+        if (value === defaultValue) {
+          panel.removeAttribute('hidden');
+        } else {
+          panel.setAttribute('hidden', '');
+        }
+      });
+
+      triggers.forEach((trigger) => {
+        const value = trigger.getAttribute('data-value');
+        if (value === defaultValue) {
+          trigger.classList.add('active');
+        }
+
+        trigger.addEventListener('click', () => {
+          const value = trigger.getAttribute('data-value');
+          triggers.forEach((t) => t.classList.remove('active'));
+          trigger.classList.add('active');
+
+          panels.forEach((panel) => {
+            if (panel.getAttribute('data-value') === value) {
+              panel.removeAttribute('hidden');
+            } else {
+              panel.setAttribute('hidden', '');
+            }
+          });
+        });
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initCodeTabs);
+  } else {
+    initCodeTabs();
+  }
+</script>

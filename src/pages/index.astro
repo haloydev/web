@@ -7,50 +7,74 @@ import { CurlewLogo } from '@/components/curlew-logo';
 import { ButtonLink } from '@/components/ui/button-link';
 import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
+import Code from '@/components/code.astro';
 ---
 
 <BaseLayout title="Haloy - Cloudfless Deploys" class="bg-background-sky">
-  <div class="relative overflow-hidden">
-    <div class="absolute inset-0 dark:hidden">
-      <Image src={pinkBurst} alt="" class="absolute -top-32 left-[10%] w-200" />
-      <Image src={pinkBurst} alt="" class="absolute -top-40 left-[40%] w-200" />
-      <Image src={pinkBurst} alt="" class="absolute -top-12 left-[27%] w-80" />
-      <Image src={pinkBurst} alt="" class="absolute -top-8 left-[30%] w-160" />
-      <Image src={pinkBurst} alt="" class="absolute -top-16 left-[15%] w-80" />
-      <Image src={blueBurst} alt="" class="absolute -top-24 left-[70%] w-140" />
-    </div>
+  <div class="absolute inset-0 mx-auto max-w-7xl overflow-hidden dark:hidden">
+    <Image src={pinkBurst} alt="" class="absolute -top-32 left-[10%] w-200" />
+    <Image src={pinkBurst} alt="" class="absolute -top-40 left-[40%] w-200" />
+    <Image src={pinkBurst} alt="" class="absolute -top-12 left-[27%] w-80" />
+    <Image src={pinkBurst} alt="" class="absolute -top-8 left-[30%] w-160" />
+    <Image src={pinkBurst} alt="" class="absolute -top-16 left-[15%] w-80" />
+    <Image src={blueBurst} alt="" class="absolute -top-24 left-[70%] w-140" />
+  </div>
 
-    <div class="relative min-h-screen pb-20">
-      <Navbar client:load />
-      <div class="flex justify-center">
-        <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
-          <h1 class="relative inline-block">
-            <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
-            <div class="font-figtree text-center text-5xl font-black text-balance sm:text-6xl">Cloudless Deploys</div>
-          </h1>
-          <p class="mt-2 max-w-2xl text-center text-xl text-balance sm:leading-10 md:text-2xl">
-            Manage deployments on your own infrastructure.
-          </p>
-          <div class="mt-6 sm:mt-8">
-            <ButtonLink href="/docs/quickstart" size="default" className="sm:h-10 sm:has-[>svg]:px-4">
-              Read docs
-              <IconArrowRight />
-            </ButtonLink>
-            <ButtonLink href="/docs/what-is-haloy" variant="link" size="default" className="sm:h1-10 sm:px-6">
-              What is Haloy?
-            </ButtonLink>
-          </div>
-          <video
-            autoplay
-            muted
-            loop
-            playsinline
-            preload="auto"
-            class="mt-12 h-auto w-full rounded shadow-lg shadow-black/50 sm:mt-22 dark:shadow-black/40"
-          >
-            <source src="/haloy-deploy-demo.webm" type="video/webm" />
-          </video>
+  <div class="relative min-h-screen pb-20">
+    <Navbar client:load />
+    <div class="flex justify-center">
+      <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
+        <h1 class="relative inline-block">
+          <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
+          <div class="font-figtree text-center text-5xl font-black text-balance sm:text-6xl">Cloudless Deploys</div>
+        </h1>
+        <p class="mt-2 max-w-2xl text-center text-xl text-balance sm:leading-10 md:text-2xl">
+          Manage deployments on your own infrastructure.
+        </p>
+        <div class="mt-6 sm:mt-8">
+          <ButtonLink href="/docs/quickstart" size="default" className="sm:h-10 sm:has-[>svg]:px-4">
+            Read docs
+            <IconArrowRight />
+          </ButtonLink>
+          <ButtonLink href="/docs/what-is-haloy" variant="link" size="default" className="sm:h1-10 sm:px-6">
+            What is Haloy?
+          </ButtonLink>
         </div>
+      </div>
+    </div>
+    <div class="mt-20 flex justify-center">
+      <div class="w-full max-w-3xl px-6">
+        <CodeTabs defaultValue="curl">
+          <Fragment slot="tabs">
+            <CodeTabTrigger value="curl">curl</CodeTabTrigger>
+            <CodeTabTrigger value="homebrew">homebrew</CodeTabTrigger>
+          </Fragment>
+
+          <CodeTabPanel value="curl">
+            <Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash" lang="bash" />
+          </CodeTabPanel>
+
+          <CodeTabPanel value="homebrew">
+            <Code code={`brew tap haloydev/tap && brew install haloy`} lang="bash" />
+          </CodeTabPanel>
+        </CodeTabs>
+      </div>
+    </div>
+    <div class="mt-20 flex justify-center">
+      <div class="max-w-3xl px-6">
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          preload="auto"
+          class="h-auto w-full rounded shadow-lg shadow-black/50 dark:shadow-black/40"
+        >
+          <source src="/haloy-deploy-demo.webm" type="video/webm" />
+        </video>
       </div>
     </div>
   </div>

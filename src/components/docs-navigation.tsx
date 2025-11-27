@@ -62,7 +62,7 @@ export function DocsNavigation({ activeSlug, sectionsWithPages, ...props }: Docs
             <Button variant="ghost" size="default" className="my-1">
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle navigation menu</span>
-              <span className="font-bold">Documentation</span>
+              <span className="font-bold">Menu</span>
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-64 p-0">
