@@ -1,8 +1,13 @@
 import type { MarkdownHeading } from 'astro';
 import * as React from 'react';
 import { ScrollArea } from './ui/scroll-area';
+import { cn } from '@/lib/utils';
 
-export function DocsTableOfContents({ headings }: { headings: MarkdownHeading[] }) {
+type DocsTableOfContentsProps = {
+  headings: MarkdownHeading[];
+  className?: string;
+};
+export function DocsTableOfContents({ headings, className }: DocsTableOfContentsProps) {
   if (headings.length === 0) {
     return null;
   }
@@ -39,21 +44,23 @@ export function DocsTableOfContents({ headings }: { headings: MarkdownHeading[] 
   }, [headings]);
 
   return (
-    <div className="sticky top-0 pt-6">
+    <div className={cn('sticky top-0 pt-6', className)}>
       <ScrollArea className="h-[calc(100vh-4rem)]">
-        <span className="text-muted-foreground text-xs font-medium">On This Page</span>
-        <ul className="mt-3 space-y-2">
-          {headings.map((heading) => (
-            <li
-              key={heading.slug}
-              data-depth={heading.depth}
-              data-active={activeId === heading.slug}
-              className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-sm data-[depth=3]:pl-4 data-[depth=4]:pl-6"
-            >
-              <a href={`#${heading.slug}`}>{heading.text}</a>
-            </li>
-          ))}
-        </ul>
+        <div className="border-muted border-l px-4">
+          <span className="text-foreground text-xs font-medium">On This Page</span>
+          <ul className="mt-3 space-y-2">
+            {headings.map((heading) => (
+              <li
+                key={heading.slug}
+                data-depth={heading.depth}
+                data-active={activeId === heading.slug}
+                className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-sm data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+              >
+                <a href={`#${heading.slug}`}>{heading.text}</a>
+              </li>
+            ))}
+          </ul>
+        </div>
       </ScrollArea>
     </div>
   );

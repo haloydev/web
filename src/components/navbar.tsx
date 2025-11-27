@@ -4,8 +4,8 @@ import { ButtonLink } from './ui/button-link';
 
 export function Navbar() {
   return (
-    <nav className="flex justify-center px-6 py-4">
-      <div className="flex w-full max-w-7xl justify-between">
+    <nav className="flex justify-center py-4 pr-6 pl-2">
+      <div className="flex w-full justify-between">
         <a href="/" className="font-figtree px-4 text-2xl font-semibold">
           Haloy
         </a>

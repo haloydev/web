@@ -36,16 +36,13 @@ const { title, activeSlug, headings } = Astro.props;
   <Navbar client:load />
   <div class="lg:flex">
     <DocsNavigation client:load activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />
-    <main class="flex-1 lg:flex">
-      <div class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
-        <Prose>
-          <h1>{title}</h1>
-          <slot />
-        </Prose>
-      </div>
-      <div class="hidden w-72 lg:block">
-        <DocsTableOfContents client:load headings={headings} />
-      </div>
+    <main class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
+      <Prose>
+        <h1>{title}</h1>
+        <slot />
+      </Prose>
+
+      <DocsTableOfContents client:load headings={headings} className="hidden lg:block xl:ml-24" />
     </main>
   </div>
 </BaseLayout>
