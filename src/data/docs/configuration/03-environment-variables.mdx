@@ -12,8 +12,7 @@ Configure environment variables for your deployed applications using multiple me
 
 The simplest way to set environment variables:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   env:
     - name: "DATABASE_URL"
@@ -22,17 +21,14 @@ The simplest way to set environment variables:
       value: "true"
     - name: "MAX_CONNECTIONS"
       value: "100"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## From Environment Variables
 
 Reference environment variables from your local machine:
 
-<Code
-  code={`name: "
-  my-app"
+<Code code={`
+  name: "my-app"
   env:
     - name: "DATABASE_URL"
       from:
@@ -43,21 +39,16 @@ Reference environment variables from your local machine:
     - name: "SECRET_KEY"
       from:
         env: "APP_SECRET"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 Set these in your shell before deploying:
 
-<Code
-  code={`
+<Code code={`
   export PRODUCTION_DATABASE_URL="postgres://prod-db:5432/myapp"
   export MY_API_KEY="your-api-key-here"
   export APP_SECRET="your-secret-here"
   haloy deploy
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 **Tip:** You have the option to define environment variables in files which the `haloy` CLI tool will automatically load. See [Environment Files](#environment-files) for more details.
 
@@ -65,8 +56,7 @@ Set these in your shell before deploying:
 
 Use external secret management services like 1Password:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   secretProviders:
     onepassword:
@@ -86,9 +76,7 @@ Use external secret management services like 1Password:
     - name: "STRIPE_KEY"
       from:
         secret: "onepassword:api-keys.stripe-key"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 See [Secret Providers](/docs/secret-providers) for more details.
 
@@ -102,15 +90,12 @@ Haloy automatically loads environment variables from these files (in order):
 
 ### Example .env File
 
-<Code
-  code={`
+<Code code={`
   DATABASE_URL=postgres://localhost:5432/myapp
   API_KEY=your-secret-api-key
   DEBUG=true
   MAX_CONNECTIONS=100
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 ### Target-Specific .env Files
 
@@ -118,25 +103,19 @@ For multi-target deployments:
 
 **.env.production:**
 
-<Code
-  code={`
+<Code code={`
   DATABASE_URL=postgres://prod-db:5432/myapp
   DEBUG=false
   NODE_ENV=production
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 **.env.staging:**
 
-<Code
-  code={`
+<Code code={`
   DATABASE_URL=postgres://staging-db:5432/myapp
   DEBUG=true
   NODE_ENV=staging
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 ## Mixed Approaches
 
@@ -160,15 +139,13 @@ Combine different methods in a single configuration:
     - name: "API_SECRET"
       from:
         secret: "onepassword:api-keys.secret"
-
 `} lang="yaml" />
 
 ## Multi-Target Environment Variables
 
 Merge environment variables per target:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   # Base environment variables
   env:
@@ -197,9 +174,7 @@ Merge environment variables per target:
           from:
             env: "STAGING_DATABASE_URL"
       # Result: NODE_ENV=staging, LOG_LEVEL=debug, FEATURE_FLAG=false, DATABASE_URL=<from env>
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 **Note:** Environment variables defined in targets are merged with base environment variables. Target-specific values override base values with the same name, while other base values are preserved.
 
@@ -208,25 +183,19 @@ Merge environment variables per target:
 1. **Never commit secrets**: Use `.env` files or secret providers for sensitive data
 2. **Add .env to .gitignore**: Prevent accidental commits
 
-<Code
-  code={`
+<Code code={`
   echo ".env" >> .gitignore
   echo ".env.*" >> .gitignore
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 3. **Use secret providers for production**: More secure than plain text or environment variables
 4. **Document required variables**: Keep a `.env.example` file:
 
-<Code
-  code={`
+<Code code={`
   DATABASE_URL=postgres://localhost:5432/myapp
   API_KEY=your-api-key-here
   SECRET_KEY=your-secret-here
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 5. **Validate configuration**: Use `haloy validate-config` to check your setup
 

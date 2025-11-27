@@ -1,5 +1,5 @@
 import type { MarkdownHeading } from 'astro';
-import * as React from 'react';
+import React from 'react';
 import { ScrollArea } from './ui/scroll-area';
 import { cn } from '@/lib/utils';
 
@@ -44,24 +44,22 @@ export function DocsTableOfContents({ headings, className }: DocsTableOfContents
   }, [headings]);
 
   return (
-    <div className={cn('sticky top-0 pt-6', className)}>
-      <ScrollArea className="h-[calc(100vh-4rem)]">
-        <div className="border-muted border-l px-4">
-          <span className="text-foreground text-xs font-medium">On This Page</span>
-          <ul className="mt-3 space-y-2">
-            {headings.map((heading) => (
-              <li
-                key={heading.slug}
-                data-depth={heading.depth}
-                data-active={activeId === heading.slug}
-                className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-sm data-[depth=3]:pl-4 data-[depth=4]:pl-6"
-              >
-                <a href={`#${heading.slug}`}>{heading.text}</a>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </ScrollArea>
+    <div className={cn('sticky top-0 h-screen pt-6', className)}>
+      <div className="border-muted border-l px-4">
+        <span className="text-muted-foreground/70 text-xs font-medium">On This Page</span>
+        <ul className="mt-3 space-y-2">
+          {headings.map((heading) => (
+            <li
+              key={heading.slug}
+              data-depth={heading.depth}
+              data-active={activeId === heading.slug}
+              className="text-muted-foreground hover:text-foreground data-[active=true]:text-foreground text-sm data-[depth=3]:pl-4 data-[depth=4]:pl-6"
+            >
+              <a href={`#${heading.slug}`}>{heading.text}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

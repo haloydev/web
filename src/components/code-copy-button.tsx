@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import { Button } from './ui/button';
 import { CheckIcon, CopyIcon } from 'lucide-react';

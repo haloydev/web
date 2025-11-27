@@ -17,10 +17,9 @@ For development environments or when you don't have root access, you can install
 
 Install to your user directory:
 
-<Code
-  code={`curl -fsSL https://raw.githubusercontent.com/haloydev/haloy/main/scripts/install-haloyadm.sh | bash`}
-  lang="bash"
-/>
+<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | bash`} lang="bash" />
+
+The script runs without elevated privileges (`sudo`) and installs to `~/.local/bin` instead of `/usr/local/bin`.
 
 ## Configure Docker Access
 

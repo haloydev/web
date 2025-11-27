@@ -41,8 +41,9 @@ const { title, activeSlug, headings } = Astro.props;
         <h1>{title}</h1>
         <slot />
       </Prose>
-
-      <DocsTableOfContents client:load headings={headings} className="hidden lg:block xl:ml-24" />
+      <aside class="hidden lg:block xl:ml-24">
+        <DocsTableOfContents client:load headings={headings} />
+      </aside>
     </main>
   </div>
 </BaseLayout>

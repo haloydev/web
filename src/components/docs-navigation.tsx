@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 
 import type { CollectionEntry } from 'astro:content';
 import { Button } from './ui/button';

@@ -38,27 +38,21 @@ Complete reference for all Haloy configuration options.
 
 Gradually replaces old containers with new ones, ensuring zero downtime:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   deployment_strategy: "rolling"
   replicas: 3
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ### Replace Deployment
 
 Stops all old containers before starting new ones:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   deployment_strategy: "replace"
   replicas: 3
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Deployment Hooks
 
@@ -71,8 +65,7 @@ Stops all old containers before starting new ones:
 
 Run custom commands before or after deployment:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   pre_deploy:
     - "npm run migrate"
@@ -80,14 +73,11 @@ Run custom commands before or after deployment:
   post_deploy:
     - "curl -X POST https://status.example.com/notify"
     - "echo 'Deployment complete'"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 For multi-target deployments, use global hooks:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   global_pre_deploy:
     - "npm run build"
@@ -102,9 +92,7 @@ For multi-target deployments, use global hooks:
     staging:
       server: staging.haloy.com
       pre_deploy: - "npm run test:staging"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Target Configuration
 
@@ -136,8 +124,7 @@ When using multi-target deployments, each target can override base configuration
 
 ### Example
 
-<Code
-  code={`
+<Code code={`
   # Base configuration - inherited by all targets
   name: "my-app"
   image:
@@ -148,7 +135,7 @@ When using multi-target deployments, each target can override base configuration
   env:
     - name: "LOG_LEVEL"
       value: "info"
-# Targets
+  # Targets
   targets:
     production: # Inherits: replicas=2, port="8080", base env (LOG_LEVEL) # Overrides: image.tag, adds domains, adds/overrides env variables
       server: "prod.haloy.com"
@@ -169,21 +156,16 @@ When using multi-target deployments, each target can override base configuration
         - name: "LOG_LEVEL"
           value: "debug"
         # FEATURE_FLAG is inherited from base
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Custom Docker Network
 
 By default, containers are attached to the `haloy` network. You can override this:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   network: "my-custom-network"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 **Important**: If you override the default network (`haloy`), the Haloy proxy will not be able to discover your containers. This means:
 
@@ -198,12 +180,11 @@ Only change the network if you have a specific networking requirement and unders
 
 Validate your configuration file:
 
-<Code
-  code={`haloy validate-config
-haloy validate-config --config path/to/config.yaml
-haloy validate-config --show-resolved-config  # Display with secrets (use with caution)`}
-  lang="bash"
-/>
+<Code code={`
+  haloy validate-config
+  haloy validate-config --config path/to/config.yaml
+  haloy validate-config --show-resolved-config  # Display with secrets (use with caution)
+`} lang="bash" />
 
 ## Next Steps
 

@@ -51,7 +51,7 @@ It’s ideal for:
 - Multi‑environment deployments
 - Lightweight multi‑region setups
 
-When Not to Use Haloy
+## When Not to Use Haloy
 
 Haloy is intentionally simple. You probably don’t want it if you need:
 
@@ -73,5 +73,6 @@ Infrastructure has become complicated. Many developers don’t need Kubernetes, 
 All while still being powerful enough for production workloads.
 
 ## Next Steps
+- [Install Haloy](/docs/quickstart)
 - [Learn about The Architecture](/docs/architecture)
 - [Commands Reference](/docs/command-reference)
