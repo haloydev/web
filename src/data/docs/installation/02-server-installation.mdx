@@ -14,15 +14,40 @@ The Haloy daemon (`haloyd`) runs on your server and manages container deployment
 - Docker installed
 - Sudo access (for system installation)
 
-## Installation
+## Automatic Setup
 
-Install `haloyadm` on your server:
+The easiest way to set up a server is using the `haloy` CLI from your local machine. This command will SSH into your server as `root` (default), install Docker (if missing), install `haloyadm`, initialize the daemon, and add the server to your local config.
+
+<Code
+  code={`haloy server setup <server-ip> --api-domain haloy.yourserver.com --acme-email you@email.com`}
+  lang="bash"
+/>
+
+**Note:** You must have SSH access to the `root` user on the target server.
+
+**This command performs the following steps automatically:**
+
+1. Checks for Docker and installs it if missing
+2. Installs `haloyadm` on the remote server
+3. Initializes `haloyd` with your API domain
+4. Retrieves the API token
+5. Adds the server to your local `haloy` configuration
+
+Once this completes, your server is ready for deployments.
+
+## Manual Installation
+
+If you prefer to install manually or cannot use SSH from your local machine, follow these steps.
+
+### 1. Install haloyadm
+
+SSH into your server and install `haloyadm`:
 
 <Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash`} lang="bash" />
 
-## Initialize haloyd
+### 2. Initialize haloyd
 
-### Standard Setup (Remote Deployment)
+#### Standard Setup (Remote Deployment)
 
 For deploying from your local machine to a remote server, initialize with an API domain. This exposes the Haloy API securely via HTTPS:
 
@@ -30,7 +55,7 @@ For deploying from your local machine to a remote server, initialize with an API
 
 **This is required for remote deployments.** Without an API domain, the `haloy` CLI on your local machine cannot communicate with `haloyd` on the server.
 
-### Same-Server Deployment
+#### Same-Server Deployment
 
 If you plan to install the `haloy` CLI directly on the server (alongside `haloyd`) and only deploy locally, you can initialize without a domain:
 
@@ -49,13 +74,13 @@ This is useful for:
 - Development environments
 - Situations where a domain isn't available
 
-### Adding a Domain Later
+#### Adding a Domain Later
 
 If you initialized without a domain and want to enable remote deployments:
 
 <Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
 
-## Get API Token
+### 3. Get API Token
 
 Generate an API token to authenticate from your local machine:
 

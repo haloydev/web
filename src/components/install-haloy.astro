@@ -1,0 +1,21 @@
+---
+import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
+---
+
+<CodeTabs defaultValue="curl">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="curl">curl</CodeTabTrigger>
+    <CodeTabTrigger value="homebrew">homebrew</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="curl">
+    <Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="homebrew">
+    <Code code={`brew tap haloydev/tap && brew install haloy`} lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>

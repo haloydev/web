@@ -10,31 +10,37 @@ The Haloy CLI tool runs on your local machine and triggers deployments to your s
 
 ## Installation
 
-Install the `haloy` CLI tool:
+### Shell Script (Recommended)
 
-<Code code={`curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash`} lang="bash" />
+To install the latest version via the official shell script:
 
-## Configure PATH
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash" lang="bash" />
 
-Ensure `~/.local/bin` is in your PATH by adding the following to your `~/.bashrc`, `~/.zshrc`, or equivalent shell profile:
+### Homebrew
 
-<Code code={`export PATH="$HOME/.local/bin:$PATH"`} lang="bash" />
+If you are using macOS or Linux with Homebrew:
 
-Then reload your shell configuration:
-
-<Code code={`source ~/.bashrc  # or ~/.zshrc`} lang="bash" />
+<Code code="brew tap haloydev/tap && brew install haloy" lang="bash" />
 
 ## Verify Installation
 
 Check that `haloy` is installed correctly:
 
-<Code code={`haloy --version`} lang="bash" />
+<Code code="haloy version" lang="bash" />
 
 ## Uninstalling
 
-To remove the Haloy CLI tool:
+### Shell Script
 
-<Code code={`curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash`} lang="bash" />
+If you installed via the shell script, you can run the uninstall script:
+
+<Code code="curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash" lang="bash" />
+
+### Homebrew
+
+If you installed via Homebrew, you can uninstall the package and untap the repository:
+
+<Code code="brew uninstall haloy && brew untap haloydev/tap" lang="bash" />
 
 ## Next Steps
 
