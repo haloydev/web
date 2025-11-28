@@ -7,10 +7,7 @@ import { CurlewLogo } from '@/components/curlew-logo';
 import { ButtonLink } from '@/components/ui/button-link';
 import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
-import CodeTabs from '@/components/code-tabs/code-tabs.astro';
-import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
-import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
-import Code from '@/components/code.astro';
+import InstallHaloy from '@/components/install-haloy.astro';
 ---
 
 <BaseLayout title="Haloy - Cloudfless Deploys" class="bg-background-sky">
@@ -47,20 +44,7 @@ import Code from '@/components/code.astro';
     </div>
     <div class="mt-20 flex justify-center">
       <div class="w-full max-w-3xl px-6">
-        <CodeTabs defaultValue="curl">
-          <Fragment slot="tabs">
-            <CodeTabTrigger value="curl">curl</CodeTabTrigger>
-            <CodeTabTrigger value="homebrew">homebrew</CodeTabTrigger>
-          </Fragment>
-
-          <CodeTabPanel value="curl">
-            <Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash" lang="bash" />
-          </CodeTabPanel>
-
-          <CodeTabPanel value="homebrew">
-            <Code code={`brew tap haloydev/tap && brew install haloy`} lang="bash" />
-          </CodeTabPanel>
-        </CodeTabs>
+        <InstallHaloy />
       </div>
     </div>
     <div class="mt-20 flex justify-center">
