@@ -15,7 +15,12 @@ const { title, class: className } = Astro.props;
 <script is:inline>
   const getThemePreference = () => {
     if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
-      return localStorage.getItem('theme');
+      const stored = localStorage.getItem('theme');
+      if (stored === 'light') return 'light';
+      if (stored === 'dark') return 'dark';
+      if (stored === 'system') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
     }
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   };
@@ -23,11 +28,17 @@ const { title, class: className } = Astro.props;
   document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
 
   if (typeof localStorage !== 'undefined') {
-    const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.classList.contains('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    // Listen for system theme changes when preference is 'system'
+    const updateSystemTheme = () => {
+      const stored = localStorage.getItem('theme');
+      if (stored === 'system') {
+        const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
+      }
+    };
+
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    mediaQuery.addEventListener('change', updateSystemTheme);
   }
 </script>
 

@@ -10,16 +10,35 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export function ModeToggle() {
-  const [theme, setThemeState] = React.useState<'theme-light' | 'dark' | 'system'>('theme-light');
+  const [theme, setThemeState] = React.useState<'light' | 'dark' | 'system'>('system');
+
   React.useEffect(() => {
-    const isDarkMode = document.documentElement.classList.contains('dark');
-    setThemeState(isDarkMode ? 'dark' : 'theme-light');
+    const storedTheme = localStorage.getItem('theme');
+    if (storedTheme === 'light' || storedTheme === 'dark' || storedTheme === 'system') {
+      setThemeState(storedTheme);
+    } else {
+      setThemeState('system');
+    }
   }, []);
 
   React.useEffect(() => {
-    const isDark =
-      theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
+    const updateTheme = () => {
+      const isDark =
+        theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.documentElement.classList[isDark ? 'add' : 'remove']('dark');
+    };
+
+    updateTheme();
+    localStorage.setItem('theme', theme);
+
+    // Listen for system theme changes when in 'system' mode
+    if (theme === 'system') {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+      const handleChange = () => updateTheme();
+
+      mediaQuery.addEventListener('change', handleChange);
+      return () => mediaQuery.removeEventListener('change', handleChange);
+    }
   }, [theme]);
 
   return (
@@ -32,7 +51,7 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setThemeState('theme-light')}>Light</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setThemeState('light')}>Light</DropdownMenuItem>
         <DropdownMenuItem onClick={() => setThemeState('dark')}>Dark</DropdownMenuItem>
         <DropdownMenuItem onClick={() => setThemeState('system')}>System</DropdownMenuItem>
       </DropdownMenuContent>
