@@ -12,55 +12,51 @@ Haloy supports shell completion for bash, zsh, fish, and PowerShell to make comm
 
 ### Temporary (current session only)
 
-<Code code={`source <(haloy completion bash)`} lang="bash" />
+<Code code="source <(haloy completion bash)" lang="bash" />
 
 ### Permanent
 
 **Linux:**
 
-<Code code={`haloy completion bash | sudo tee /etc/bash_completion.d/haloy > /dev/null`} lang="bash" />
+<Code code="haloy completion bash | sudo tee /etc/bash_completion.d/haloy > /dev/null" lang="bash" />
 
 **macOS:**
 
-<Code code={`haloy completion bash | sudo tee /usr/local/etc/bash_completion.d/haloy > /dev/null`} lang="bash" />
+<Code code="haloy completion bash | sudo tee /usr/local/etc/bash_completion.d/haloy > /dev/null" lang="bash" />
 
 ## Zsh
 
 Create completions directory and generate completion file:
 
-<Code
-  code={`mkdir -p ~/.local/share/zsh/site-functions
-haloy completion zsh > ~/.local/share/zsh/site-functions/_haloy`}
-  lang="bash"
-/>
+<Code code={`
+  mkdir -p ~/.local/share/zsh/site-functions
+  haloy completion zsh > ~/.local/share/zsh/site-functions/_haloy
+`} lang="bash" />
 
 Add to `~/.zshrc` (only needed once):
 
-<Code
-  code={`echo 'fpath=(~/.local/share/zsh/site-functions $fpath)' >> ~/.zshrc
-echo 'autoload -U compinit && compinit' >> ~/.zshrc`}
-  lang="bash"
-/>
+<Code code={`
+  echo 'fpath=(~/.local/share/zsh/site-functions $fpath)' >> ~/.zshrc
+  echo 'autoload -U compinit && compinit' >> ~/.zshrc
+`} lang="bash" />
 
 Reload your shell or restart terminal:
 
-<Code code={`source ~/.zshrc`} lang="bash" />
+<Code code="source ~/.zshrc" lang="bash" />
 
 ## Fish
 
-<Code
-  code={`mkdir -p ~/.config/fish/completions
-haloy completion fish > ~/.config/fish/completions/haloy.fish`}
-  lang="bash"
-/>
+<Code code={`
+  mkdir -p ~/.config/fish/completions
+  haloy completion fish > ~/.config/fish/completions/haloy.fish
+`} lang="bash" />
 
 ## PowerShell
 
-<Code
-  code={`haloy completion powershell > haloy.ps1
-# Then source the file from your PowerShell profile`}
-  lang="powershell"
-/>
+<Code code={`
+  haloy completion powershell > haloy.ps1
+  # Then source the file from your PowerShell profile
+`} lang="powershell" />
 
 ## What You Get
 
@@ -76,11 +72,10 @@ Shell completion provides:
 
 After setup, test that completion works:
 
-<Code
-  code={`haloy <tab><tab>      # Shows all available commands
-haloy deploy --<tab>   # Shows all deploy flags`}
-  lang="bash"
-/>
+<Code code={`
+  haloy <tab><tab>      # Shows all available commands
+  haloy deploy --<tab>   # Shows all deploy flags
+`} lang="bash" />
 
 ## Troubleshooting
 

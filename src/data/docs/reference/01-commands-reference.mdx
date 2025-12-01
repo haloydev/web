@@ -20,33 +20,31 @@ Deploy your application to configured servers.
   # Deploy with default config
   haloy deploy
 
-# Specify config file
+  # Specify config file
+  haloy deploy --config path/to/config.yaml
+  haloy deploy -c path/to/config.yaml
 
-haloy deploy --config path/to/config.yaml
-haloy deploy -c path/to/config.yaml
+  # Deploy to specific target
+  haloy deploy --target production
+  haloy deploy -t staging
 
-# Deploy to specific target
+  # Deploy to all targets
+  haloy deploy --all
+  haloy deploy -a
 
-haloy deploy --target production
-haloy deploy -t staging
-
-# Deploy to all targets
-
-haloy deploy --all
-haloy deploy -a
-
-# Deploy without showing logs
-
-haloy deploy --no-logs
+  # Deploy without showing logs
+  haloy deploy --no-logs
 `} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--config, -c <path>` - Path to config file or directory (default: current directory)
 - `--target, -t <name>` - Deploy to specific target
 - `--all, -a` - Deploy to all targets
 - `--no-logs` - Skip deployment logs (faster)
 - `--server, -s <url>` - Override server URL from config
+</div>
 
 ### status
 
@@ -56,26 +54,25 @@ Check the status of your deployed applications.
   # Check status with default config
   haloy status
 
-# Specify config file
+  # Specify config file
+  haloy status --config path/to/config.yaml
 
-haloy status --config path/to/config.yaml
+  # Check specific target
+  haloy status --target production
+  haloy status -t staging
 
-# Check specific target
-
-haloy status --target production
-haloy status -t staging
-
-# Check all targets
-
-haloy status --all
+  # Check all targets
+  haloy status --all
 `} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
 - `--target, -t <name>` - Status for specific target
 - `--all, -a` - Status for all targets
 - `--server, -s <url>` - Override server URL
+</div>
 
 ### stop
 
@@ -85,30 +82,28 @@ Stop running application containers.
   # Stop application
   haloy stop
 
-# Specify config file
+  # Specify config file
+  haloy stop --config path/to/config.yaml
 
-haloy stop --config path/to/config.yaml
+  # Stop specific target
+  haloy stop --target production
 
-# Stop specific target
+  # Stop all targets
+  haloy stop --all
 
-haloy stop --target production
-
-# Stop all targets
-
-haloy stop --all
-
-# Remove containers after stopping
-
-haloy stop --remove-containers
+  # Remove containers after stopping
+  haloy stop --remove-containers
 `} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
 - `--target, -t <name>` - Stop specific target
 - `--all, -a` - Stop all targets
 - `--remove-containers` - Remove containers after stopping
 - `--server, -s <url>` - Override server URL
+</div>
 
 ### logs
 
@@ -118,73 +113,22 @@ View logs from your deployed application.
   # View logs
   haloy logs
 
-# Specify config file
+  # Specify config file
+  haloy logs --config path/to/config.yaml
 
-haloy logs --config path/to/config.yaml
-
-# Logs from specific target
-
-haloy logs --target staging
+  # Logs from specific target
+  haloy logs --target staging
 `} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
 - `--target, -t <name>` - Logs from specific target
 - `--server, -s <url>` - Override server URL
+</div>
 
-### validate-config
-
-Validate your configuration file.
-
-<Code code={`
-  # Validate config
-  haloy validate-config
-
-# Specify config file
-
-haloy validate-config --config path/to/config.yaml
-
-# Show resolved configuration with secrets (use with caution)
-
-haloy validate-config --show-resolved-config
-
-# Both options combined
-
-haloy validate-config --config path/to/config.yaml --show-resolved-config
-`} lang="bash" />
-
-**Options:**
-
-- `--config, -c <path>` - Path to config file
-- `--show-resolved-config` - Display resolved config with secrets (displays secrets in plain text!)
-
-**Warning**: `--show-resolved-config` displays all secrets in plain text. Only use in secure environments.
-
-### rollback-targets
-
-List available rollback targets.
-
-<Code code={`
-  # List rollback targets
-  haloy rollback-targets
-
-# Specify config file
-
-haloy rollback-targets --config path/to/config.yaml
-
-# Targets for specific deployment
-
-haloy rollback-targets --target production
-`} lang="bash" />
-
-**Options:**
-
-- `--config, -c <path>` - Path to config file
-- `--target, -t <name>` - Rollback targets for specific target
-- `--server, -s <url>` - Override server URL
-
-**Note**: Rollback availability depends on `image.history.strategy` configuration.
+Rollback availability depends on `image.history.strategy` configuration.
 
 ### rollback
 
@@ -194,24 +138,23 @@ Rollback to a specific deployment.
   # Rollback using deployment ID
   haloy rollback <deployment-id>
 
-# Example
+  # Example
+  haloy rollback dep_abc123xyz
 
-haloy rollback dep_abc123xyz
+  # Specify config file
+  haloy rollback --config path/to/config.yaml <deployment-id>
 
-# Specify config file
-
-haloy rollback --config path/to/config.yaml <deployment-id>
-
-# Rollback specific target
-
-haloy rollback --target production <deployment-id>
+  # Rollback specific target
+  haloy rollback --target production <deployment-id>
 `} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
 - `--target, -t <name>` - Rollback specific target
 - `--server, -s <url>` - Override server URL
+</div>
 
 **Arguments:**
 
@@ -225,21 +168,22 @@ Provision a remote Haloy server over SSH. This requires root access to install d
   # Basic setup
   haloy server setup <host>
 
-# Setup with API domain and email
+  # Setup with API domain and email
+  haloy server setup 192.168.1.100 --api-domain api.example.com --acme-email admin@example.com
 
-haloy server setup 192.168.1.100 --api-domain api.example.com --acme-email admin@example.com
-
-# Setup with specific user and identity file
-
-haloy server setup myserver.com -u ubuntu --ssh-identity ~/.ssh/id_rsa
+  # Setup with specific user and identity file
+  haloy server setup myserver.com -u ubuntu --ssh-identity ~/.ssh/id_rsa
 `} lang="bash" />
 
 **Arguments:**
 
+<div class="list-unstyled">
 - `<host>` - The hostname or IP address of the server
+</div>
 
 **Options:**
 
+<div class="list-unstyled">
 - `--user, -u <user>` - SSH username (default: root)
 - `--port, -p <port>` - SSH port (default: 22)
 - `--api-domain <domain>` - Domain for the haloyd API
@@ -248,6 +192,7 @@ haloy server setup myserver.com -u ubuntu --ssh-identity ~/.ssh/id_rsa
 - `--override` - Override existing Haloy data/config
 - `--no-services` - Don't start HAProxy and haloyd containers
 - `--no-logs` - Don't stream haloyd initialization logs
+</div>
 
 ### server add
 
@@ -257,29 +202,31 @@ Add a server to your local configuration.
   # Add server
   haloy server add <server-domain> <token>
 
-# Example
+  # Example
+  haloy server add haloy.example.com abc123token456
 
-haloy server add haloy.example.com abc123token456
-
-# Force overwrite if exists
-
-haloy server add haloy.example.com abc123token456 --force
+  # Force overwrite if exists
+  haloy server add haloy.example.com abc123token456 --force
 `} lang="bash" />
 
 **Arguments:**
 
+<div class="list-unstyled">
 - `<server-domain>` - Server domain (e.g., `haloy.example.com`)
 - `<token>` - API token from the server
+</div>
 
 **Options:**
 
+<div class="list-unstyled">
 - `--force` - Overwrite existing server configuration
+</div>
 
 ### server list
 
 List all configured servers.
 
-<Code code={`haloy server list`} lang="bash" />
+<Code code="haloy server list" lang="bash" />
 
 ### server delete
 
@@ -289,33 +236,36 @@ Remove a server from your local configuration.
   # Remove server
   haloy server delete <server-domain>
 
-# Example
-
-haloy server delete staging.haloy.com
+  # Example
+  haloy server delete staging.haloy.com
 `} lang="bash" />
 
 **Arguments:**
 
+<div class="list-unstyled">
 - `<server-domain>` - Server domain to remove
+</div>
 
 ### server version
 
 Get the version from a haloyd server.
 
-<Code code={`haloy server version`} lang="bash" />
+<Code code="haloy server version" lang="bash" />
 
 **Flags:**
 
+<div class="list-unstyled">
 - `--server, -s` - Server URL (overrides config file)
 - `--config, -c` - Path to config file or directory
 - `--targets, -t` - Get version for specific targets (comma-separated)
 - `--all, -a` - Get version for all targets
+</div>
 
 ### version
 
 Display the CLI version.
 
-<Code code={`haloy version`} lang="bash" />
+<Code code="haloy version" lang="bash" />
 
 Outputs only the CLI version number in plaintext (e.g., `0.1.0`).
 
@@ -327,17 +277,14 @@ Generate shell completion scripts.
   # Bash
   haloy completion bash
 
-# Zsh
+  # Zsh
+  haloy completion zsh
 
-haloy completion zsh
+  # Fish
+  haloy completion fish
 
-# Fish
-
-haloy completion fish
-
-# PowerShell
-
-haloy completion powershell
+  # PowerShell
+  haloy completion powershell
 `} lang="bash" />
 
 See [Shell Completion](/docs/shell-completion) for setup instructions.
@@ -350,22 +297,24 @@ Commands run on the server to manage the Haloy daemon and services.
 
 Initialize haloyd and HAProxy (first-time setup).
 
-<Code code={`# Basic initialization
-sudo haloyadm init
+<Code code={`
+  # Basic initialization
+  sudo haloyadm init
 
-# Initialize with API domain and SSL
+  # Initialize with API domain and SSL
+  sudo haloyadm init --api-domain haloy.example.com --acme-email you@example.com
 
-sudo haloyadm init --api-domain haloy.example.com --acme-email you@example.com
-
-# Initialize for non-root installation
-
-haloyadm init --local-install`} lang="bash" />
+  # Initialize for non-root installation
+  haloyadm init --local-install
+`} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--api-domain <domain>` - Domain for Haloy API with automatic SSL
 - `--acme-email <email>` - Email for Let's Encrypt certificates
 - `--local-install` - Install in user directory (non-root)
+</div>
 
 ### start
 
@@ -375,46 +324,47 @@ Start haloyd and HAProxy services.
   # Start services
   sudo haloyadm start
 
-# Start with local development image
+  # Start with local development image
+  sudo haloyadm start --dev
 
-sudo haloyadm start --dev
+  # Start with debug logging
+  sudo haloyadm start --debug
 
-# Start with debug logging
-
-sudo haloyadm start --debug
-
-# Combine options
-
-sudo haloyadm start --dev --debug
+  # Combine options
+  sudo haloyadm start --dev --debug
 `} lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--dev` - Use local haloyd image for development
 - `--debug` - Enable debug mode with verbose logging
+</div>
 
 ### stop
 
 Stop haloyd and HAProxy services.
 
-<Code code={`sudo haloyadm stop`} lang="bash" />
+<Code code="sudo haloyadm stop" lang="bash" />
 
 ### restart
 
 Restart haloyd and HAProxy services.
 
-<Code code={`sudo haloyadm restart`} lang="bash" />
+<Code code="sudo haloyadm restart" lang="bash" />
 
 **Options:**
 
+<div class="list-unstyled">
 - `--dev` - Use local haloyd image
 - `--debug` - Enable debug mode
+</div>
 
 ### api token
 
 Generate a new API token.
 
-<Code code={`sudo haloyadm api token`} lang="bash" />
+<Code code="sudo haloyadm api token" lang="bash" />
 
 Returns a token that can be used with `haloy server add` on local machines.
 
@@ -426,15 +376,16 @@ Set or update the API domain and SSL configuration.
   # Set API domain with automatic SSL
   sudo haloyadm api domain <domain> <email>
 
-# Example
-
-sudo haloyadm api domain haloy.example.com admin@example.com
+  # Example
+  sudo haloyadm api domain haloy.example.com admin@example.com
 `} lang="bash" />
 
 **Arguments:**
 
+<div class="list-unstyled">
 - `<domain>` - Domain for the Haloy API
 - `<email>` - Email address for Let's Encrypt certificates
+</div>
 
 ## Common Flags
 
@@ -451,14 +402,16 @@ These flags are available across multiple commands:
 
 When `--config` is not specified, Haloy looks for config files in the current directory:
 
-1. `haloy.yaml`
-2. `haloy.yml`
-3. `haloy.json`
-4. `haloy.toml`
+<div class="list-unstyled">
+- `haloy.yaml`
+- `haloy.yml`
+- `haloy.json`
+- `haloy.toml`
+</div>
 
 You can also specify a directory:
 
-<Code code={`haloy deploy --config /path/to/config/directory`} lang="bash" />
+<Code code="haloy deploy --config /path/to/config/directory" lang="bash" />
 
 ## Examples
 
@@ -468,26 +421,21 @@ You can also specify a directory:
   # 1. Validate configuration
   haloy validate-config
 
-# 2. Deploy to staging first
+  # 2. Deploy to staging first
+  haloy deploy --target staging
 
-haloy deploy --target staging
+  # 3. Check staging status
+  haloy status --target staging
 
-# 3. Check staging status
+  # 4. View staging logs
+  haloy logs --target staging
 
-haloy status --target staging
+  # 5. If good, deploy to production
+  haloy deploy --target production
 
-# 4. View staging logs
-
-haloy logs --target staging
-
-# 5. If good, deploy to production
-
-haloy deploy --target production
-
-# 6. Monitor production
-
-haloy status --target production
-haloy logs --target production
+  # 6. Monitor production
+  haloy status --target production
+  haloy logs --target production
 `} lang="bash" />
 
 ### Emergency Rollback
@@ -496,13 +444,11 @@ haloy logs --target production
   # 1. List available rollback targets
   haloy rollback-targets --target production
 
-# 2. Rollback to previous deployment
+  # 2. Rollback to previous deployment
+  haloy rollback --target production dep_abc123xyz
 
-haloy rollback --target production dep_abc123xyz
-
-# 3. Verify rollback succeeded
-
-haloy status --target production
+  # 3. Verify rollback succeeded
+  haloy status --target production
 `} lang="bash" />
 
 ### Multi-Server Setup
@@ -511,46 +457,43 @@ haloy status --target production
   # On each server, generate token
   sudo haloyadm api token
 
-# On local machine, add all servers
+  # On local machine, add all servers
+  haloy server add prod.haloy.com <prod-token>
+  haloy server add staging.haloy.com <staging-token>
+  haloy server add dev.haloy.com <dev-token>
 
-haloy server add prod.haloy.com <prod-token>
-haloy server add staging.haloy.com <staging-token>
-haloy server add dev.haloy.com <dev-token>
+  # List all servers
+  haloy server list
 
-# List all servers
+  # Deploy to all environments
+  haloy deploy --all
 
-haloy server list
-
-# Deploy to all environments
-
-haloy deploy --all
-
-# Check status of all environments
-
-haloy status --all
+  # Check status of all environments
+  haloy status --all
 `} lang="bash" />
 
 ## Exit Codes
 
 Both `haloy` and `haloyadm` CLI tools use consistent exit codes:
 
+<div class="list-unstyled">
 - `0` - Success
 - `1` - Any error
+</div>
 
 Use in scripts:
 
-<Code
-  code={`#!/bin/bash
-if haloy deploy --target production; then
+<Code code={`
+  #!/bin/bash
+  if haloy deploy --target production; then
     echo "Deployment successful"
     # Send success notification
-else
+  else
     echo "Deployment failed"
     # Send failure alert
     exit 1
-fi`}
-  lang="bash"
-/>
+  fi
+`} lang="bash" />
 
 ## Next Steps
 

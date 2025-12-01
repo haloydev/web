@@ -23,10 +23,7 @@ Get up and running with Haloy in minutes. This guide will walk you through deplo
 
 Use the `server setup` command to provision your server automatically. This command will SSH into your server as `root` (default), install Docker if needed, install `haloyadm`, and configure the remote `haloyd` service.
 
-<Code
-  code={`haloy server setup <server-ip> --api-domain haloy.yourserver.com --acme-email you@email.com`}
-  lang="bash"
-/>
+<Code code="haloy server setup <server-ip> --api-domain haloy.yourserver.com --acme-email you@email.com" lang="bash" />
 
 **Note:** This command requires SSH access to the `root` user on the server. If you don't have this or if you prefer to install manually, check the [Server Installation](/docs/server-installation#manual-installation) guide.
 
@@ -55,9 +52,8 @@ Check out the [examples repository](https://github.com/haloydev/examples) for co
 <Code code={`
   haloy deploy
 
-# Check status
-
-haloy status
+  # Check status
+  haloy status
 `} lang="bash" />
 
 That's it! Your application is now deployed and accessible at your configured domain.

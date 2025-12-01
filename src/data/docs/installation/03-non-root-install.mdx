@@ -17,7 +17,7 @@ For development environments or when you don't have root access, you can install
 
 Install to your user directory:
 
-<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | bash`} lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | bash" lang="bash" />
 
 The script runs without elevated privileges (`sudo`) and installs to `~/.local/bin` instead of `/usr/local/bin`.
 
@@ -25,31 +25,30 @@ The script runs without elevated privileges (`sudo`) and installs to `~/.local/b
 
 Add your user to the docker group (required for non-root Docker access):
 
-<Code code={`sudo usermod -aG docker $(whoami)`} lang="bash" />
+<Code code="sudo usermod -aG docker $(whoami)" lang="bash" />
 
 Log out and back in, or run:
 
-<Code code={`newgrp docker`} lang="bash" />
+<Code code="newgrp docker" lang="bash" />
 
 Test Docker access:
 
-<Code code={`docker ps`} lang="bash" />
+<Code code="docker ps" lang="bash" />
 
 ## Initialize in Local Mode
 
 Initialize Haloy with the `--local-install` flag:
 
-<Code code={`haloyadm init --local-install`} lang="bash" />
+<Code code="haloyadm init --local-install" lang="bash" />
 
 ## Directory Structure
 
 **User Installation:**
 
-<Code
-  code={`~/.config/haloy/         # Configuration
-~/.local/share/haloy/    # Data`}
-  lang="bash"
-/>
+<Code code={`
+  ~/.config/haloy/         # Configuration
+  ~/.local/share/haloy/    # Data`
+} lang="bash" />
 
 ## User vs System Installation
 

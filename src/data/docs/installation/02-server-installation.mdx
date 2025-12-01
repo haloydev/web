@@ -18,10 +18,7 @@ The Haloy daemon (`haloyd`) runs on your server and manages container deployment
 
 The easiest way to set up a server is using the `haloy` CLI from your local machine. This command will SSH into your server as `root` (default), install Docker (if missing), install `haloyadm`, initialize the daemon, and add the server to your local config.
 
-<Code
-  code={`haloy server setup <server-ip> --api-domain haloy.yourserver.com --acme-email you@email.com`}
-  lang="bash"
-/>
+<Code code="haloy server setup <server-ip> --api-domain haloy.yourserver.com --acme-email you@email.com" lang="bash" />
 
 **Note:** You must have SSH access to the `root` user on the target server.
 
@@ -43,7 +40,7 @@ If you prefer to install manually or cannot use SSH from your local machine, fol
 
 SSH into your server and install `haloyadm`:
 
-<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash`} lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash" lang="bash" />
 
 ### 2. Initialize haloyd
 
@@ -51,7 +48,7 @@ SSH into your server and install `haloyadm`:
 
 For deploying from your local machine to a remote server, initialize with an API domain. This exposes the Haloy API securely via HTTPS:
 
-<Code code={`sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com`} lang="bash" />
+<Code code="sudo haloyadm init --api-domain haloy.yourserver.com --acme-email you@email.com" lang="bash" />
 
 **This is required for remote deployments.** Without an API domain, the `haloy` CLI on your local machine cannot communicate with `haloyd` on the server.
 
@@ -59,7 +56,7 @@ For deploying from your local machine to a remote server, initialize with an API
 
 If you plan to install the `haloy` CLI directly on the server (alongside `haloyd`) and only deploy locally, you can initialize without a domain:
 
-<Code code={`sudo haloyadm init`} lang="bash" />
+<Code code="sudo haloyadm init" lang="bash" />
 
 In this setup:
 
@@ -78,13 +75,13 @@ This is useful for:
 
 If you initialized without a domain and want to enable remote deployments:
 
-<Code code={`sudo haloyadm api domain haloy.yourserver.com you@email.com`} lang="bash" />
+<Code code="sudo haloyadm api domain haloy.yourserver.com you@email.com" lang="bash" />
 
 ### 3. Get API Token
 
 Generate an API token to authenticate from your local machine:
 
-<Code code={`sudo haloyadm api token`} lang="bash" />
+<Code code="sudo haloyadm api token" lang="bash" />
 
 Save this token securely. You'll use it to configure your local `haloy` CLI.
 
@@ -92,25 +89,25 @@ Save this token securely. You'll use it to configure your local `haloy` CLI.
 
 Start the Haloy services:
 
-<Code code={`sudo haloyadm start`} lang="bash" />
+<Code code="sudo haloyadm start" lang="bash" />
 
 Stop the services:
 
-<Code code={`sudo haloyadm stop`} lang="bash" />
+<Code code="sudo haloyadm stop" lang="bash" />
 
 Restart the services:
 
-<Code code={`sudo haloyadm restart`} lang="bash" />
+<Code code="sudo haloyadm restart" lang="bash" />
 
 ### Development Options
 
 For local development, you can use the local `haloyd` image:
 
-<Code code={`sudo haloyadm start --dev`} lang="bash" />
+<Code code="sudo haloyadm start --dev" lang="bash" />
 
 Enable debug mode:
 
-<Code code={`sudo haloyadm start --debug`} lang="bash" />
+<Code code="sudo haloyadm start --debug" lang="bash" />
 
 ## Directory Structure
 
@@ -118,26 +115,28 @@ Haloy uses standard system directories:
 
 **System Installation (default):**
 
-<Code code={`/etc/haloy/              # Configuration
-├── haloyd.yaml          # Haloyd settings
-├── .env                 # API tokens
+<Code code={`
+  /etc/haloy/              # Configuration
+  ├── haloyd.yaml          # Haloyd settings
+  ├── .env                 # API tokens
 
-/var/lib/haloy/ # Data
-├── haproxy-config/ # HAProxy configs
-├── cert-storage/ # SSL certificates
-└── db/ # Database files`} lang="bash" />
+  /var/lib/haloy/          # Data
+  ├── haproxy-config/      # HAProxy configs
+  ├── cert-storage/        # SSL certificates
+  └── db/                  # Database files
+`} lang="bash" />
 
 ## Uninstalling
 
 ### Remove Admin Tool Only
 
-<Code code={`curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash`} lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash" lang="bash" />
 
 ### Complete Server Removal
 
 To completely remove Haloy including all data and configurations:
 
-<Code code={`curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash`} lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash" lang="bash" />
 
 ## Next Steps
 
