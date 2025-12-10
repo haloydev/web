@@ -122,15 +122,55 @@ View logs from your deployed application.
   haloy logs --target staging
 `} lang="bash" />
 
+### exec
+
+Execute commands inside running application containers. Useful for debugging, inspecting container state, or running one-off administrative commands.
+
+<Code code={`
+  # Run 'ls -la' in the first container
+  haloy exec -- ls -la
+
+  # Run on all containers (useful when app has multiple replicas)
+  haloy exec --all-containers -- whoami
+
+  # Run on a specific container by ID (supports short IDs like 'abc123')
+  haloy exec --container abc123 -- env
+
+  # With target selection (for multi-target configs)
+  haloy exec --target prod -- ls -la
+
+  # Execute on all targets
+  haloy exec --all -- cat /etc/hostname
+
+  # Combine target and container flags
+  haloy exec --target prod --all-containers -- ps aux
+
+  # Run a command with arguments
+  haloy exec -- cat /app/config.json
+
+  # Run a shell command (note: container must have the shell available)
+  haloy exec -- sh -c "echo hello && ls -la"
+`} lang="bash" />
+
+**Syntax:**
+<Code code="haloy exec [flags] -- <command> [args...]" lang="bash" />
+
+The `--` separator is required to distinguish between flags and the command to execute inside the container.
+
 **Options:**
 
 <div class="list-unstyled">
-- `--config, -c <path>` - Path to config file
-- `--target, -t <name>` - Logs from specific target
-- `--server, -s <url>` - Override server URL
+- `--config, -c <path>` - Path to config file or directory (default: current directory)
+- `--targets, -t <targets>` - Execute on specific targets (comma-separated)
+- `--all, -a` - Execute on all targets
+- `--all-containers` - Execute on all containers (when app has multiple replicas)
+- `--container <id>` - Execute on a specific container by ID (supports short IDs)
 </div>
 
-Rollback availability depends on `image.history.strategy` configuration.
+**Default Behavior:** By default (no container flags), the command runs on the first container of the application
+The app name and server are read from the haloy configuration file (same as other commands like deploy, stop, status)
+
+**Note:** This is a non-interactive exec (no TTY support) - suitable for running commands that complete and return output - Commands run with the default user configured in the container image - The `--` separator is mandatory - the command will error if omitted
 
 ### rollback
 
@@ -161,6 +201,8 @@ Rollback to a specific deployment.
 **Arguments:**
 
 - `<deployment-id>` - The deployment ID to rollback to (from `rollback-targets`)
+
+**Note**: Rollback availability depends on `image.history.strategy` configuration. See [Image Configuration](/docs/image-configuration#image-history--rollback) for more information.
 
 ### server setup
 
