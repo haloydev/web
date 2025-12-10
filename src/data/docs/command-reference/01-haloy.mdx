@@ -1,16 +1,16 @@
 ---
-title: 'Commands Reference'
-slug: 'commands-reference'
-section: reference
+title: 'haloy'
+slug: 'haloy'
+section: command-reference
 ---
 
 import Code from '@/components/code.astro';
 
 Complete reference for Haloy CLI commands.
 
-## `haloy` Commands
-
 Commands run on your local machine to manage deployments.
+
+## Commands
 
 Most commands require a haloy config file. If you don't specify `--config <path>`, haloy looks in the current directory for `haloy.yaml`, `haloy.yml`, `haloy.json`, or `haloy.toml`. See [Basic Configuration](/docs/basic-configuration) for more information.
 
@@ -30,6 +30,9 @@ Deploy your application to configured servers.
   haloy deploy --target production
   haloy deploy -t staging
 
+  # Deploy to multiple targets
+  haloy deploy --target staging,production
+
   # Deploy to all targets
   haloy deploy --all
   haloy deploy -a
@@ -42,7 +45,7 @@ Deploy your application to configured servers.
 
 <div class="list-unstyled">
 - `--config, -c <path>` - Path to config file or directory (default: current directory)
-- `--target, -t <name>` - Deploy to specific target
+- `--target, -t <name>` - Deploy to specific target(s) (comma-separated for multiple)
 - `--all, -a` - Deploy to all targets
 - `--no-logs` - Skip deployment logs (faster)
 - `--server, -s <url>` - Override server URL from config
@@ -71,7 +74,7 @@ Check the status of your deployed applications.
 
 <div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
-- `--target, -t <name>` - Status for specific target
+- `--target, -t <name>` - Status for specific target(s) (comma-separated for multiple)
 - `--all, -a` - Status for all targets
 - `--server, -s <url>` - Override server URL
 </div>
@@ -101,7 +104,7 @@ Stop running application containers.
 
 <div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
-- `--target, -t <name>` - Stop specific target
+- `--target, -t <name>` - Stop specific target(s) (comma-separated for multiple)
 - `--all, -a` - Stop all targets
 - `--remove-containers` - Remove containers after stopping
 - `--server, -s <url>` - Override server URL
@@ -124,7 +127,7 @@ View logs from your deployed application.
 
 ### exec
 
-Execute commands inside running application containers. Useful for debugging, inspecting container state, or running one-off administrative commands.
+Execute commands inside running application containers.
 
 <Code code={`
   # Run 'ls -la' in the first container
@@ -161,7 +164,7 @@ The `--` separator is required to distinguish between flags and the command to e
 
 <div class="list-unstyled">
 - `--config, -c <path>` - Path to config file or directory (default: current directory)
-- `--targets, -t <targets>` - Execute on specific targets (comma-separated)
+- `--target, -t <name>` - Execute on specific target(s) (comma-separated for multiple)
 - `--all, -a` - Execute on all targets
 - `--all-containers` - Execute on all containers (when app has multiple replicas)
 - `--container <id>` - Execute on a specific container by ID (supports short IDs)
@@ -194,7 +197,8 @@ Rollback to a specific deployment.
 
 <div class="list-unstyled">
 - `--config, -c <path>` - Path to config file
-- `--target, -t <name>` - Rollback specific target
+- `--target, -t <name>` - Rollback specific target(s) (comma-separated for multiple)
+- `--all, -a` - Rollback all targets
 - `--server, -s <url>` - Override server URL
 </div>
 
@@ -301,7 +305,7 @@ Get the version from a haloyd server.
 <div class="list-unstyled">
 - `--server, -s` - Server URL (overrides config file)
 - `--config, -c` - Path to config file or directory
-- `--targets, -t` - Get version for specific targets (comma-separated)
+- `--target, -t <name>` - Apply to specific target(s) (comma-separated for multiple)
 - `--all, -a` - Get version for all targets
 </div>
 
@@ -333,104 +337,6 @@ Generate shell completion scripts.
 
 See [Shell Completion](/docs/shell-completion) for setup instructions.
 
-## `haloyadm` Commands
-
-Commands run on the server to manage the Haloy daemon and services.
-
-### init
-
-Initialize haloyd and HAProxy (first-time setup).
-
-<Code code={`
-  # Basic initialization
-  sudo haloyadm init
-
-  # Initialize with API domain and SSL
-  sudo haloyadm init --api-domain haloy.example.com --acme-email you@example.com
-
-  # Initialize for non-root installation
-  haloyadm init --local-install
-`} lang="bash" />
-
-**Options:**
-
-<div class="list-unstyled">
-- `--api-domain <domain>` - Domain for Haloy API with automatic SSL
-- `--acme-email <email>` - Email for Let's Encrypt certificates
-- `--local-install` - Install in user directory (non-root)
-</div>
-
-### start
-
-Start haloyd and HAProxy services.
-
-<Code code={`
-  # Start services
-  sudo haloyadm start
-
-  # Start with local development image
-  sudo haloyadm start --dev
-
-  # Start with debug logging
-  sudo haloyadm start --debug
-
-  # Combine options
-  sudo haloyadm start --dev --debug
-`} lang="bash" />
-
-**Options:**
-
-<div class="list-unstyled">
-- `--dev` - Use local haloyd image for development
-- `--debug` - Enable debug mode with verbose logging
-</div>
-
-### stop
-
-Stop haloyd and HAProxy services.
-
-<Code code="sudo haloyadm stop" lang="bash" />
-
-### restart
-
-Restart haloyd and HAProxy services.
-
-<Code code="sudo haloyadm restart" lang="bash" />
-
-**Options:**
-
-<div class="list-unstyled">
-- `--dev` - Use local haloyd image
-- `--debug` - Enable debug mode
-</div>
-
-### api token
-
-Generate a new API token.
-
-<Code code="sudo haloyadm api token" lang="bash" />
-
-Returns a token that can be used with `haloy server add` on local machines.
-
-### api domain
-
-Set or update the API domain and SSL configuration.
-
-<Code code={`
-  # Set API domain with automatic SSL
-  sudo haloyadm api domain <domain> <email>
-
-  # Example
-  sudo haloyadm api domain haloy.example.com admin@example.com
-`} lang="bash" />
-
-**Arguments:**
-
-<div class="list-unstyled">
-- `<domain>` - Domain for the Haloy API
-- `<email>` - Email address for Let's Encrypt certificates
-</div>
-
 ## Common Flags
 
 These flags are available across multiple commands:
@@ -439,7 +345,7 @@ These flags are available across multiple commands:
 | ----------------- | ----- | ----------------------------------- |
 | `--config <path>` | `-c`  | Path to config file or directory    |
 | `--server <url>`  | `-s`  | Haloy server URL (overrides config) |
-| `--target <name>` | `-t`  | Target specific deployment          |
+| `--target <name>` | `-t`  | Apply to specific targets. Use comma-separated values for multiple targets (e.g., `staging,production`)          |
 | `--all`           | `-a`  | Apply to all targets                |
 
 ## Configuration File Discovery
@@ -456,6 +362,27 @@ When `--config` is not specified, Haloy looks for config files in the current di
 You can also specify a directory:
 
 <Code code="haloy deploy --config /path/to/config/directory" lang="bash" />
+
+## Target Selection
+
+The `--target` flag controls which target(s) your command applies to:
+
+<Code code={`
+  # Single target
+  haloy deploy --target production
+
+  # Multiple targets (comma-separated, no spaces)
+  haloy deploy --target staging,production
+
+  # All targets
+  haloy deploy --all
+`} lang="bash" />
+
+**Important notes:**
+- When using multiple targets, separate them with commas **without spaces**
+- If your config defines targets, you must use either `--target` or `--all`
+- Use `--all` or `-a` to target all configured environments at once
+- Multiple targets are applied sequentially in the order specified
 
 ## Examples
 
@@ -482,19 +409,6 @@ You can also specify a directory:
   haloy logs --target production
 `} lang="bash" />
 
-### Emergency Rollback
-
-<Code code={`
-  # 1. List available rollback targets
-  haloy rollback-targets --target production
-
-  # 2. Rollback to previous deployment
-  haloy rollback --target production dep_abc123xyz
-
-  # 3. Verify rollback succeeded
-  haloy status --target production
-`} lang="bash" />
-
 ### Multi-Server Setup
 
 <Code code={`
@@ -509,6 +423,9 @@ You can also specify a directory:
   # List all servers
   haloy server list
 
+  # Deploy to specific environments
+  haloy deploy --target staging,production
+
   # Deploy to all environments
   haloy deploy --all
 
@@ -518,7 +435,7 @@ You can also specify a directory:
 
 ## Exit Codes
 
-Both `haloy` and `haloyadm` CLI tools use consistent exit codes:
+The `haloy` CLI uses consistent exit codes:
 
 <div class="list-unstyled">
 - `0` - Success
