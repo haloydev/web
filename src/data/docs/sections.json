@@ -4,5 +4,6 @@
   { "id": "command-reference", "title": "Command Reference" },
   { "id": "configuration", "title": "Configuration" },
   { "id": "deployment", "title": "Deployment" },
+  { "id": "examples", "title": "Examples" },
   { "id": "guides", "title": "Guides" }
 ]
