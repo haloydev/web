@@ -6,6 +6,8 @@ section: introduction
 
 **Haloy** is a lightweight deployment and orchestration system designed for developers who want a simple, reliable way to deploy Docker‑based applications to their own servers. It removes the complexity of traditional DevOps stacks while providing the core features needed for modern deployments.
 
+**Haloy is open source, MIT licensed, and completely free.**
+
 Haloy consists of three main parts:
 
 1. **haloy:** CLI tool that runs on your local machine and handles deployments, build workflows, logs, rollbacks, and multi‑server targeting.
