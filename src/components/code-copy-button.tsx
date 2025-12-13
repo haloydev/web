@@ -1,8 +1,7 @@
-import React from 'react';
-
-import { Button } from './ui/button';
 import { CheckIcon, CopyIcon } from 'lucide-react';
+import React from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from './ui/button';
 
 type CopyButtonProps = {
   code: string;
@@ -15,7 +14,8 @@ export function CodeCopyButton({ code, className }: CopyButtonProps) {
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(code);
+      const trimmedCode = code.trim();
+      await navigator.clipboard.writeText(trimmedCode);
       setCopied(true);
       setOpen(true);
 
