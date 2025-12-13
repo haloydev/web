@@ -538,13 +538,18 @@ Ensure your `volumes` configuration matches your `DATABASE_URL`:
     - "db-data:/app/db-data"  # Volume mounted here
 `} lang="yaml" />
 
+You can use `haloy exec` to run commands inside your container for debugging. Verify the database file exists and is being written to the correct location:
+<Code code="haloy exec -- ls -la /app/db-data/" lang="bash" />
+
 ### Migration Errors
 
 If migrations fail at startup, check:
-
 1. The `drizzle/` directory is included in your Docker image
 2. `drizzle-kit` is a production dependency (not devDependency)
 3. Logs for specific error messages: `haloy logs`
+
+Verify the migration files are present in the container:
+<Code code="haloy exec -- ls -la /app/drizzle/" lang="bash" />
 
 ### Connection Issues
 
@@ -554,4 +559,10 @@ If you can't connect to your deployed app:
 2. Check the app is running: `haloy logs`
 3. Ensure port 3000 matches your app's listening port
 
+### Scaling Limitations
+SQLite is designed for single-server deployments. If you need to run multiple replicas of your application, you have two options:
 
+1. **Switch to a client-server database** like PostgreSQL or MySQL
+2. **Use a distributed SQLite solution** like [Turso](https://turso.tech/) or [LiteFS](https://fly.io/docs/litefs/)
+
+For most applications, a single replica with SQLite can handle significant traffic—often more than you'd expect.
