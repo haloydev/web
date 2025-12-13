@@ -69,8 +69,13 @@ Install TanStack Start and React:
 
 <Code code={`
   pnpm add @tanstack/react-start @tanstack/react-router react react-dom nitro
+`} lang="bash" />
+
+Install dev dependencies
+<Code code={`
   pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node vite-tsconfig-paths
 `} lang="bash" />
+
 
 Install Drizzle and SQLite:
 
@@ -133,24 +138,24 @@ TanStack Start uses [Nitro](https://nitro.unjs.io/) as its server engine. For th
 Create `drizzle.config.ts`:
 
 <Code code={`
-  import { config } from 'dotenv'
-  import { defineConfig } from 'drizzle-kit'
+  import { config } from "dotenv";
+  import { defineConfig } from "drizzle-kit";
 
-  config()
+  config();
 
-  const databaseUrl = process.env.DATABASE_URL
+  const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {
-    throw new Error('DATABASE_URL is not set')
+    throw new Error("DATABASE_URL is not set");
   }
 
   export default defineConfig({
-    out: './drizzle',
-    schema: './src/db/schema.ts',
-    dialect: 'sqlite',
+    out: "./drizzle",
+    schema: "./src/db/schema.ts",
+    dialect: "sqlite",
     dbCredentials: {
       url: databaseUrl,
     },
-  })
+  });
 `} lang="typescript" />
 
 ### 2. Create Database Client
@@ -226,6 +231,8 @@ Create `src/router.tsx`:
     return router;
   }
 `} lang="tsx" />
+
+**Note:** You might see a TypeScript error about `./routeTree.gen` not being found. This is expected. TanStack Start automatically generates this file when you run the dev server in the next steps.
 
 ### 2. Create the Root Route
 
@@ -459,23 +466,15 @@ This creates a named volume `db-data` mounted at `/app/db-data` inside the conta
 
 ### 1. Test Locally
 
-<Code code={`
-  # Create .env if you haven't
-  echo "DATABASE_URL=file:local.db" > .env
+Before deploying, verify everything works locally. If you haven't already, make sure you've completed the database setup steps above (create `.env`, generate and run migrations).
 
-  # Generate migrations
-  pnpm db:generate
+<Code code="pnpm dev" lang="bash" />
 
-  # Run migrations
-  pnpm db:migrate
-
-  # Start dev server
-  pnpm dev
-`} lang="bash" />
-
-Visit `http://localhost:3000` to verify everything works.
+Visit `http://localhost:3000` and try adding a todo to verify both the app and database are working correctly.
 
 ### 2. Deploy with Haloy
+
+If everything is working locally, you can now deploy to your server. Make sure you have Haloy installed and have configured your domain's DNS to point to your server. Check out the [Quickstart](/docs/quickstart) if you haven't set it up yet.
 
 <Code code="haloy deploy" lang="bash" />
 
