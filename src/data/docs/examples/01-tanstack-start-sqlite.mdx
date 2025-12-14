@@ -11,14 +11,6 @@ This guide walks you through deploying a TanStack Start application with SQLite 
 The complete source code for this guide is available at:
 [github.com/haloydev/examples/tanstack-start-sqlite](https://github.com/haloydev/examples/tree/main/tanstack-start-sqlite)
 
-## Why This Stack?
-
-**TanStack Start**  File-based routing, server functions, and TypeScript support out of the box
-
-**SQLite**  Zero-config database that handles millions of requests per day on a single server
-
-**Haloy**  Deploy to your own infrastructure without Kubernetes complexity or PaaS costs
-
 ## What You'll Build
 
 A full-stack React application using:
@@ -36,7 +28,7 @@ A full-stack React application using:
 - A domain or a subdomain
 - Basic familiarity with React and TypeScript
 
-## Project Setup
+This guide uses [pnpm](https://pnpm.io/), but you can use `npm` instead by replacing `pnpm add` with `npm install` and `pnpm` with `npm run` for scripts.
 
 ### 1. Initialize the Project
 
@@ -129,7 +121,7 @@ Create `vite.config.ts`:
 
 #### About Nitro
 
-TanStack Start uses [Nitro](https://nitro.unjs.io/) as its server engine. For this deployment, we're using the default Node.js preset, which works perfectly with Haloy. No additional configuration is needed—the empty `nitro: {}` object is sufficient.
+TanStack Start uses [Nitro](https://nitro.unjs.io/) as its server engine. For this deployment, we're using the default Node.js preset, which works perfectly with Haloy. No additional configuration is needed. The empty `nitro: {}` object is sufficient.
 
 ## Database Setup
 
@@ -400,14 +392,14 @@ Create `Dockerfile`:
 Key points:
 
 - Uses multi-stage builds for smaller final image
-- Runs database migrations at container startup—this is safe because Drizzle migrations are idempotent (running them multiple times has no effect if the database is already up to date)
+- Runs database migrations at container startup. This is safe because Drizzle migrations are idempotent (running them multiple times has no effect if the database is already up to date)
 - Production dependencies include `drizzle-kit` for migrations
 
 ### 2. Create .dockerignore
 
 Create `.dockerignore`:
 
-We need to exclude files from the built Docker image. Notice `*.db` is excluded. Your local database should never be copied to production—the production database lives in the persistent volume.
+We need to exclude files from the built Docker image. Notice `*.db` is excluded. Your local database should never be copied to production. The production database lives in the persistent volume.
 
 <Code code={`
   node_modules
@@ -564,4 +556,4 @@ SQLite is designed for single-server deployments. If you need to run multiple re
 1. **Switch to a client-server database** like PostgreSQL or MySQL
 2. **Use a distributed SQLite solution** like [Turso](https://turso.tech/) or [LiteFS](https://fly.io/docs/litefs/)
 
-For most applications, a single replica with SQLite can handle significant traffic—often more than you'd expect.
+For most applications, a single replica with SQLite can handle significant traffic. Often more than you'd expect.
