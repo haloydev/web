@@ -10,15 +10,15 @@ Configure Docker images, registry authentication, local building, and rollback s
 
 ## Basic Image Configuration
 
-| Key            | Type    | Required | Description                                             |
-| -------------- | ------- | -------- | ------------------------------------------------------- |
-| `repository`   | string  | **Yes**  | Docker image name                                       |
-| `tag`          | string  | No       | Image tag (default: "latest")                           |
-| `build`        | boolean | No       | Whether to build the image locally                      |
-| `registry`     | object  | No       | Private registry authentication                         |
-| `source`       | string  | No       | Where to get the image: "registry" (default) or "local" |
-| `history`      | object  | No       | Image history and rollback strategy                     |
-| `build_config` | object  | No       | Build configuration for local building                  |
+| Key            | Type    | Required | Description                                                                            |
+| -------------- | ------- | -------- | -------------------------------------------------------------------------------------- |
+| `repository`   | string  | **Yes**  | Docker image name                                                                      |
+| `tag`          | string  | No       | Image tag (default: "latest"). Can also be included in repository (e.g., nginx:alpine) |
+| `build`        | boolean | No       | Whether to build the image locally                                                     |
+| `registry`     | object  | No       | Private registry authentication                                                        |
+| `source`       | string  | No       | Where to get the image: "registry" (default) or "local"                                |
+| `history`      | object  | No       | Image history and rollback strategy                                                    |
+| `build_config` | object  | No       | Build configuration for local building                                                 |
 
 ## Simple Configuration
 
@@ -27,9 +27,19 @@ Pull from a public registry:
 <Code code={`
   name: "my-app"
   image:
+    repository: "nginx:alpine"
+`} lang="yaml" />
+
+
+**Note:** You can also specify the tag separately using the `tag` field:
+<Code code={`
+  image:
     repository: "nginx"
     tag: "alpine"
 `} lang="yaml" />
+
+
+If no tag is specified (and none is included in the repository), it defaults to latest.
 
 ## Registry Authentication
 
