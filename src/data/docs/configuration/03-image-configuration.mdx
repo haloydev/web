@@ -103,7 +103,7 @@ haloy deploy`}
         from:
           secret: "onepassword:registry-credentials.password"
 
-  secretProviders:
+  secret_providers:
     onepassword:
       registry-credentials:
         vault: "Infrastructure"
@@ -436,7 +436,7 @@ Useful when:
       count: 10
       pattern: "v\*"
 
-  secretProviders:
+  secret_providers:
     onepassword:
       registry:
         vault: "Infrastructure"

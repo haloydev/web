@@ -123,11 +123,9 @@ Complete setup for production, staging, and development:
   global_pre_deploy:
     - "echo 'Starting deployment pipeline'"
     - "npm run build"
-
   global_post_deploy:
     - "echo 'All deployments completed'"
     - "curl -X POST https://status.io/webhook"
-
   targets:
     production:
       server: prod.haloy.com
@@ -140,13 +138,14 @@ Complete setup for production, staging, and development:
       replicas: 3
       env:
         - name: "NODE_ENV"
-        value: "production"
+          value: "production"
         - name: "DATABASE_URL"
           from:
             secret: "onepassword:prod-db.url"
-      pre_deploy: - "npm run migrate:production"
-      post_deploy: - "echo 'Production deployed'"
-
+      pre_deploy:
+        - "npm run migrate:production"
+      post_deploy:
+        - "echo 'Production deployed'"
     staging:
       server: staging.haloy.com
       image:
@@ -161,7 +160,6 @@ Complete setup for production, staging, and development:
           from:
             env: "STAGING_DATABASE_URL"
       pre_deploy: - "npm run migrate:staging"
-
     development:
       server: dev.haloy.com
       image:
@@ -265,10 +263,12 @@ Run before or after individual target deployments:
         - "curl https://my-app.com/api/health"
         - "echo 'Production health check passed'"
 
-  staging:
-    server: staging.haloy.com
-    pre_deploy: - "npm run migrate:staging"
-    post_deploy: - "npm run test:e2e:staging"`} lang="yaml" />
+    staging:
+      server: staging.haloy.com
+      pre_deploy:
+        - "npm run migrate:staging"
+      post_deploy:
+        - "npm run test:e2e:staging"`} lang="yaml" />
 
 ## Target-Specific Commands
 

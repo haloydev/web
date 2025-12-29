@@ -120,7 +120,7 @@ You can also use [environment files](/docs/environment-variables#environment-fil
     from:
       secret: "onepassword:api-tokens.production"
 
-  secretProviders:
+  secret_providers:
     onepassword:
       api-tokens:
         vault: "Infrastructure"
@@ -184,7 +184,7 @@ Deploy to different environments:
   server: project-a-prod.haloy.com
   api_token:
     from:
-    env: "PROJECT_A_PROD_TOKEN"
+      env: "PROJECT_A_PROD_TOKEN"
 
   # project-a/staging.haloy.yaml
   server: project-a-staging.haloy.com
@@ -225,7 +225,7 @@ Deploy to different environments:
     repository: "my-org/my-app"
     tag: "latest"
 
-  secretProviders:
+  secret_providers:
     onepassword:
       prod-tokens:
         vault: "Production"

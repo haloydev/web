@@ -29,11 +29,63 @@ Haloy automatically searches for configuration files in the current directory in
 
 Most Haloy commands require a configuration file. See [Basic Configuration](/docs/basic-configuration) to get started.
 
-## Root Configuration Options
+## Configuration Structure
+
+The configuration file supports two modes of operation:
+
+1.  **Single Deployment**: If no `targets` are defined, the root configuration acts as the single deployment target.
+2.  **Multi-Target**: If `targets` are defined, the root configuration acts as the **Base/Default** configuration. Specific targets inherit these defaults and can override them.
+
+### Single Deployment Example
+
+<Code code={`
+  name: "my-app"
+  server: "haloy.yourserver.com"
+  image:
+    repository: "my-app"
+    tag: "latest"
+`} lang="yaml" />
+
+### Multi-Target Example
+
+<Code code={`
+  name: "my-app"
+  # Base settings inherited by all targets
+  image:
+    repository: "my-app"
+    tag: "latest"
+
+  targets:
+    prod:
+      server: "prod.server.com"
+      replicas: 2
+    staging:
+      server: "staging.server.com"
+      replicas: 1
+`} lang="yaml" />
+
+## Global Configuration
+
+These options are **only** available at the top level of the configuration file.
+
+| Key                  | Type   | Description                                                                                     |
+| -------------------- | ------ | ----------------------------------------------------------------------------------------------- |
+| `targets`            | object | Define multiple deployment targets (see [Multi-Server Deployments](/docs/multi-server-deployments)) |
+| `images`             | map    | Define named images that can be referenced by targets                                           |
+| `secret_providers`   | object | Configure secret providers (see [Secret Providers](/docs/secret-providers))                     |
+| `global_pre_deploy`  | array  | Commands to run once before **any** deployment starts                                           |
+| `global_post_deploy` | array  | Commands to run once after **all** deployments finish                                           |
+
+## Target Configuration
+
+These options define a deployment unit.
+
+*   **At Root**: They serve as the default settings (or the single deployment configuration).
+*   **Under `targets`**: They override the defaults for that specific target.
 
 | Key                   | Type           | Required | Description                                                                                                 |
 | --------------------- | -------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `name`                | string         | **Yes**  | Unique application name                                                                                     |
+| `name`                | string         | **Yes**  | Unique application name (Required at root)                                                                  |
 | `preset`              | string         | No       | Apply preset configuration (Options: database)                                                              |
 | `protected`           | boolean        | No       | Exclude from `--all` deployments (default: false)                                                           |
 | `naming_strategy`     | string         | No       | Container naming: "dynamic" (default) or "static"                                                           |
@@ -48,12 +100,8 @@ Most Haloy commands require a configuration file. See [Basic Configuration](/doc
 | `health_check_path`   | string         | No       | Health check endpoint (default: "/")                                                                        |
 | `env`                 | array          | No       | Environment variables (see [Environment Variables](/docs/environment-variables))                            |
 | `volumes`             | array          | No       | Volume mounts (see [Volumes](/docs/volumes))                                                                |
-| `pre_deploy`          | array          | No       | Commands to run before deploy                                                                               |
-| `post_deploy`         | array          | No       | Commands to run after deploy                                                                                |
-| `global_pre_deploy`   | array          | No       | Commands to run once before all deployments (multi-target only)                                             |
-| `global_post_deploy`  | array          | No       | Commands to run once after all deployments (multi-target only)                                              |
-| `targets`             | object         | No       | Multiple deployment targets with overrides (see [Multi-Server Deployments](/docs/multi-server-deployments)) |
-| `secret_providers`    | object         | No       | Secret provider configuration (see [Secret Providers](/docs/secret-providers))                              |
+| `pre_deploy`          | array          | No       | Commands to run before deploy (per target)                                                                  |
+| `post_deploy`         | array          | No       | Commands to run after deploy (per target)                                                                   |
 | `network`             | string         | No       | Docker network for the container. (default: `haloy`)                                                        |
 
 ## Presets
@@ -174,7 +222,7 @@ For multi-target deployments, use global hooks:
       pre_deploy: - "npm run test:staging"
 `} lang="yaml" />
 
-## Target Configuration
+## Multi-Target Overrides
 
 When using multi-target deployments, each target can override base configuration:
 
