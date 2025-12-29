@@ -22,15 +22,13 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
 
 ### Configuration
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   deployment_strategy: "rolling"  # Default, can be omitted
   replicas: 3
   domains:
-    - domain: "my-app.com"`}
-  lang="yaml"
-/>
+    - domain: "my-app.com"
+`} lang="yaml" />
 
 ### Benefits
 
@@ -46,8 +44,7 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
 
 ### Example
 
-<Code
-  code={`
+<Code code={`
   name: "high-availability-app"
   deployment_strategy: "rolling"
   replicas: 5
@@ -58,9 +55,7 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
   domains:
     - domain: "ha-app.com"
   acme_email: "admin@ha-app.com"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Replace Deployment
 
@@ -68,23 +63,23 @@ Stops all old containers before starting new ones.
 
 ### How It Works
 
-1. Stop all old containers
-2. Start new container(s)
-3. Wait for health checks
-4. Route traffic to new containers
+1. Stop old containers
+2. Wait for containers to exit and verify removal
+3. Start new container(s)
+4. Wait for health checks
+5. Route traffic to new containers
+
+This strategy is required when using `naming_strategy: "static"`, as it ensures the old container name is freed before the new one starts.
 
 ### Configuration
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   deployment_strategy: "replace"
   replicas: 3
   domains:
     - domain: "my-app.com"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ### Benefits
 
@@ -107,8 +102,7 @@ Stops all old containers before starting new ones.
 
 ### Example
 
-<Code
-  code={`
+<Code code={`
   name: "batch-processor"
   deployment_strategy: "replace"
   replicas: 2
@@ -119,9 +113,7 @@ Stops all old containers before starting new ones.
   env:
     - name: "BATCH_SIZE"
       value: "1000"
-  `}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Comparison
 
@@ -138,8 +130,7 @@ Stops all old containers before starting new ones.
 
 Use different strategies for different environments:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   # Default for all targets
   deployment_strategy: "rolling"
@@ -163,31 +154,25 @@ Use different strategies for different environments:
       replicas: 1
       domains:
         - domain: "dev.my-app.com"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Health Checks
 
 Both strategies rely on health checks to determine when containers are ready:
 
-<Code code={`name: "my-app"
-health_check_path: "/api/health"
-port: "8080"
+<Code code={`
+  name: "my-app"
+  health_check_path: "/api/health"
+  port: "8080"
 
-# Your app should respond with 200 OK when healthy
-
-# Example health endpoint response:
-
-# {
-
-# "status": "healthy",
-
-# "uptime": 42,
-
-# "database": "connected"
-
-# }`} lang="yaml" />
+  # Your app should respond with 200 OK when healthy
+  # Example health endpoint response:
+  # {
+  #   "status": "healthy",
+  #   "uptime": 42,
+  #   "database": "connected"
+  # }
+`} lang="yaml" />
 
 ### Health Check Requirements
 
@@ -223,7 +208,8 @@ res.status(503).json({ status: 'unhealthy', reason: error.message });
 
 **Go:**
 
-<Code code={`func healthHandler(w http.ResponseWriter, r *http.Request) {
+<Code code={`
+  func healthHandler(w http.ResponseWriter, r *http.Request) {
     // Check database
     if err := db.Ping(); err != nil {
         w.WriteHeader(http.StatusServiceUnavailable)
@@ -238,27 +224,26 @@ res.status(503).json({ status: 'unhealthy', reason: error.message });
     json.NewEncoder(w).Encode(map[string]string{
         "status": "healthy",
     })
-
-}`} lang="go" />
+  }
+`} lang="go" />
 
 ## Deployment Process
 
 Monitor your deployment:
 
-<Code code={`# Deploy with logs
-haloy deploy
+<Code code={`
+  # Deploy with logs
+   haloy deploy
 
-# Deploy without logs (faster)
+  # Deploy without logs (faster)
+  haloy deploy --no-logs
 
-haloy deploy --no-logs
+  # Check status after deployment
+  haloy status
 
-# Check status after deployment
-
-haloy status
-
-# View application logs
-
-haloy logs`} lang="bash" />
+  # View application logs
+  haloy logs
+`} lang="bash" />
 
 ## Troubleshooting
 
@@ -267,12 +252,10 @@ haloy logs`} lang="bash" />
 If a rolling deployment gets stuck:
 
 1. Check health check endpoint:
-
-   <Code code={`curl https://my-app.com/health`} lang="bash" />
+<Code code="curl https://my-app.com/health" lang="bash" />
 
 2. View application logs:
-
-   <Code code={`haloy logs`} lang="bash" />
+<Code code="haloy logs" lang="bash" />
 
 3. Verify health check path is correct in config
 

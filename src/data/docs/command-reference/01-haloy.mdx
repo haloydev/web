@@ -33,9 +33,12 @@ Deploy your application to configured servers.
   # Deploy to multiple targets
   haloy deploy --target staging,production
 
-  # Deploy to all targets
+  # Deploy to all targets (skips protected targets)
   haloy deploy --all
   haloy deploy -a
+
+  # Deploy all targets including protected ones
+  haloy deploy --all --include-protected
 
   # Deploy without showing logs
   haloy deploy --no-logs
@@ -46,7 +49,8 @@ Deploy your application to configured servers.
 <div class="list-unstyled">
 - `--config, -c <path>` - Path to config file or directory (default: current directory)
 - `--target, -t <name>` - Deploy to specific target(s) (comma-separated for multiple)
-- `--all, -a` - Deploy to all targets
+- `--all, -a` - Deploy to all targets (skips protected targets unless --include-protected is used)
+- `--include-protected` - Include protected targets when using --all
 - `--no-logs` - Skip deployment logs (faster)
 - `--server, -s <url>` - Override server URL from config
 </div>
