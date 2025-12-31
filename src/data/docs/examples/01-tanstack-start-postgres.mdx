@@ -1,0 +1,594 @@
+---
+title: 'TanStack Start with PostgreSQL'
+slug: 'tanstack-start-postgres'
+section: examples
+---
+
+import Code from '@/components/code.astro';
+
+This guide walks you through deploying a TanStack Start application with a PostgreSQL database to your own server using Haloy. Any Linux-based VPS or dedicated server will work.
+
+The complete source code for this guide is available at:
+[github.com/haloydev/examples/tanstack-start-postgres](https://github.com/haloydev/examples/tree/main/tanstack-start-postgres)
+
+## What You'll Build
+
+A full-stack React application using:
+
+- **TanStack Start** - React meta-framework with file-based routing and server functions
+- **PostgreSQL** - Powerful, open source object-relational database system
+- **Drizzle ORM** - TypeScript ORM for type-safe database queries
+- **Haloy** - Simple deployment to your own server
+
+## Prerequisites
+
+- Node.js 20+ installed
+- Haloy installed ([Quickstart](/docs/quickstart))
+- A linux server (VPS or dedicated server)
+- A domain or a subdomain
+- Basic familiarity with React and TypeScript
+
+This guide uses [pnpm](https://pnpm.io/), but you can use `npm` instead by replacing `pnpm add` with `npm install` and `pnpm` with `npm run` for scripts.
+
+### 1. Initialize the Project
+
+<Code code={`
+  mkdir my-tanstack-app
+  cd my-tanstack-app
+  pnpm init
+`} lang="bash" />
+
+### 2. Configure TypeScript
+
+Create `tsconfig.json`:
+
+<Code code={`
+  {
+    "compilerOptions": {
+      "jsx": "react-jsx",
+      "moduleResolution": "Bundler",
+      "module": "ESNext",
+      "target": "ES2022",
+      "skipLibCheck": true,
+      "strictNullChecks": true
+    }
+  }
+`} lang="json" />
+
+### 3. Install Dependencies
+
+Install TanStack Start and React:
+
+<Code code={`
+  pnpm add @tanstack/react-start @tanstack/react-router react react-dom nitro
+`} lang="bash" />
+
+Install dev dependencies:
+<Code code={`
+  pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node vite-tsconfig-paths
+`} lang="bash" />
+
+Install Drizzle and PostgreSQL:
+
+<Code code={`
+  pnpm add drizzle-orm pg dotenv drizzle-kit
+  pnpm add -D @types/pg
+`} lang="bash" />
+
+**Note:** `drizzle-kit` is installed as a production dependency (not `-D`) because we need it available in the Docker container to run migrations at startup.
+
+### 4. Update package.json
+
+Update your `package.json` with the required configuration and scripts:
+
+<Code code={`
+  {
+    // ...
+    "type": "module",
+    "scripts": {
+      "dev": "vite dev",
+      "build": "vite build",
+      "start": "node .output/server/index.mjs",
+      "db:generate": "drizzle-kit generate",
+      "db:migrate": "drizzle-kit migrate"
+    }
+  }
+`} lang="json" />
+
+**Important:** The `"type": "module"` field is crucial - without it, Node.js will treat your files as CommonJS instead of ES modules, causing errors like `"This package is ESM only but it was tried to load by require"`. TanStack Start requires ES module support to work properly.
+
+### 5. Create Vite Configuration
+
+Create `vite.config.ts`:
+
+<Code code={`
+  import { defineConfig } from "vite";
+  import { nitro } from "nitro/vite";
+  import tsConfigPaths from "vite-tsconfig-paths";
+  import { tanstackStart } from "@tanstack/react-start/plugin/vite";
+  import viteReact from "@vitejs/plugin-react";
+
+  export default defineConfig({
+    server: {
+      port: 3000,
+    },
+    plugins: [
+      tsConfigPaths(),
+      tanstackStart(),
+      nitro(),
+      // react's vite plugin must come after start's vite plugin
+      viteReact(),
+    ],
+    nitro: {},
+  });
+`} lang="typescript" />
+
+#### About Nitro
+
+TanStack Start uses [Nitro](https://nitro.unjs.io/) as its server engine. For this deployment, we're using the default Node.js preset, which works perfectly with Haloy. No additional configuration is needed. The empty `nitro: {}` object is sufficient.
+
+## Database Setup
+
+### 1. Database Connection Helper
+
+Create `src/db/database-url.ts` to handle connection string construction:
+
+<Code code={`
+  export function getDatabaseUrl() {
+    const postgresUser = process.env.POSTGRES_USER;
+    if (!postgresUser) {
+      throw new Error("POSTGRES_USER environment variable not found");
+    }
+
+    const postgresPassword = process.env.POSTGRES_PASSWORD;
+    if (!postgresPassword) {
+      throw new Error("POSTGRES_PASSWORD environment variable not found");
+    }
+
+    const postgresDb = process.env.POSTGRES_DB;
+    if (!postgresDb) {
+      throw new Error("POSTGRES_DB environment variable not found");
+    }
+
+    // In production, we use the service name 'postgres' as the host
+    // In development, we connect to localhost
+    const host = process.env.NODE_ENV === "production" ? "postgres" : "localhost";
+
+    return \`postgres://\${postgresUser}:\${postgresPassword}@\${host}:5432/\${postgresDb}\`;
+  }
+`} lang="typescript" />
+
+This helper constructs the database connection string from environment variables and automatically switches between `localhost` (development) and `postgres` (production hostname) based on `NODE_ENV`.
+
+### 2. Configure Drizzle
+
+Create `drizzle.config.ts`:
+
+<Code code={`
+  import { config } from "dotenv";
+  import { defineConfig } from "drizzle-kit";
+  import { getDatabaseUrl } from "./src/db/database-url";
+
+  config();
+
+  const databaseUrl = getDatabaseUrl();
+
+  export default defineConfig({
+    out: "./drizzle",
+    schema: "./src/db/schema.ts",
+    dialect: "postgresql",
+    dbCredentials: {
+      url: databaseUrl,
+    },
+  });
+`} lang="typescript" />
+
+### 3. Create Database Client
+
+Create `src/db/index.ts`:
+
+<Code code={`
+  import "dotenv/config";
+  import { drizzle } from "drizzle-orm/node-postgres";
+  import { getDatabaseUrl } from "./database-url";
+
+  const databaseUrl = getDatabaseUrl();
+
+  const db = drizzle(databaseUrl);
+  export { db };
+`} lang="typescript" />
+
+### 4. Define Your Schema
+
+Create `src/db/schema.ts`:
+
+<Code code={`
+  import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+
+  export const todos = pgTable("todos", {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    title: varchar({ length: 255 }).notNull(),
+    createdAt: timestamp({ mode: "date" }).defaultNow(),
+  });
+`} lang="typescript" />
+
+### 5. Create Environment File
+
+Create `.env` for local development. Make sure you have a local PostgreSQL instance running or use Docker Compose.
+
+<Code code={`
+  POSTGRES_USER=postgres
+  POSTGRES_PASSWORD=postgres
+  POSTGRES_DB=todo_app
+`} lang="bash" />
+
+### 6. Generate Migrations
+
+<Code code="pnpm db:generate" lang="bash" />
+
+This creates migration files in the `drizzle/` directory.
+
+**Important:** These generated migration files should be committed to your git repository. They are part of your application code and will be included in your Docker image for production deployment.
+
+### 7. Set Up Local Database (Optional)
+
+For local testing, you can use Docker to run PostgreSQL without installing it:
+
+<Code code={`
+  docker run --name postgres-dev \\
+    -e POSTGRES_USER=postgres \\
+    -e POSTGRES_PASSWORD=postgres \\
+    -e POSTGRES_DB=todo_app \\
+    -p 5432:5432 \\
+    -d postgres:18
+`} lang="bash" />
+
+This command:
+- Creates a PostgreSQL container named `postgres-dev`
+- Sets up credentials matching your `.env` file
+- Exposes port 5432 to your local machine
+- Runs in the background
+
+To stop the container later:
+
+<Code code={`
+  docker stop postgres-dev
+  docker rm postgres-dev
+`} lang="bash" />
+
+## Application Code
+
+### 1. Create the Router
+
+Create `src/router.tsx`:
+
+<Code code={`
+  import { createRouter } from "@tanstack/react-router";
+  import { routeTree } from "./routeTree.gen";
+
+  export function getRouter() {
+    const router = createRouter({
+      routeTree,
+      scrollRestoration: true,
+      defaultNotFoundComponent: () => <div>404 - not found</div>,
+    });
+
+    return router;
+  }
+`} lang="tsx" />
+
+**Note:** You might see a TypeScript error about `./routeTree.gen` not being found. This is expected. TanStack Start automatically generates this file when you run the dev server in the next steps.
+
+### 2. Create the Root Route
+
+Create `src/routes/__root.tsx`:
+
+<Code code={`
+  /// <reference types="vite/client" />
+
+  import {
+    createRootRoute,
+    HeadContent,
+    Outlet,
+    Scripts,
+  } from "@tanstack/react-router";
+  import type { ReactNode } from "react";
+
+  export const Route = createRootRoute({
+    head: () => ({
+      meta: [
+        {
+          charSet: "utf-8",
+        },
+        {
+          name: "viewport",
+          content: "width=device-width, initial-scale=1",
+        },
+        {
+          title: "TanStack Start Starter",
+        },
+      ],
+    }),
+    component: RootComponent,
+  });
+
+  function RootComponent() {
+    return (
+      <RootDocument>
+        <Outlet />
+      </RootDocument>
+    );
+  }
+
+  function RootDocument({ children }: Readonly<{ children: ReactNode }>) {
+    return (
+      <html lang="en">
+        <head>
+          <HeadContent />
+        </head>
+        <body>
+          {children}
+          <Scripts />
+        </body>
+      </html>
+    );
+  }
+`} lang="tsx" />
+
+### 3. Create the Index Route
+
+Create `src/routes/index.tsx`:
+
+<Code code={`
+  import { createFileRoute, useRouter } from "@tanstack/react-router";
+  import { createServerFn } from "@tanstack/react-start";
+  import { eq } from "drizzle-orm";
+  import { db } from "../db";
+  import { todos } from "../db/schema";
+
+  const getTodos = createServerFn({
+    method: "GET",
+  }).handler(async () => await db.select().from(todos));
+
+  const addTodo = createServerFn({ method: "POST" })
+    .inputValidator((data: FormData) => {
+      if (!(data instanceof FormData)) {
+        throw new Error("Expected FormData");
+      }
+      return {
+        title: data.get("title")?.toString() || "",
+      };
+    })
+    .handler(async ({ data }) => {
+      await db.insert(todos).values({ title: data.title });
+    });
+
+  const deleteTodo = createServerFn({ method: "POST" })
+    .inputValidator((data: number) => data)
+    .handler(async ({ data }) => {
+      await db.delete(todos).where(eq(todos.id, data));
+    });
+
+  export const Route = createFileRoute("/")({
+    component: RouteComponent,
+    loader: async () => await getTodos(),
+  });
+
+  function RouteComponent() {
+    const router = useRouter();
+    const todos = Route.useLoaderData();
+
+    return (
+      <div>
+        <ul>
+          {todos.map((todo) => (
+            <li key={todo.id}>
+              {todo.title}
+              <button
+                type="button"
+                onClick={async () => {
+                    await deleteTodo({ data: todo.id });
+                    router.invalidate();
+                  }}
+                >
+                  X
+                </button>
+              </li>
+            ))}
+          </ul>
+          <h2>Add todo</h2>
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const form = e.currentTarget;
+              const data = new FormData(form);
+              await addTodo({ data });
+              router.invalidate();
+              form.reset();
+            }}
+          >
+            <input name="title" placeholder="Enter a new todo..." />
+            <button type="submit">Add</button>
+          </form>
+        </div>
+      );
+    }
+`} lang="tsx" />
+
+### 4. Create Health Check Route
+
+Create `src/routes/health.tsx` for health checks:
+
+<Code code={`
+  import { createFileRoute } from "@tanstack/react-router";
+
+  export const Route = createFileRoute("/health")({
+    server: {
+      handlers: {
+        GET: async () => {
+          return Response.json({ status: "ok" });
+        },
+      },
+    },
+  });
+`} lang="tsx" />
+
+This endpoint responds without querying the database, ensuring the container can be marked healthy even before migrations run.
+
+## Docker Configuration
+
+### 1. Create Dockerfile
+
+Create `Dockerfile`:
+
+<Code code={`
+  FROM node:24-slim AS base
+  ENV PNPM_HOME="/pnpm"
+  ENV PATH="$PNPM_HOME:$PATH"
+  RUN corepack enable
+  COPY . /app
+  WORKDIR /app
+
+  FROM base AS prod-deps
+  RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --prod --frozen-lockfile
+
+  FROM base AS build
+  RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
+  RUN pnpm run build
+
+  FROM base
+  COPY --from=prod-deps /app/node_modules /app/node_modules
+  COPY --from=build /app/.output /app/.output
+
+  HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \\
+    CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+
+  CMD ["sh", "-c", "pnpm db:migrate && pnpm start"]
+`} lang="dockerfile" />
+
+Key points:
+
+- Uses multi-stage builds for smaller final image
+- Copies migration files and Drizzle config for manual migration execution
+- Includes a `HEALTHCHECK` that queries `/health` endpoint
+- Migrations are run manually after deployment (see deploy steps below)
+
+### 2. Create .dockerignore
+
+Create `.dockerignore`:
+
+<Code code={`
+  node_modules
+  .git
+  .gitignore
+  *.md
+  dist
+  .DS_Store
+`} lang="text" />
+
+## Haloy Configuration
+
+Create `haloy.yml`:
+
+For PostgreSQL, we need to deploy two services: the database and the application. We can define both in a single `haloy.yml` file.
+
+<Code code={`
+  # Global server and environment variables shared across targets
+  server: your-server.haloy.dev
+  env:
+    - name: POSTGRES_USER
+      value: postgres
+    - name: POSTGRES_PASSWORD
+      value: "changeme"
+    - name: POSTGRES_DB
+      value: mydb
+
+  targets:
+    # Database Service
+    postgres:
+      preset: database
+      image:
+        repository: postgres:18
+      port: 5432
+      volumes:
+        - postgres-data:/var/lib/postgresql
+
+    # Application Service
+    tanstack-start-postgres:
+      domains:
+        - domain: my-app.example.com
+      port: 3000
+      env:
+        - name: NODE_ENV
+          value: production
+`} lang="yaml" />
+
+**Important:** Replace `your-server.haloy.dev` with the actual server domain you configured during the [Quickstart setup](/docs/quickstart). This should match the server where you installed the Haloy daemon using `haloy server setup`.
+
+Also update:
+- `my-app.example.com` - Replace with your actual domain or subdomain
+- `POSTGRES_PASSWORD` - Change to a strong, unique password for production
+
+### Configuration Explained
+
+We define two **targets**:
+
+1.  `postgres`:
+    -   Uses the official `postgres:18` image.
+    -   Mounts a volume `postgres-data` to `/var/lib/postgresql` to ensure data persistence.
+    -   Exposes port `5432`.
+    -   Is accessible to other containers on the same server via the hostname `postgres`.
+
+2.  `tanstack-start-postgres`:
+    -   Your application code.
+    -   Connects to the database using the environment variables.
+    -   `NODE_ENV=production` ensures `src/db/database-url.ts` uses the `postgres` hostname.
+
+### Persistent Storage
+
+The `postgres` target uses a named volume:
+
+<Code code={`
+  volumes:
+    - postgres-data:/var/lib/postgresql
+`} lang="yaml" />
+
+This ensures that even if you redeploy or restart the database container, your data remains safe on the server.
+
+## Deploy
+
+### 1. Test Locally
+
+Before deploying, verify everything works locally. Ensure you have a local PostgreSQL database running and updated `.env`.
+
+<Code code={`
+  pnpm db:migrate
+  pnpm dev
+`} lang="bash" />
+
+Visit `http://localhost:3000` and try adding a todo.
+
+### 2. Deploy the Database First
+
+**Important:** You must deploy the PostgreSQL database before deploying the application, as the app container needs the database to run migrations at startup.
+
+<Code code="haloy deploy -t postgres" lang="bash" />
+
+Wait for the database deployment to complete before proceeding to the next step.
+
+### 3. Deploy the Application
+
+Once the database is running, deploy your application:
+
+<Code code="haloy deploy -t tanstack-start-postgres" lang="bash" />
+
+### 4. Verify Deployment
+
+<Code code={`
+  # Check status of all targets
+  haloy status --all
+
+  # View deployment logs
+  haloy logs -t tanstack-start-postgres
+`} lang="bash" />
+
