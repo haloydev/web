@@ -86,7 +86,7 @@ These options define a deployment unit.
 | Key                   | Type           | Required | Description                                                                                                 |
 | --------------------- | -------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
 | `name`                | string         | **Yes**  | Unique application name (Required at root)                                                                  |
-| `preset`              | string         | No       | Apply preset configuration (Options: database)                                                              |
+| `preset`              | string         | No       | Apply preset configuration (Options: database, service)                                                     |
 | `protected`           | boolean        | No       | Exclude from `--all` deployments (default: false)                                                           |
 | `naming_strategy`     | string         | No       | Container naming: "dynamic" (default) or "static"                                                           |
 | `image`               | object         | No       | Docker image configuration (see [Image Configuration](/docs/image-configuration))                           |
@@ -125,6 +125,22 @@ Use `preset: "database"` for stateful database services. This automatically appl
       tag: "18"
     volumes:
       - /data/postgres:/var/lib/postgresql/data
+`} lang="yaml" />
+
+### Service Preset
+
+Use `preset: "service"` for stateful services that share similar requirements to databases (static naming, replace strategy) but do not need the strict safety of being `protected`. This automatically applies:
+
+- `deployment_strategy: "replace"`
+- `naming_strategy: "static"`
+- `image.history.strategy: "none"`
+
+<Code code={`
+  redis:
+    preset: service
+    image:
+      repository: "henrygd/beszel"
+      tag: "latest"
 `} lang="yaml" />
 
 ## Protected Targets
