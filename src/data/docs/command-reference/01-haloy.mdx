@@ -179,6 +179,47 @@ The app name and server are read from the haloy configuration file (same as othe
 
 **Note:** This is a non-interactive exec (no TTY support) - suitable for running commands that complete and return output - Commands run with the default user configured in the container image - The `--` separator is mandatory - the command will error if omitted
 
+### tunnel
+
+Create a TCP tunnel to a running container, allowing local connections to be forwarded to the container's port. This is useful for accessing services like databases that aren't exposed externally.
+
+<Code code={`
+  # Tunnel to a database container (uses port from haloy.yaml config)
+  haloy tunnel 15432 -t postgres
+  # Then connect: psql -h localhost -p 15432
+
+  # Override the remote port
+  haloy tunnel 15432 -t myapp --port 5432
+
+  # Tunnel to a specific container (for apps with replicas)
+  haloy tunnel 15432 -t myapp --container abc123
+`} lang="bash" />
+
+**Syntax:**
+<Code code="haloy tunnel <local-port> [flags]" lang="bash" />
+
+**Options:**
+
+<div class="list-unstyled">
+- `--targets, -t <name>` - Target to tunnel to (required for multi-target configs)
+- `--port <port>` - Remote port to tunnel to (default: port from config)
+- `--container <id>` - Specific container ID to tunnel to (useful for apps with replicas)
+- `--config, -c <path>` - Path to config file or directory
+</div>
+
+**How It Works:**
+
+1. Client establishes a TLS connection to the haloyd API server
+2. Sends an HTTP upgrade request to `/v1/tunnel/{appName}`
+3. Server validates auth, connects to the target container, and responds with `101 Switching Protocols`
+4. The connection is upgraded to a raw TCP tunnel
+5. Data flows bidirectionally between the local port and the container
+
+**Requirements:**
+
+- Requires exactly one target (use `--targets` flag for multi-target configs)
+- The target container must be running
+
 ### rollback
 
 Rollback to a specific deployment.
