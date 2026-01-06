@@ -18,7 +18,7 @@ Remove the Haloy CLI (`haloy`) from your local machine.
 
 If you installed via the shell script, you can run the uninstall script:
 
-<Code code="curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash" lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-haloy.sh | sh" lang="bash" />
 
 #### Homebrew
 
@@ -44,8 +44,9 @@ Manually remove configuration files associated with the `haloy` CLI (not needed 
   # Remove client configuration
   rm -rf ~/.config/haloy/
 
-  # Remove client data
-  rm -rf ~/.local/share/haloy/
+# Remove client data
+
+rm -rf ~/.local/share/haloy/
 `} lang="bash" />
 
 ## Server Uninstallation
@@ -56,7 +57,7 @@ Remove Haloy components from your server.
 
 Remove `haloyadm` but keep `haloyd` and deployed applications running:
 
-<Code code="curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash" lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo sh" lang="bash" />
 
 This removes:
 
@@ -75,7 +76,7 @@ This does NOT remove:
 
 Remove all Haloy components, data, and configurations:
 
-<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash" lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh" lang="bash" />
 
 This removes:
 
@@ -99,9 +100,10 @@ Before complete server removal, stop your applications:
   # From your local machine
   haloy stop --all --remove-containers
 
-  # Or on the server
-  docker ps --filter "label=dev.haloy.role=app" -q | xargs docker stop
-  docker ps --filter "label=dev.haloy.role=app" -qa | xargs docker rm
+# Or on the server
+
+docker ps --filter "label=dev.haloy.role=app" -q | xargs docker stop
+docker ps --filter "label=dev.haloy.role=app" -qa | xargs docker rm
 `} lang="bash" />
 
 ## Complete Cleanup
@@ -112,25 +114,30 @@ For a full cleanup of everything Haloy-related:
 
 <Code code={`
   # 1. Remove CLI
-  curl -sL https://sh.haloy.dev/uninstall-haloy.sh | bash
+  curl -sL https://sh.haloy.dev/uninstall-haloy.sh | sh
 
-  # 2. Remove configuration
-  rm -rf ~/.config/haloy/
-  rm -rf ~/.local/share/haloy/
+# 2. Remove configuration
 
-  # 3. Remove shell completion (if installed)
+rm -rf ~/.config/haloy/
+rm -rf ~/.local/share/haloy/
 
-  # Bash (Linux)
-  sudo rm -f /etc/bash_completion.d/haloy
+# 3. Remove shell completion (if installed)
 
-  # Bash (macOS)
-  sudo rm -f /usr/local/etc/bash_completion.d/haloy
+# Bash (Linux)
 
-  # Zsh
-  rm -f ~/.local/share/zsh/site-functions/_haloy
+sudo rm -f /etc/bash_completion.d/haloy
 
-  # Fish
-  rm -f ~/.config/fish/completions/haloy.fish
+# Bash (macOS)
+
+sudo rm -f /usr/local/etc/bash_completion.d/haloy
+
+# Zsh
+
+rm -f ~/.local/share/zsh/site-functions/\_haloy
+
+# Fish
+
+rm -f ~/.config/fish/completions/haloy.fish
 `} lang="bash" />
 
 ### On Server
@@ -140,17 +147,21 @@ For a full cleanup of everything Haloy-related:
   docker ps --filter "label=dev.haloy.role=app" -q | xargs docker stop
   docker ps --filter "label=dev.haloy.role=app" -qa | xargs docker rm
 
-  # 2. Remove server components
-  curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash
+# 2. Remove server components
 
-  # 3. Remove admin tool
-  curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh
 
-  # 4. Optional: Remove application data volumes
-  docker volume ls --filter "label=dev.haloy.role=app" -q | xargs docker volume rm
+# 3. Remove admin tool
 
-  # 5. Optional: Clean up unused Docker resources
-  docker system prune -a --volumes
+curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo sh
+
+# 4. Optional: Remove application data volumes
+
+docker volume ls --filter "label=dev.haloy.role=app" -q | xargs docker volume rm
+
+# 5. Optional: Clean up unused Docker resources
+
+docker system prune -a --volumes
 `} lang="bash" />
 
 ## Selective Removal
@@ -163,13 +174,16 @@ Stop services but preserve data for later reinstallation:
   # Stop services
   sudo haloyadm stop
 
-  # Remove only the admin tool
-  curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash
+# Remove only the admin tool
 
-  # Data remains in /var/lib/haloy/ and /etc/haloy/
+curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo sh
 
-  # Can be restored by reinstalling and running:
-  # sudo haloyadm init
+# Data remains in /var/lib/haloy/ and /etc/haloy/
+
+# Can be restored by reinstalling and running:
+
+# sudo haloyadm init
+
 `} lang="bash" />
 
 ### Remove Everything Except Applications
@@ -183,14 +197,17 @@ Remove Haloy but keep applications running:
   # - No domain routing
   # - Direct access to container ports needed
 
-  # Stop Haloy services
-  sudo haloyadm stop
+# Stop Haloy services
 
-  # Remove Haloy components
-  curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash
+sudo haloyadm stop
 
-  # Applications still running
-  docker ps --filter "label=dev.haloy.role=app"
+# Remove Haloy components
+
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh
+
+# Applications still running
+
+docker ps --filter "label=dev.haloy.role=app"
 `} lang="bash" />
 
 **Warning**: Applications will lose HAProxy routing and SSL. You'll need alternative routing.
@@ -225,19 +242,22 @@ After uninstallation, you can reinstall Haloy:
 
 ### Reinstall Client
 
-<Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | bash" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | sh" lang="bash" />
 
 ### Reinstall Server
 
 <Code code={`
   # Install admin tool
-  curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash
+  curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo sh
 
-  # Initialize
-  sudo haloyadm init
+# Initialize
 
-  # Optionally restore configuration
-  # (if you preserved /etc/haloy/ and /var/lib/haloy/)
+sudo haloyadm init
+
+# Optionally restore configuration
+
+# (if you preserved /etc/haloy/ and /var/lib/haloy/)
+
 `} lang="bash" />
 
 ## Troubleshooting
@@ -248,8 +268,9 @@ After uninstallation, you can reinstall Haloy:
   # Force stop
   docker stop $(docker ps -q --filter "label=dev.haloy.role=app")
 
-  # Force remove
-  docker rm -f $(docker ps -qa --filter "label=dev.haloy.role=app")
+# Force remove
+
+docker rm -f $(docker ps -qa --filter "label=dev.haloy.role=app")
 `} lang="bash" />
 
 ### Permission Denied Errors
@@ -258,16 +279,19 @@ After uninstallation, you can reinstall Haloy:
   # Ensure using sudo for server operations
   sudo su
 
-  # Then run uninstall script
-  curl -sL https://sh.haloy.dev/uninstall-server.sh | bash
+# Then run uninstall script
+
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 `} lang="bash" />
 
 ### Files Still Remain
 
-<Code code={`
+<Code
+  code={`
   # Manually remove remaining files
   sudo rm -rf /etc/haloy/
   sudo rm -rf /var/lib/haloy/
   sudo rm -rf /usr/local/bin/haloyadm
-`} lang="bash" />
-
+`}
+  lang="bash"
+/>

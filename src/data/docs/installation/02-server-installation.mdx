@@ -40,7 +40,7 @@ If you prefer to install manually or cannot use SSH from your local machine, fol
 
 SSH into your server and install `haloyadm`:
 
-<Code code="curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo bash" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyadm.sh | sudo sh" lang="bash" />
 
 ### 2. Initialize haloyd
 
@@ -120,23 +120,23 @@ Haloy uses standard system directories:
   ├── haloyd.yaml          # Haloyd settings
   ├── .env                 # API tokens
 
-  /var/lib/haloy/          # Data
-  ├── haproxy-config/      # HAProxy configs
-  ├── cert-storage/        # SSL certificates
-  └── db/                  # Database files
+/var/lib/haloy/ # Data
+├── haproxy-config/ # HAProxy configs
+├── cert-storage/ # SSL certificates
+└── db/ # Database files
 `} lang="bash" />
 
 ## Uninstalling
 
 ### Remove Admin Tool Only
 
-<Code code="curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo bash" lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-haloyadm.sh | sudo sh" lang="bash" />
 
 ### Complete Server Removal
 
 To completely remove Haloy including all data and configurations:
 
-<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo bash" lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh" lang="bash" />
 
 ## Next Steps
 
