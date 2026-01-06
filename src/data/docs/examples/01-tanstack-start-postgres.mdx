@@ -59,23 +59,18 @@ Create `tsconfig.json`:
 
 Install TanStack Start and React:
 
-<Code code={`
-  pnpm add @tanstack/react-start @tanstack/react-router react react-dom nitro
-`} lang="bash" />
+<Code code="pnpm add @tanstack/react-start @tanstack/react-router react react-dom nitro" lang="bash" />
 
 Install dev dependencies:
-<Code code={`
-  pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node vite-tsconfig-paths
-`} lang="bash" />
+
+<Code code="pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node vite-tsconfig-paths" lang="bash" />
 
 Install Drizzle and PostgreSQL:
 
 <Code code={`
-  pnpm add drizzle-orm pg dotenv drizzle-kit
-  pnpm add -D @types/pg
+  pnpm add drizzle-orm pg dotenv
+  pnpm add -D drizzle-kit @types/pg
 `} lang="bash" />
-
-**Note:** `drizzle-kit` is installed as a production dependency (not `-D`) because we need it available in the Docker container to run migrations at startup.
 
 ### 4. Update package.json
 
@@ -89,9 +84,9 @@ Update your `package.json` with the required configuration and scripts:
       "dev": "vite dev",
       "build": "vite build",
       "start": "node .output/server/index.mjs",
-      "db:generate": "drizzle-kit generate",
-      "db:migrate": "drizzle-kit migrate"
-    }
+      "db:push": "drizzle-kit push",
+      "db:studio": "drizzle-kit studio"
+    },
   }
 `} lang="json" />
 
@@ -129,7 +124,59 @@ TanStack Start uses [Nitro](https://nitro.unjs.io/) as its server engine. For th
 
 ## Database Setup
 
-### 1. Database Connection Helper
+### 1. Configure Drizzle
+
+Create `drizzle.config.ts`:
+
+<Code code={`
+  import { config } from "dotenv";
+  import { defineConfig } from "drizzle-kit";
+  import { getDatabaseUrl } from "./src/db/database-url";
+
+  config();
+
+  const databaseUrl = getDatabaseUrl();
+
+  export default defineConfig({
+    out: "./drizzle",
+    schema: "./src/db/schema.ts",
+    dialect: "postgresql",
+    dbCredentials: {
+      url: databaseUrl,
+    },
+  });
+`} lang="typescript" />
+
+### 2. Create Database Client
+
+Create `src/db/index.ts`:
+
+<Code code={`
+  import "dotenv/config";
+  import { drizzle } from "drizzle-orm/node-postgres";
+  import { getDatabaseUrl } from "./database-url";
+
+  const databaseUrl = getDatabaseUrl();
+
+  const db = drizzle(databaseUrl);
+  export { db };
+`} lang="typescript" />
+
+### 3. Define Your Schema
+
+Create `src/db/schema.ts`:
+
+<Code code={`
+  import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+
+  export const todos = pgTable("todos", {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    title: varchar({ length: 255 }).notNull(),
+    createdAt: timestamp({ mode: "date" }).defaultNow(),
+  });
+`} lang="typescript" />
+
+### 4. Database Connection Helper
 
 Create `src/db/database-url.ts` to handle connection string construction:
 
@@ -155,86 +202,32 @@ Create `src/db/database-url.ts` to handle connection string construction:
     const host = process.env.NODE_ENV === "production" ? "postgres" : "localhost";
 
     return \`postgres://\${postgresUser}:\${postgresPassword}@\${host}:5432/\${postgresDb}\`;
-  }
+}
 `} lang="typescript" />
 
 This helper constructs the database connection string from environment variables and automatically switches between `localhost` (development) and `postgres` (production hostname) based on `NODE_ENV`.
 
-### 2. Configure Drizzle
 
-Create `drizzle.config.ts`:
-
-<Code code={`
-  import { config } from "dotenv";
-  import { defineConfig } from "drizzle-kit";
-  import { getDatabaseUrl } from "./src/db/database-url";
-
-  config();
-
-  const databaseUrl = getDatabaseUrl();
-
-  export default defineConfig({
-    out: "./drizzle",
-    schema: "./src/db/schema.ts",
-    dialect: "postgresql",
-    dbCredentials: {
-      url: databaseUrl,
-    },
-  });
-`} lang="typescript" />
-
-### 3. Create Database Client
-
-Create `src/db/index.ts`:
-
-<Code code={`
-  import "dotenv/config";
-  import { drizzle } from "drizzle-orm/node-postgres";
-  import { getDatabaseUrl } from "./database-url";
-
-  const databaseUrl = getDatabaseUrl();
-
-  const db = drizzle(databaseUrl);
-  export { db };
-`} lang="typescript" />
-
-### 4. Define Your Schema
-
-Create `src/db/schema.ts`:
-
-<Code code={`
-  import { integer, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
-
-  export const todos = pgTable("todos", {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    title: varchar({ length: 255 }).notNull(),
-    createdAt: timestamp({ mode: "date" }).defaultNow(),
-  });
-`} lang="typescript" />
 
 ### 5. Create Environment File
 
 Create `.env` for local development. Make sure you have a local PostgreSQL instance running or use Docker Compose.
 
-<Code code={`
+<Code
+  code={`
   POSTGRES_USER=postgres
   POSTGRES_PASSWORD=postgres
   POSTGRES_DB=todo_app
-`} lang="bash" />
+`}
+  lang="bash"
+/>
 
-### 6. Generate Migrations
-
-<Code code="pnpm db:generate" lang="bash" />
-
-This creates migration files in the `drizzle/` directory.
-
-**Important:** These generated migration files should be committed to your git repository. They are part of your application code and will be included in your Docker image for production deployment.
-
-### 7. Set Up Local Database (Optional)
+### 6. Set Up Local Database (Optional)
 
 For local testing, you can use Docker to run PostgreSQL without installing it:
 
-<Code code={`
+<Code
+  code={`
   docker run --name postgres-dev \\
     -e POSTGRES_USER=postgres \\
     -e POSTGRES_PASSWORD=postgres \\
@@ -244,6 +237,7 @@ For local testing, you can use Docker to run PostgreSQL without installing it:
 `} lang="bash" />
 
 This command:
+
 - Creates a PostgreSQL container named `postgres-dev`
 - Sets up credentials matching your `.env` file
 - Exposes port 5432 to your local machine
@@ -369,7 +363,7 @@ Create `src/routes/index.tsx`:
       await db.delete(todos).where(eq(todos.id, data));
     });
 
-  export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")({
     component: RouteComponent,
     loader: async () => await getTodos(),
   });
@@ -387,32 +381,32 @@ Create `src/routes/index.tsx`:
               <button
                 type="button"
                 onClick={async () => {
-                    await deleteTodo({ data: todo.id });
-                    router.invalidate();
-                  }}
-                >
-                  X
-                </button>
-              </li>
-            ))}
-          </ul>
-          <h2>Add todo</h2>
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const form = e.currentTarget;
-              const data = new FormData(form);
-              await addTodo({ data });
-              router.invalidate();
-              form.reset();
-            }}
-          >
-            <input name="title" placeholder="Enter a new todo..." />
-            <button type="submit">Add</button>
-          </form>
-        </div>
-      );
-    }
+                  await deleteTodo({ data: todo.id });
+                  router.invalidate();
+                }}
+              >
+                X
+              </button>
+            </li>
+          ))}
+        </ul>
+        <h2>Add todo</h2>
+        <form
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const form = e.currentTarget;
+            const data = new FormData(form);
+            await addTodo({ data });
+            router.invalidate();
+            form.reset();
+          }}
+        >
+          <input name="title" placeholder="Enter a new todo..." />
+          <button type="submit">Add</button>
+        </form>
+      </div>
+    );
+  }
 `} lang="tsx" />
 
 ### 4. Create Health Check Route
@@ -433,7 +427,7 @@ Create `src/routes/health.tsx` for health checks:
   });
 `} lang="tsx" />
 
-This endpoint responds without querying the database, ensuring the container can be marked healthy even before migrations run.
+This endpoint responds without querying the database, ensuring the container can be marked healthy quickly.
 
 ## Docker Configuration
 
@@ -460,18 +454,17 @@ Create `Dockerfile`:
   COPY --from=prod-deps /app/node_modules /app/node_modules
   COPY --from=build /app/.output /app/.output
 
-  HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \\
-    CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
+  HEALTHCHECK --interval=10s --timeout=3s --start-period=10s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"
 
-  CMD ["sh", "-c", "pnpm db:migrate && pnpm start"]
+  CMD ["pnpm", "start"]
 `} lang="dockerfile" />
 
 Key points:
 
 - Uses multi-stage builds for smaller final image
-- Copies migration files and Drizzle config for manual migration execution
 - Includes a `HEALTHCHECK` that queries `/health` endpoint
-- Migrations are run manually after deployment (see deploy steps below)
+- Schema changes are pushed before deployment using the tunnel feature (see below)
 
 ### 2. Create .dockerignore
 
@@ -499,9 +492,9 @@ For PostgreSQL, we need to deploy two services: the database and the application
     - name: POSTGRES_USER
       value: postgres
     - name: POSTGRES_PASSWORD
-      value: "changeme"
+      value: "postgres"
     - name: POSTGRES_DB
-      value: mydb
+      value: "todo_app"
 
   targets:
     # Database Service
@@ -512,7 +505,6 @@ For PostgreSQL, we need to deploy two services: the database and the application
       port: 5432
       volumes:
         - postgres-data:/var/lib/postgresql
-
     # Application Service
     tanstack-start-postgres:
       domains:
@@ -526,6 +518,7 @@ For PostgreSQL, we need to deploy two services: the database and the application
 **Important:** Replace `your-server.haloy.dev` with the actual server domain you configured during the [Quickstart setup](/docs/quickstart). This should match the server where you installed the Haloy daemon using `haloy server setup`.
 
 Also update:
+
 - `my-app.example.com` - Replace with your actual domain or subdomain
 - `POSTGRES_PASSWORD` - Change to a strong, unique password for production
 
@@ -534,15 +527,15 @@ Also update:
 We define two **targets**:
 
 1.  `postgres`:
-    -   Uses the official `postgres:18` image.
-    -   Mounts a volume `postgres-data` to `/var/lib/postgresql` to ensure data persistence.
-    -   Exposes port `5432`.
-    -   Is accessible to other containers on the same server via the hostname `postgres`.
+    - Uses the official `postgres:18` image.
+    - Mounts a volume `postgres-data` to `/var/lib/postgresql` to ensure data persistence.
+    - Exposes port `5432`.
+    - Is accessible to other containers on the same server via the hostname `postgres`.
 
 2.  `tanstack-start-postgres`:
-    -   Your application code.
-    -   Connects to the database using the environment variables.
-    -   `NODE_ENV=production` ensures `src/db/database-url.ts` uses the `postgres` hostname.
+    - Your application code.
+    - Connects to the database using the environment variables.
+    - `NODE_ENV=production` ensures `src/db/database-url.ts` uses the `postgres` hostname.
 
 ### Persistent Storage
 
@@ -562,27 +555,49 @@ This ensures that even if you redeploy or restart the database container, your d
 Before deploying, verify everything works locally. Ensure you have a local PostgreSQL database running and updated `.env`.
 
 <Code code={`
-  pnpm db:migrate
+  pnpm db:push
   pnpm dev
 `} lang="bash" />
 
 Visit `http://localhost:3000` and try adding a todo.
 
-### 2. Deploy the Database First
+### 2. Deploy the Database
 
-**Important:** You must deploy the PostgreSQL database before deploying the application, as the app container needs the database to run migrations at startup.
+Deploy the PostgreSQL database first:
 
 <Code code="haloy deploy -t postgres" lang="bash" />
 
-Wait for the database deployment to complete before proceeding to the next step.
+Wait for the database deployment to complete before proceeding.
 
-### 3. Deploy the Application
+**Note:** If you started a local PostgreSQL container for testing, stop it first to free up port 5432:
 
-Once the database is running, deploy your application:
+<Code code="docker stop postgres-dev" lang="bash" />
+
+### 3. Push Your Schema to Production
+
+Before deploying your application, you need to set up the database schema. Haloy's tunnel feature lets you connect to the production database from your local machine:
+
+<Code code={`
+  # In one terminal, open a tunnel to the database
+  haloy tunnel 5432 -t postgres
+`} lang="bash" />
+
+The tunnel forwards the remote PostgreSQL port to your local machine. Now, in a separate terminal, push your schema:
+
+<Code code={`
+  # In another terminal, push your schema
+  pnpm db:push
+`} lang="bash" />
+
+Drizzle will connect to `localhost:5432` (which tunnels to your production database) and apply your schema changes.
+
+### 4. Deploy the Application
+
+With the database schema in place, deploy your application:
 
 <Code code="haloy deploy -t tanstack-start-postgres" lang="bash" />
 
-### 4. Verify Deployment
+### 5. Verify Deployment
 
 <Code code={`
   # Check status of all targets
@@ -592,3 +607,40 @@ Once the database is running, deploy your application:
   haloy logs -t tanstack-start-postgres
 `} lang="bash" />
 
+## Working with Your Production Database
+
+The tunnel feature is useful beyond initial deployment. Here are some common workflows:
+
+### Inspecting Data with Drizzle Studio
+
+Drizzle Studio provides a visual interface for browsing and editing your database:
+
+<Code code={`
+  # Terminal 1: Open the tunnel
+  haloy tunnel 5432 -t postgres
+
+  # Terminal 2: Start Drizzle Studio
+  pnpm db:studio
+`} lang="bash" />
+
+Then open `https://local.drizzle.studio` in your browser to explore your production data.
+
+### Updating the Schema
+
+When you modify your schema in `src/db/schema.ts`, push the changes to production:
+
+<Code code={`
+  # Terminal 1: Open the tunnel (if not already open)
+  haloy tunnel 5432 -t postgres
+
+  # Terminal 2: Push schema changes
+  pnpm db:push
+`} lang="bash" />
+
+Drizzle will show you a diff of the changes and prompt for confirmation before applying them.
+
+## Alternative: Migration-Based Workflow
+
+The `drizzle-kit push` approach shown above is ideal for solo developers who want to move fast. For teams or projects that need a more controlled change management process, consider using migrations instead.
+
+With migrations, schema changes are captured as versioned SQL files that can be reviewed in pull requests and applied consistently across environments. See the [Drizzle Migrations documentation](https://orm.drizzle.team/docs/migrations) for details on this approach.
