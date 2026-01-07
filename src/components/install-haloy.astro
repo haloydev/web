@@ -9,6 +9,8 @@ import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
   <Fragment slot="tabs">
     <CodeTabTrigger value="curl">curl</CodeTabTrigger>
     <CodeTabTrigger value="homebrew">homebrew</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
   </Fragment>
 
   <CodeTabPanel value="curl">
@@ -17,5 +19,13 @@ import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
 
   <CodeTabPanel value="homebrew">
     <Code code="brew install haloydev/tap/haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm add -g haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="npm">
+    <Code code="npm i -g haloy" lang="bash" />
   </CodeTabPanel>
 </CodeTabs>

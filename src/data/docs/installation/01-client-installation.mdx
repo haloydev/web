@@ -22,6 +22,42 @@ If you are using macOS or Linux with Homebrew:
 
 <Code code="brew install haloydev/tap/haloy" lang="bash" />
 
+
+### npm/pnpm
+<Code code="npm install -g haloy" lang="bash" />
+
+Or with pnpm:
+
+<Code code="pnpm add -g haloy" lang="bash" />
+
+#### Project Dev Dependency
+
+For teams working on JavaScript/TypeScript projects, you can add Haloy as a dev dependency:
+
+<Code code="npm install --save-dev haloy" lang="bash" />
+
+Or with pnpm:
+
+<Code code="pnpm add -D haloy" lang="bash" />
+
+Then use it via npm scripts in your `package.json`:
+
+<Code code={`
+  // ...
+  {
+    "scripts": {
+      "deploy": "haloy deploy",
+      "deploy:staging": "haloy deploy --target staging",
+      "deploy:prod": "haloy deploy --target production",
+      "status": "haloy status"
+    }
+  }
+`} lang="json" />
+
+Run with:
+
+<Code code="npm run deploy" lang="bash" />
+
 ## Verify Installation
 
 Check that `haloy` is installed correctly:
@@ -41,6 +77,19 @@ If you installed via the shell script, you can run the uninstall script:
 If you installed via Homebrew, you can uninstall the package and untap the repository:
 
 <Code code="brew uninstall haloy && brew untap haloydev/tap" lang="bash" />
+
+### npm/pnpm
+
+If you installed globally via npm:
+
+<Code code="npm uninstall -g haloy" lang="bash" />
+
+Or with pnpm:
+
+<Code code="pnpm remove -g haloy" lang="bash" />
+
+
+
 
 ## Next Steps
 
