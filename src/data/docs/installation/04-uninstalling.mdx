@@ -1,10 +1,13 @@
 ---
 title: 'Uninstalling'
 slug: 'uninstalling'
-section: guides
+section: installation
 ---
 
 import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
 
 Instructions for removing Haloy components from your system.
 
@@ -36,21 +39,51 @@ This does NOT remove:
 - Client configuration (`~/.config/haloy/`)
 - Server configurations and tokens
 
-#### npm/pnpm
+#### JavaScript Package Managers
 
-If you installed globally via npm:
-<Code code="npm uninstall -g haloy" lang="bash" />
+If you installed globally:
 
-Or with pnpm:
-<Code code="pnpm remove -g haloy" lang="bash" />
+<CodeTabs defaultValue="npm">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bun">bun</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="npm">
+    <Code code="npm uninstall -g haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm remove -g haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bun">
+    <Code code="bun remove -g haloy" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
 
 If you added it as a dev dependency in your project:
 
-<Code code="npm uninstall haloy" lang="bash" />
+<CodeTabs defaultValue="npm">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bun">bun</CodeTabTrigger>
+  </Fragment>
 
-Or with pnpm:
+  <CodeTabPanel value="npm">
+    <Code code="npm uninstall haloy" lang="bash" />
+  </CodeTabPanel>
 
-<Code code="pnpm remove haloy" lang="bash" />
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm remove haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bun">
+    <Code code="bun remove haloy" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
 
 ### Remove Client Configuration
 

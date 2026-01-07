@@ -5,6 +5,9 @@ section: installation
 ---
 
 import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
 
 The Haloy CLI tool runs on your local machine and triggers deployments to your servers.
 
@@ -23,22 +26,52 @@ If you are using macOS or Linux with Homebrew:
 <Code code="brew install haloydev/tap/haloy" lang="bash" />
 
 
-### npm/pnpm
-<Code code="npm install -g haloy" lang="bash" />
+### JavaScript Package Managers
 
-Or with pnpm:
+<CodeTabs defaultValue="npm">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bun">bun</CodeTabTrigger>
+  </Fragment>
 
-<Code code="pnpm add -g haloy" lang="bash" />
+  <CodeTabPanel value="npm">
+    <Code code="npm install -g haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm add -g haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bun">
+    <Code code="bun add -g haloy" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
+
 
 #### Project Dev Dependency
 
-For teams working on JavaScript/TypeScript projects, you can add Haloy as a dev dependency:
+For project-specific installations, add haloy as a dev dependency:
 
-<Code code="npm install --save-dev haloy" lang="bash" />
+<CodeTabs defaultValue="npm">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bun">bun</CodeTabTrigger>
+  </Fragment>
 
-Or with pnpm:
+  <CodeTabPanel value="npm">
+    <Code code="npm install --save-dev haloy" lang="bash" />
+  </CodeTabPanel>
 
-<Code code="pnpm add -D haloy" lang="bash" />
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm add -D haloy" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bun">
+    <Code code="bun add -D haloy" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
 
 Then use it via npm scripts in your `package.json`:
 
@@ -54,9 +87,6 @@ Then use it via npm scripts in your `package.json`:
   }
 `} lang="json" />
 
-Run with:
-
-<Code code="npm run deploy" lang="bash" />
 
 ## Verify Installation
 
@@ -66,30 +96,7 @@ Check that `haloy` is installed correctly:
 
 ## Uninstalling
 
-### Shell Script
-
-If you installed via the shell script, you can run the uninstall script:
-
-<Code code="curl -sL https://sh.haloy.dev/uninstall-haloy.sh | sh" lang="bash" />
-
-### Homebrew
-
-If you installed via Homebrew, you can uninstall the package and untap the repository:
-
-<Code code="brew uninstall haloy && brew untap haloydev/tap" lang="bash" />
-
-### npm/pnpm
-
-If you installed globally via npm:
-
-<Code code="npm uninstall -g haloy" lang="bash" />
-
-Or with pnpm:
-
-<Code code="pnpm remove -g haloy" lang="bash" />
-
-
-
+See the [Uninstalling guide](/docs/uninstalling) for instructions on removing Haloy from your system.
 
 ## Next Steps
 
