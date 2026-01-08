@@ -102,6 +102,9 @@ Stop running application containers.
 
   # Remove containers after stopping
   haloy stop --remove-containers
+
+  # Remove containers and volumes after stopping
+  haloy stop --remove-containers --remove-volumes
 `} lang="bash" />
 
 **Options:**
@@ -111,6 +114,7 @@ Stop running application containers.
 - `--target, -t <name>` - Stop specific target(s) (comma-separated for multiple)
 - `--all, -a` - Stop all targets
 - `--remove-containers, -r` - Remove containers after stopping
+- `--remove-volumes` - Remove volumes after stopping (requires --remove-containers)
 - `--server, -s <url>` - Override server URL
 </div>
 
