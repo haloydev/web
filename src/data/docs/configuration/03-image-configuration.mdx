@@ -183,7 +183,7 @@ Build locally and upload directly to your server:
   image:
     repository: "my-app"
     tag: "latest"
-    builder:
+    build_config:
       context: "."
       dockerfile: "Dockerfile"
       platform: "linux/amd64"
@@ -210,7 +210,7 @@ Build locally and push to a registry:
       password:
         from:
           env: "GITHUB_TOKEN"
-    builder:
+    build_config:
       context: "."
       dockerfile: "Dockerfile"
       platform: "linux/amd64"
@@ -228,7 +228,7 @@ Pass build-time variables:
   image:
     repository: "my-app"
     tag: "latest"
-    builder:
+    build_config:
       args:
         # Direct value
         - name: "NODE_ENV"
@@ -257,7 +257,7 @@ Build once, deploy to multiple targets:
   image:
     repository: "ghcr.io/your-org/my-app"
     tag: "latest"
-    builder:
+    build_config:
       context: "."
       dockerfile: "Dockerfile"
       platform: "linux/amd64"
@@ -266,7 +266,7 @@ Build once, deploy to multiple targets:
     production:
       server: "prod.haloy.com"
       image:
-        builder:
+        build_config:
           push: "server" # Push directly to production server
       domains:
         - domain: "my-app.com"
@@ -281,7 +281,7 @@ Build once, deploy to multiple targets:
           password:
             from:
               env: "GITHUB_TOKEN"
-          builder:
+          build_config:
             push: "registry" # Push to registry for staging
       domains:
         - domain: "staging.my-app.com"
@@ -416,7 +416,7 @@ Useful when:
         from:
           secret: "onepassword:registry.token"
     # Local build configuration
-    builder:
+    build_config:
       context: "."
       dockerfile: "Dockerfile.prod"
       platform: "linux/amd64"
