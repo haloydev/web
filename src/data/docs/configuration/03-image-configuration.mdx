@@ -78,12 +78,11 @@ Authenticate with private Docker registries including Docker Hub, GitHub Contain
 
 Then set the environment variables:
 
-<Code
-  code={`export REGISTRY_USERNAME="your-username"
-export REGISTRY_PASSWORD="your-token"
-haloy deploy`}
-  lang="bash"
-/>
+<Code code={`
+  export REGISTRY_USERNAME="your-username"
+  export REGISTRY_PASSWORD="your-token"
+  haloy deploy
+`} lang="bash" />
 
 **Tip:** You have the option to define environment variables in files which the `haloy` CLI tool will automatically load. See [Environment Files](/docs/environment-variables#environment-files) for more details.
 
@@ -165,13 +164,49 @@ Haloy can build Docker images locally and distribute them to your servers, elimi
 
 ### Build Configuration
 
-| Key          | Type   | Required | Description                                           |
-| ------------ | ------ | -------- | ----------------------------------------------------- |
-| `context`    | string | No       | Build context directory (default: ".")                |
-| `dockerfile` | string | No       | Path to Dockerfile (default: "Dockerfile")            |
-| `platform`   | string | No       | Target platform (default: "linux/amd64")              |
-| `args`       | array  | No       | Build arguments                                       |
-| `push`       | string | No       | Where to push: "registry" or "server" (auto-detected) |
+| Key          | Type   | Required | Description                                                         |
+| ------------ | ------ | -------- | --------------------------------------------------------------------|
+| `context`    | string | No       | Build context directory, relative to config file (default: ".")     |
+| `dockerfile` | string | No       | Path to Dockerfile, relative to config file (default: "Dockerfile") |
+| `platform`   | string | No       | Target platform (default: "linux/amd64")                            |
+| `args`       | array  | No       | Build arguments                                                     |
+| `push`       | string | No       | Where to push: "registry" or "server" (auto-detected)               |
+
+
+**Example:**
+
+<Code code={`
+  build_config:
+    context: "."
+    dockerfile: "Dockerfile"
+    platform: "linux/amd64"
+    args:
+      - name: NODE_ENV
+        value: "production"
+      - name: API_URL
+        from:
+          env: API_URL
+    push: "registry"
+`} lang="yaml" />
+
+#### Dockerfile and Context
+
+Both context and dockerfile paths are resolved relative to the config file's directory.
+
+<Code code={`
+  # Dockerfile inside context directory
+  build_config:
+    context: "./dockerfiles/static"
+    dockerfile: "./dockerfiles/static/Dockerfile-static"
+  # Shared Dockerfile with different context
+  build_config:
+    context: "./apps/frontend"
+    dockerfile: "./dockerfiles/Dockerfile-node"
+  # Dockerfile at root, context is a subdirectory
+  build_config:
+    context: "./src"
+    dockerfile: "./Dockerfile"
+`} lang="yaml" />
 
 ### Push to Server (No Registry Required)
 
