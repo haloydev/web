@@ -77,4 +77,4 @@ All while still being powerful enough for production workloads.
 ## Next Steps
 - [Install Haloy](/docs/quickstart)
 - [Learn about The Architecture](/docs/architecture)
-- [Commands Reference](/docs/command-reference)
+- [haloy CLI Command Reference](/docs/haloy)
