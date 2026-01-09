@@ -65,9 +65,9 @@ These options define a deployment unit.
 | Key                   | Type           | Required | Description                                                                                                 |
 | --------------------- | -------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
 | `name`                | string         | **Yes**  | Unique application name (Required at root)                                                                  |
-| `preset`              | string         | No       | Apply preset configuration (Options: database, service)                                                     |
-| `protected`           | boolean        | No       | Exclude from `--all` deployments (default: false)                                                           |
-| `naming_strategy`     | string         | No       | Container naming: "dynamic" (default) or "static"                                                           |
+| `preset`              | string         | No       | Apply preset configuration (Options: database, service)  (see [Presets](#presets))                          |
+| `protected`           | boolean        | No       | Exclude from `--all` deployments (default: false)  (see [Protected Targets](#protected-targets))            |
+| `naming_strategy`     | string         | No       | Container naming: "dynamiAc" (default) or "static" (see [Naming Strategy](#naming-strategy))                |
 | `image`               | object         | No       | Docker image configuration (see [Image Configuration](/docs/image-configuration))                           |
 | `server`              | string         | No       | Haloy server API URL                                                                                        |
 | `api_token`           | object         | No       | API token configuration (see [Authentication](/docs/server-authentication))                                 |
