@@ -283,6 +283,8 @@ Pass build-time variables:
         - name: "GITHUB_TOKEN"
 `} lang="yaml" />
 
+**Tip:** If you need the same variable as both a runtime environment variable and a build argument, you can define it once in `env` with `build_arg: true` instead of duplicating it. See [Build Arguments from Environment Variables](/docs/environment-variables#build-arguments-from-environment-variables) for details.
+
 ### Multi-Target with Shared Build
 
 Build once, deploy to multiple targets:

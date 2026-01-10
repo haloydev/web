@@ -141,6 +141,51 @@ Combine different methods in a single configuration:
         secret: "onepassword:api-keys.secret"
 `} lang="yaml" />
 
+## Build Arguments from Environment Variables
+When building Docker images locally, you often need the same variable both as a runtime environment variable and as a build argument. Instead of duplicating the definition, use the `build_arg` option:
+
+<Code code={`
+  name: "my-app"
+  env:
+    - name: "NODE_ENV"
+      value: "production"
+      build_arg: true  # Also pass as build argument
+    - name: "API_URL"
+      from:
+        env: "API_URL"
+      build_arg: true
+  image:
+    repository: "my-app"
+    build_config:
+      context: "."
+`} lang="yaml" />
+
+This is equivalent to the more verbose:
+
+<Code code={`
+  env:
+    - name: "NODE_ENV"
+      value: "production"
+    - name: "API_URL"
+      from:
+        env: "API_URL"
+  image:
+    repository: "my-app"
+    build_config:
+      context: "."
+      args:
+        - name: "NODE_ENV"
+          value: "production"
+        - name: "API_URL"
+          from:
+            env: "API_URL"
+`} lang="yaml" />
+
+**Notes:**
+- The `build_arg` option only takes effect when the image has a `build_config` (i.e., the image will be built locally)
+- If the same variable name is explicitly defined in `build_config.args`, the explicit definition takes precedence
+- All value sources work with `build_arg`: plain `value`, `from.env`, and `from.secret`
+
 ## Multi-Target Environment Variables
 
 Merge environment variables per target:
