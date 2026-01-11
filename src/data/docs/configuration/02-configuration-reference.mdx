@@ -28,7 +28,6 @@ The configuration file supports **two modes** of operation:
 ### Multi-Target Example
 
 <Code code={`
-  name: "my-app"
   # Base settings inherited by all targets
   image:
     repository: "my-app"
@@ -62,26 +61,26 @@ These options define a deployment unit.
 *   **At Root**: They serve as the default settings (or the single deployment configuration).
 *   **Under `targets`**: They override the defaults for that specific target.
 
-| Key                   | Type           | Required | Description                                                                                                 |
-| --------------------- | -------------- | -------- | ----------------------------------------------------------------------------------------------------------- |
-| `name`                | string         | **Yes**  | Unique application name (Required at root)                                                                  |
-| `preset`              | string         | No       | Apply preset configuration (Options: database, service)  (see [Presets](#presets))                          |
-| `protected`           | boolean        | No       | Exclude from `--all` deployments (default: false)  (see [Protected Targets](#protected-targets))            |
-| `naming_strategy`     | string         | No       | Container naming: "dynamiAc" (default) or "static" (see [Naming Strategy](#naming-strategy))                |
-| `image`               | object         | No       | Docker image configuration (see [Image Configuration](/docs/image-configuration))                           |
-| `server`              | string         | No       | Haloy server API URL                                                                                        |
-| `api_token`           | object         | No       | API token configuration (see [Authentication](/docs/server-authentication))                                 |
-| `deployment_strategy` | string         | No       | Deployment strategy: "rolling" (default) or "replace"                                                       |
-| `domains`             | array          | No       | Domain configuration                                                                                        |
-| `acme_email`          | string         | No       | Let's Encrypt email (required with domains)                                                                 |
-| `replicas`            | integer        | No       | Number of container instances (default: 1)                                                                  |
-| `port`                | string/integer | No       | Container port to expose (default: "8080"). The port your application listens on inside the container.      |
-| `health_check_path`   | string         | No       | Health check endpoint (default: "/")                                                                        |
-| `env`                 | array          | No       | Environment variables (see [Environment Variables](/docs/environment-variables))                            |
-| `volumes`             | array          | No       | Volume mounts (see [Volumes](/docs/volumes))                                                                |
-| `pre_deploy`          | array          | No       | Commands to run before deploy (per target)                                                                  |
-| `post_deploy`         | array          | No       | Commands to run after deploy (per target)                                                                   |
-| `network`             | string         | No       | Docker network for the container. (default: `haloy`)                                                        |
+| Key                   | Type           | Required | Description                                                                                                    |
+| --------------------- | -------------- | ------------| ----------------------------------------------------------------------------------------------------------- |
+| `name`                | string         | Conditional | Application name. (see [Container Name Source](#container-name-source))                                     |
+| `preset`              | string         | No          | Apply preset configuration (Options: database, service)  (see [Presets](#presets))                          |
+| `protected`           | boolean        | No          | Exclude from `--all` deployments (default: false)  (see [Protected Targets](#protected-targets))            |
+| `naming_strategy`     | string         | No          | Container naming: "dynamiAc" (default) or "static" (see [Naming Strategy](#naming-strategy))                |
+| `image`               | object         | No          | Docker image configuration (see [Image Configuration](/docs/image-configuration))                           |
+| `server`              | string         | No          | Haloy server API URL                                                                                        |
+| `api_token`           | object         | No          | API token configuration (see [Authentication](/docs/server-authentication))                                 |
+| `deployment_strategy` | string         | No          | Deployment strategy: "rolling" (default) or "replace"                                                       |
+| `domains`             | array          | No          | Domain configuration                                                                                        |
+| `acme_email`          | string         | No          | Let's Encrypt email (required with domains)                                                                 |
+| `replicas`            | integer        | No          | Number of container instances (default: 1)                                                                  |
+| `port`                | string/integer | No          | Container port to expose (default: "8080"). The port your application listens on inside the container.      |
+| `health_check_path`   | string         | No          | Health check endpoint (default: "/")                                                                        |
+| `env`                 | array          | No          | Environment variables (see [Environment Variables](/docs/environment-variables))                            |
+| `volumes`             | array          | No          | Volume mounts (see [Volumes](/docs/volumes))                                                                |
+| `pre_deploy`          | array          | No          | Commands to run before deploy (per target)                                                                  |
+| `post_deploy`         | array          | No          | Commands to run after deploy (per target)                                                                   |
+| `network`             | string         | No          | Docker network for the container. (default: `haloy`)                                                        |
 
 ## Configuration File Discovery
 
@@ -159,6 +158,30 @@ Prevent accidental deployment of critical services (like databases) by marking t
 - Deploy explicitly: `haloy deploy -t postgres`
 - Force inclusion: `haloy deploy --all --include-protected`
 
+
+## Container Name Source
+- **Single-target configs**: Container names are derived from the root `name` field (required).
+- **Multi-target configs**: Container names are derived from the **target key** by default. Targets can explicitly set `name` to override this.
+
+**Example (multi-target):**
+
+<Code code={`
+  targets:
+    production:   # Container: production-abc123
+      server: prod.server.com
+    staging:      # Container: staging-abc123
+      server: staging.server.com
+`} lang="yaml" />
+
+**Constraints for Static Naming:**
+- Requires `deployment_strategy: "replace"`
+- Does not support multiple replicas
+
+<Code code={`
+  naming_strategy: static
+  deployment_strategy: replace
+`} lang="yaml" />
+
 ## Naming Strategy
 
 Control how container names are generated.
@@ -224,7 +247,6 @@ Run custom commands before or after deployment:
 For multi-target deployments, use global hooks:
 
 <Code code={`
-  name: "my-app"
   global_pre_deploy:
     - "npm run build"
     - "docker build -t my-app ."
@@ -276,7 +298,6 @@ When using multi-target deployments, each target can override base configuration
 
 <Code code={`
   # Base configuration - inherited by all targets
-  name: "my-app"
   image:
     repository: "ghcr.io/my-org/my-app"
     tag: "latest"

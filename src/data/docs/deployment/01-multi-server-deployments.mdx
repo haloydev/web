@@ -18,7 +18,6 @@ Deploy your application to multiple servers with a single configuration file. Pe
 ## Basic Multi-Target Configuration
 
 <Code code={`
-  name: "my-app"
   # Base configuration inherited by all targets
   image:
     repository: "ghcr.io/your-username/my-app"
@@ -62,7 +61,6 @@ Deploy your application to multiple servers with a single configuration file. Pe
 Base configuration provides defaults that targets can override:
 
 <Code code={`
-  name: "my-app"
   # Base configuration - inherited by all targets
   image:
     repository: "ghcr.io/my-org/my-app"
@@ -105,12 +103,13 @@ Base configuration provides defaults that targets can override:
 - **Exception:** Environment variables (`env`) are merged - target values override base values with the same name, while preserving other base variables
 - Other arrays (like `domains`, `volumes`) are replaced entirely, not merged
 
+**Container Naming:** In multi-target configurations, containers are named using the target key (e.g., `production-abc123`, `staging-abc123`). This ensures each target's containers are uniquely identifiable. You can override this by setting a name for the target explicitly.
+
 ## Multi-Environment Example
 
 Complete setup for production, staging, and development:
 
 <Code code={`
-  name: "my-app"
   # Base configuration
   image:
     repository: "ghcr.io/my-org/my-app"
@@ -182,7 +181,6 @@ Complete setup for production, staging, and development:
 Deploy to multiple regions:
 
 <Code code={`
-  name: "my-api"
   image:
     repository: "ghcr.io/my-org/api"
     tag: "v2.0.0"
@@ -231,7 +229,6 @@ Deploy to multiple regions:
 Run once before or after all target deployments:
 
 <Code code={`
-  name: "my-app"
   global_pre_deploy:
     - "npm run build"
     - "docker build -t my-app ."
@@ -318,7 +315,6 @@ Add all your servers to the local client:
 When using the image builder, the image is built once and distributed to all targets:
 
 <Code code={`
-  name: "my-app"
   image:
     repository: "my-app"
     tag: "latest"
