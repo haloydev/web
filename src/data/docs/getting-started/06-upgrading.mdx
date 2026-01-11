@@ -1,0 +1,87 @@
+---
+title: Upgrading
+slug: upgrading
+section: getting-started
+---
+
+import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
+
+## Upgrading Haloy CLI
+
+### Shell Script
+
+To upgrade the Haloy CLI from the previous version:
+
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloy.sh | sh" lang="bash" />
+
+The installation script will upgrade your existing installation to the latest version.
+
+### Homebrew
+
+If you installed Haloy via Homebrew:
+
+<Code code="brew upgrade haloy" lang="bash" />
+
+###  Javascript Package Managers
+
+If you installed Haloy as a global package:
+
+<CodeTabs defaultValue="npm">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bun">bun</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="npm">
+    <Code code="npm install -g haloy@latest" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm add -g haloy@latest" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bun">
+    <Code code="bun add -g haloy@latest" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
+
+If you installed Haloy as a project dev dependency:
+
+<CodeTabs defaultValue="npm">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npm">npm</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bun">bun</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="npm">
+    <Code code="npm install --save-dev haloy@latest" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm add -D haloy@latest" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bun">
+    <Code code="bun add -D haloy@latest" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
+
+### Verify Upgrade
+
+Check that the upgrade was successful:
+
+<Code code="haloy version" lang="bash" />
+
+## Upgrading Server Components
+
+To upgrade `haloyadm` and `haloyd` on your server, use the upgrade script:
+
+<Code code="curl -fsSL https://sh.haloy.dev/upgrade-server.sh | sudo sh" lang="bash" />
+
+This script will upgrade both components to the latest version while preserving your configuration and data.
+
