@@ -85,8 +85,9 @@ See [Secret Providers](/docs/secret-providers) for more details.
 Haloy automatically loads environment variables from these files (in order):
 
 1. `.env` in the current directory
-2. `.env.{target}` for target-specific variables
-3. `.env` in the Haloy config directory (`~/.config/haloy/`)
+2. `.env.local` in the current directory (overrides `.env`)
+3. `.env.{target}` for target-specific variables
+4. `.env` in the Haloy config directory (`~/.config/haloy/`)
 
 ### Example .env File
 
@@ -96,6 +97,30 @@ Haloy automatically loads environment variables from these files (in order):
   DEBUG=true
   MAX_CONNECTIONS=100
 `} lang="bash" />
+
+### Local Overrides with .env.local
+
+The `.env.local` file is loaded after `.env` and overrides any duplicate variables. This follows a common convention where:
+
+- `.env` contains committed defaults and safe-to-share values
+- `.env.local` contains local or secret overrides that are gitignored
+
+**.env (committed to repository):**
+
+<Code code={`
+  DATABASE_URL=postgres://localhost:5432/myapp
+  API_KEY=placeholder
+  DEBUG=true
+`} lang="bash" />
+
+**.env.local (gitignored, local overrides):**
+
+<Code code={`
+  API_KEY=your-actual-secret-key
+  DEBUG=false
+`} lang="bash" />
+
+In this example, `API_KEY` and `DEBUG` from `.env.local` override the values in `.env`, while `DATABASE_URL` remains unchanged.
 
 ### Target-Specific .env Files
 
@@ -226,10 +251,11 @@ Merge environment variables per target:
 ## Best Practices
 
 1. **Never commit secrets**: Use `.env` files or secret providers for sensitive data
-2. **Add .env to .gitignore**: Prevent accidental commits
+2. **Add .env files to .gitignore**: Prevent accidental commits
 
 <Code code={`
   echo ".env" >> .gitignore
+  echo ".env.local" >> .gitignore
   echo ".env.*" >> .gitignore
 `} lang="bash" />
 
