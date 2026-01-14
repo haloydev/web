@@ -18,42 +18,34 @@ const formatDate = (date: Date) => {
 <BaseLayout title="Blog - Haloy">
   <Navbar client:load />
   <main class="px-6 pb-20">
-    <div class="max-w-3xl mx-auto">
+    <div class="mx-auto max-w-3xl">
       <header class="pt-12 pb-8">
-        <h1 class="text-4xl font-bold tracking-tight mb-4">Blog</h1>
-        <p class="text-lg text-muted-foreground">
-          Updates, tutorials, and insights from the Haloy team.
-        </p>
+        <h1 class="mb-4 text-4xl font-bold tracking-tight">Blog</h1>
+        <p class="text-muted-foreground text-lg">Updates, tutorials, and insights from developing haloy.</p>
       </header>
       <div class="space-y-8">
-        {sortedPosts.map((post) => (
-          <article class="group">
-            <a href={`/blog/${post.data.slug}`} class="block">
-              <div class="flex flex-wrap gap-2 mb-2">
-                {post.data.tags.slice(0, 3).map((tag) => (
-                  <span class="px-2 py-0.5 text-xs font-medium bg-muted rounded text-muted-foreground">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <h2 class="text-xl font-semibold mb-2 group-hover:text-primary transition-colors">
-                {post.data.title}
-              </h2>
-              <p class="text-muted-foreground mb-2">{post.data.description}</p>
-              <div class="flex items-center gap-2 text-sm text-muted-foreground">
-                <span>{post.data.author}</span>
-                <span>·</span>
-                <time datetime={post.data.pubDate.toISOString()}>
-                  {formatDate(post.data.pubDate)}
-                </time>
-              </div>
-            </a>
-          </article>
-        ))}
+        {
+          sortedPosts.map((post) => (
+            <article class="group">
+              <a href={`/blog/${post.data.slug}`} class="block">
+                <div class="mb-2 flex flex-wrap gap-2">
+                  {post.data.tags.slice(0, 3).map((tag) => (
+                    <span class="bg-muted text-muted-foreground rounded px-2 py-0.5 text-xs font-medium">{tag}</span>
+                  ))}
+                </div>
+                <h2 class="group-hover:text-primary mb-2 text-xl font-semibold transition-colors">{post.data.title}</h2>
+                <p class="text-muted-foreground mb-2">{post.data.description}</p>
+                <div class="text-muted-foreground flex items-center gap-2 text-sm">
+                  <span>{post.data.author}</span>
+                  <span>·</span>
+                  <time datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+                </div>
+              </a>
+            </article>
+          ))
+        }
       </div>
-      {sortedPosts.length === 0 && (
-        <p class="text-muted-foreground">No posts yet. Check back soon!</p>
-      )}
+      {sortedPosts.length === 0 && <p class="text-muted-foreground">No posts yet. Check back soon!</p>}
     </div>
   </main>
 </BaseLayout>

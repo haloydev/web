@@ -10,22 +10,24 @@ export function Navbar({ showLinks = true }: NavbarProps) {
   return (
     <nav className="flex justify-center py-4 pr-6 pl-2">
       <div className="flex w-full justify-between">
-        <div className="flex items-center">
-          <a href="/" className="font-figtree px-4 text-2xl font-semibold">
-            Haloy
-          </a>
+        <a href="/" className="font-figtree px-4 text-2xl font-semibold">
+          Haloy
+        </a>
+        <div className="flex items-center space-x-2">
           {showLinks && (
-            <>
-              <a href="/docs/quickstart" className="text-muted-foreground hover:text-foreground px-3 text-sm">
+            <div className="mr-12">
+              <a
+                href="/docs/quickstart"
+                className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium"
+              >
                 Docs
               </a>
-              <a href="/blog" className="text-muted-foreground hover:text-foreground px-3 text-sm">
+              <a href="/blog" className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium">
                 Blog
               </a>
-            </>
+            </div>
           )}
-        </div>
-        <div className="flex space-x-2">
+
           <ModeToggle />
           <ButtonLink
             href="https://github.com/haloydev/haloy"
