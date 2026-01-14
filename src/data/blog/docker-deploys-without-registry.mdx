@@ -1,0 +1,299 @@
+---
+title: 'Docker Deploys as Fast as Registry Pushes. Without the Registry'
+slug: 'docker-deploys-without-registry'
+description: 'What if your deployment server could cache layers the same way a registry does? Registry-like layer caching for direct-to-server deploys, without the registry.'
+pubDate: 2026-01-13
+author: 'Andreas Meistad'
+tags: ['docker', 'deployment', 'devops', 'go']
+draft: false
+---
+
+import Code from '@/components/code.astro';
+
+The goal with Haloy was to create a simple tool that could do zero downtime deployments to my own server without needing a complicated build system and unnecessary services. Just a server and my local development machine. My first approach was simple, maybe a little naive:
+
+<Code code={`
+  # Build the image
+  docker build -t myapp:latest .
+
+  # Save it to a tar
+  docker save -o myapp.tar myapp:latest
+
+  # Upload the tar to your server (scp, HTTP, whatever)
+  scp myapp.tar server:/tmp/
+
+  # Load it on the server
+  ssh server "docker load -i /tmp/myapp.tar"
+`} lang="bash" />
+
+This worked, but it's wasteful. A typical dockerized Node.js app is 200-400MB. A Next.js production build? Easily 400-600MB. And you're uploading all of it, every single deploy. Most of that is base layers that haven't changed. The `node:22-alpine` base image. The `npm install` layer with your dependencies. The only thing that actually changed is your application code, maybe 5MB.
+
+After a few days of iterating on a feature, I checked my bandwidth usage and realized this wasn't going to scale.
+
+The "obvious" solution is to use a Docker registry. Push once, pull everywhere. I even considered running a private registry container directly on the production server. But that meant managing authentication, volume mounts, and exposing ports (or tunneling). It felt like overkill for a simple "push code to server" workflow. I wanted a single binary with zero external dependencies.
+
+The alternative? Make the server act like a registry, minus the registry.
+
+## How It Works
+
+Docker images is essentially just a stack of layers, each identified by a SHA256 digest of its contents (content-addressable storage).
+
+<Code code={`
+  myapp:latest
+  ├── sha256:7bb20cf5ef67... (alpine base)
+  ├── sha256:8ae63eb1f31f... (node runtime)
+  ├── sha256:a1b2c3d4e5f6... (npm dependencies)
+  └── sha256:f9e8d7c6b5a4... (your code)
+`} lang="text" />
+
+When you `docker push` to a registry, it doesn't blindly accept the whole image. Instead:
+
+1. Client sends the list of layer digests
+2. Registry responds: "I already have layers 1, 2, and 3. Just send me layer 4."
+3. Client uploads only the missing layer
+4. Registry stores it and links everything together
+
+Registries aren't magic. They're just content-addressable caches with an HTTP API. There's no reason a deployment server can't do the same thing. Track which layers the server already has, skip uploading them. The server becomes its own mini-registry, minus the complexity.
+
+### Parsing the Image Tar
+
+When you run `docker save`, it creates a tar archive with a specific structure:
+
+<Code code={`
+  myapp.tar
+  ├── manifest.json
+  ├── [config-hash].json
+  └── blobs/
+      └── sha256/
+          ├── 7bb20cf5ef67...
+          ├── 8ae63eb1f31f...
+          └── ...
+`} lang="text" />
+
+The `manifest.json` tells us which layers make up the image:
+
+<Code code={`
+  type DockerManifest struct {
+      Config   string   ${"`"}json:"Config"${"`"}
+      RepoTags []string ${"`"}json:"RepoTags"${"`"}
+      Layers   []string ${"`"}json:"Layers"${"`"}
+  }
+
+  func parseImageTar(tarPath string) (\*ImageInfo, error) {
+      f, \_ := os.Open(tarPath)
+      defer f.Close()
+
+      tr := tar.NewReader(f)
+      var manifest []DockerManifest
+      layers := make(map[string]string) // digest -> path in tar
+
+      for {
+          header, err := tr.Next()
+          if err == io.EOF {
+              break
+          }
+
+          if header.Name == "manifest.json" {
+              json.NewDecoder(tr).Decode(&manifest)
+          }
+
+          // Extract layer digests from paths like "blobs/sha256/abc123..."
+          if strings.HasPrefix(header.Name, "blobs/sha256/") {
+              digest := "sha256:" + filepath.Base(header.Name)
+              layers[digest] = header.Name
+          }
+      }
+
+      return &ImageInfo{
+          Manifest: manifest[0],
+          Layers:   layers,
+      }, nil
+  }
+`} lang="go" />
+
+### The Layer Check Protocol
+
+The client sends the list of layer digests to the server and asks which ones it already has:
+
+<Code code={`
+  type LayerCheckRequest struct {
+      Digests []string ${"`"}json:"digests"${"`"}
+  }
+
+  type LayerCheckResponse struct {
+  Missing []string ${"`"}json:"missing"${"`"}
+        Exists  []string ${"`"}json:"exists"${"`"}
+  }
+
+  // Client side
+  func checkCachedLayers(serverURL string, digests []string) ([]string, error) {
+  req := LayerCheckRequest{Digests: digests}
+  resp, \_ := http.Post(serverURL+"/v1/images/layers/check",
+  "application/json", toJSON(req))
+
+        var result LayerCheckResponse
+        json.NewDecoder(resp.Body).Decode(&result)
+
+        return result.Missing, nil
+
+  }
+`} lang="go" />
+
+Server side, I just check the layer store:
+
+<Code code={`
+  func handleLayerCheck(w http.ResponseWriter, r *http.Request) {
+      var req LayerCheckRequest
+      json.NewDecoder(r.Body).Decode(&req)
+
+      exists, missing := layerStore.HasLayers(req.Digests)
+
+      json.NewEncoder(w).Encode(LayerCheckResponse{
+          Missing: missing,
+          Exists:  exists,
+      })
+  }
+`} lang="go" />
+
+### Streaming Missing Layers
+
+For each missing layer, the client extracts it from the tar and uploads it with its digest:
+
+<Code code={`
+  func uploadMissingLayers(tarPath string, missing []string, serverURL string) error {
+      f, _ := os.Open(tarPath)
+      defer f.Close()
+
+      tr := tar.NewReader(f)
+
+      for {
+          header, err := tr.Next()
+          if err == io.EOF {
+              break
+          }
+
+          digest := digestFromPath(header.Name)
+          if !contains(missing, digest) {
+              continue // Server already has this layer
+          }
+
+          // Upload this layer
+          req, _ := http.NewRequest("POST", serverURL+"/v1/images/layers", tr)
+          req.Header.Set("X-Layer-Digest", digest)
+          req.Header.Set("Content-Type", "application/octet-stream")
+
+          http.DefaultClient.Do(req)
+      }
+      return nil
+  }
+`} lang="go" />
+
+The server validates the digest matches the content (no trusting the client):
+
+<Code
+  code={`
+  func handleLayerUpload(w http.ResponseWriter, r *http.Request) {
+      expectedDigest := r.Header.Get("X-Layer-Digest")
+
+      // Write to temp file while computing hash
+      tmp, _ := os.CreateTemp("", "layer-*")
+      hash := sha256.New()
+      writer := io.MultiWriter(tmp, hash)
+
+      io.Copy(writer, r.Body)
+
+      actualDigest := "sha256:" + hex.EncodeToString(hash.Sum(nil))
+
+      if actualDigest != expectedDigest {
+          os.Remove(tmp.Name())
+          http.Error(w, "digest mismatch", http.StatusBadRequest)
+          return
+      }
+
+      // Atomic rename into layer store
+      layerPath := filepath.Join(layerDir, actualDigest, "layer.tar")
+      os.MkdirAll(filepath.Dir(layerPath), 0755)
+      os.Rename(tmp.Name(), layerPath)
+
+      w.WriteHeader(http.StatusCreated)
+
+}
+`}
+lang="go"
+/>
+
+### Reassembly
+
+Once all layers are cached, the server reconstructs a Docker-loadable tar:
+
+<Code
+  code={`
+  func assembleImageTar(config []byte, manifest DockerManifest) (string, error) {
+      tmp, _ := os.CreateTemp("", "image-*.tar")
+      tw := tar.NewWriter(tmp)
+
+      // Write manifest.json
+      manifestJSON, _ := json.Marshal([]DockerManifest{manifest})
+      writeToTar(tw, "manifest.json", manifestJSON)
+
+      // Write config blob
+      writeToTar(tw, manifest.Config, config)
+
+      // Copy each cached layer into the tar
+      for _, layerPath := range manifest.Layers {
+          digest := digestFromPath(layerPath)
+          cachedPath := filepath.Join(layerDir, digest, "layer.tar")
+
+          data, _ := os.ReadFile(cachedPath)
+          writeToTar(tw, layerPath, data)
+      }
+
+      tw.Close()
+      return tmp.Name(), nil
+
+}
+`}
+lang="go"
+/>
+
+Then it's just `docker load -i assembled.tar` and the deploy is complete.
+
+## The Results
+
+**First deploy** (cold cache, ~940MB Tanstack Start app):
+
+<Code code={`
+  ● Pushing image myapp:latest to server.haloy.dev (layered)
+  ● Server has 1/9 layers cached, uploading 8
+  ● Uploading layers [████████████████████] 8/8 (938.8 MB)
+  ✓ Deploy complete
+`} lang="text" />
+
+**Second deploy** (after some code changes):
+
+<Code code={`
+  ● Pushing image myapp:latest to server.haloy.dev (layered)
+  ● Server has 7/9 layers cached, uploading 2
+  ● Uploading layers [████████████████████] 2/2 (65.1 MB)
+  ✓ Deploy complete
+`} lang="text" />
+
+From 939MB down to 65MB. The first time I saw this work, I thought the deploy had failed because it finished so fast. The base image, node runtime, and most dependencies were already on the server.
+
+If you deploy multiple apps that share a base image (say, three services all using `node:22-alpine`), those base layers are cached once and shared across all of them.
+
+## Trade-offs
+
+**Disk space**: Layers accumulate on the server. I track `last_used_at` for each layer and can evict old ones, but you'll want to monitor disk usage.
+
+**Complexity**: More moving parts than just uploading a tar. The client needs to understand the protocol, and there's a fallback for older servers that don't support it.
+
+**Initial deploy is the same**: The first deploy still uploads everything. The wins come on subsequent deploys.
+
+**The BuildKit Headache**: This was the hardest part. `docker save` produces different directory structures and `manifest.json` formats depending on whether you use the classic builder or BuildKit (OCI layout). I had to reverse-engineer the OCI layout to find the actual layer blobs, as they aren't always in the root level like legacy archives.
+
+Layer compression is next on the list, which should cut upload times further for text-heavy layers.
+
+---
+
+This is how [Haloy](https://haloy.dev) handles direct-to-server deployments. A few hundred lines of Go, 939MB down to 65MB on the second push, no registry required.

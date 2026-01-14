@@ -1,0 +1,70 @@
+---
+import type { MarkdownHeading } from 'astro';
+import { Navbar } from '@/components/navbar';
+import { DocsTableOfContents } from '@/components/docs-table-of-contents';
+import BaseLayout from '@/layouts/base.astro';
+import Prose from '@/components/prose.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  updatedDate?: Date;
+  author: string;
+  tags: string[];
+  headings: MarkdownHeading[];
+}
+
+const { title, description, pubDate, updatedDate, author, tags, headings } = Astro.props;
+
+const formatDate = (date: Date) => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+---
+
+<BaseLayout title={`${title} - Haloy Blog`}>
+  <Navbar client:load />
+  <div class="lg:flex">
+    <main class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
+      <article class="w-full max-w-3xl">
+        <header class="pt-6 pb-8 border-b border-border mb-8">
+          <div class="flex flex-wrap gap-2 mb-4">
+            {tags.map((tag) => (
+              <span class="px-2 py-1 text-xs font-medium bg-muted rounded-md text-muted-foreground">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <h1 class="text-4xl font-bold tracking-tight mb-4">{title}</h1>
+          <p class="text-lg text-muted-foreground mb-4">{description}</p>
+          <div class="flex items-center gap-4 text-sm text-muted-foreground">
+            <span>{author}</span>
+            <span>·</span>
+            <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+            {updatedDate && (
+              <>
+                <span>·</span>
+                <span>Updated {formatDate(updatedDate)}</span>
+              </>
+            )}
+          </div>
+        </header>
+        <Prose>
+          <slot />
+        </Prose>
+        <footer class="mt-12 pt-8 border-t border-border">
+          <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            &larr; Back to all posts
+          </a>
+        </footer>
+      </article>
+      <aside class="hidden lg:block xl:ml-24">
+        <DocsTableOfContents client:load headings={headings} />
+      </aside>
+    </main>
+  </div>
+</BaseLayout>

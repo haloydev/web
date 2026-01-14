@@ -33,7 +33,7 @@ const { title, activeSlug, headings } = Astro.props;
 ---
 
 <BaseLayout title={`${title} - Haloy Documentation`}>
-  <Navbar client:load />
+  <Navbar client:load showLinks={false} />
   <div class="lg:flex">
     <DocsNavigation client:load activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />
     <main class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
