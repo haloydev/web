@@ -28,15 +28,13 @@ The goal with Haloy was to create a simple tool that could do zero downtime depl
 
 This worked, but it's wasteful. A typical dockerized Node.js app is 200-400MB. A Next.js production build? Easily 400-600MB. And you're uploading all of it, every single deploy. Most of that is base layers that haven't changed. The `node:22-alpine` base image. The `npm install` layer with your dependencies. The only thing that actually changed is your application code, maybe 5MB.
 
-After a few days of iterating on a feature, I checked my bandwidth usage and realized this wasn't going to scale.
+The "obvious" solution is to use a Docker registry. Push once, pull everywhere. I considered running a private registry container directly on the production server, but that meant managing authentication, volume mounts, and exposing ports (or tunneling). In other words, complexity I wanted to avoid in the first place. I wanted a single binary with zero external dependencies.
 
-The "obvious" solution is to use a Docker registry. Push once, pull everywhere. I even considered running a private registry container directly on the production server. But that meant managing authentication, volume mounts, and exposing ports (or tunneling). It felt like overkill for a simple "push code to server" workflow. I wanted a single binary with zero external dependencies.
-
-The alternative? Make the server act like a registry, minus the registry.
+After some thinking (and prompting), I realized the answer was simpler: extract just the layer caching mechanism from a registry and build it into the server itself.
 
 ## How It Works
 
-Docker images is essentially just a stack of layers, each identified by a SHA256 digest of its contents (content-addressable storage).
+A Docker image is essentially just a stack of layers, each identified by a SHA256 digest of its contents (content-addressable storage).
 
 <Code code={`
   myapp:latest
@@ -53,7 +51,7 @@ When you `docker push` to a registry, it doesn't blindly accept the whole image.
 3. Client uploads only the missing layer
 4. Registry stores it and links everything together
 
-Registries aren't magic. They're just content-addressable caches with an HTTP API. There's no reason a deployment server can't do the same thing. Track which layers the server already has, skip uploading them. The server becomes its own mini-registry, minus the complexity.
+Registries aren't magic. They're just content-addressable caches with an HTTP API. There's no reason a deployment server can't do the same thing. Track which layers the server already has and skip uploading them. The server becomes its own mini-registry, minus the complexity.
 
 ### Parsing the Image Tar
 
@@ -121,20 +119,20 @@ The client sends the list of layer digests to the server and asks which ones it 
   }
 
   type LayerCheckResponse struct {
-  Missing []string ${"`"}json:"missing"${"`"}
-        Exists  []string ${"`"}json:"exists"${"`"}
+      Missing []string ${"`"}json:"missing"${"`"}
+      Exists  []string ${"`"}json:"exists"${"`"}
   }
 
   // Client side
   func checkCachedLayers(serverURL string, digests []string) ([]string, error) {
-  req := LayerCheckRequest{Digests: digests}
-  resp, \_ := http.Post(serverURL+"/v1/images/layers/check",
-  "application/json", toJSON(req))
+      req := LayerCheckRequest{Digests: digests}
+      resp, \_ := http.Post(serverURL+"/v1/images/layers/check",
+      "application/json", toJSON(req))
 
-        var result LayerCheckResponse
-        json.NewDecoder(resp.Body).Decode(&result)
+          var result LayerCheckResponse
+          json.NewDecoder(resp.Body).Decode(&result)
 
-        return result.Missing, nil
+      return result.Missing, nil
 
   }
 `} lang="go" />
@@ -190,8 +188,7 @@ For each missing layer, the client extracts it from the tar and uploads it with 
 
 The server validates the digest matches the content (no trusting the client):
 
-<Code
-  code={`
+<Code code={`
   func handleLayerUpload(w http.ResponseWriter, r *http.Request) {
       expectedDigest := r.Header.Get("X-Layer-Digest")
 
@@ -216,18 +213,14 @@ The server validates the digest matches the content (no trusting the client):
       os.Rename(tmp.Name(), layerPath)
 
       w.WriteHeader(http.StatusCreated)
-
-}
-`}
-lang="go"
-/>
+  }
+`} lang="go" />
 
 ### Reassembly
 
 Once all layers are cached, the server reconstructs a Docker-loadable tar:
 
-<Code
-  code={`
+<Code code={`
   func assembleImageTar(config []byte, manifest DockerManifest) (string, error) {
       tmp, _ := os.CreateTemp("", "image-*.tar")
       tw := tar.NewWriter(tmp)
@@ -239,22 +232,32 @@ Once all layers are cached, the server reconstructs a Docker-loadable tar:
       // Write config blob
       writeToTar(tw, manifest.Config, config)
 
-      // Copy each cached layer into the tar
+      // Stream each cached layer into the tar (no buffering, keeps memory usage low)
       for _, layerPath := range manifest.Layers {
           digest := digestFromPath(layerPath)
           cachedPath := filepath.Join(layerDir, digest, "layer.tar")
 
-          data, _ := os.ReadFile(cachedPath)
-          writeToTar(tw, layerPath, data)
+          file, err := os.Open(cachedPath)
+          if err != nil {
+              return "", err
+          }
+
+          info, _ := file.Stat()
+          header := &tar.Header{
+              Name: layerPath,
+              Size: info.Size(),
+              Mode: 0644,
+          }
+          tw.WriteHeader(header)
+
+          io.Copy(tw, file)
+          file.Close() // Close immediately after use
       }
 
       tw.Close()
       return tmp.Name(), nil
-
-}
-`}
-lang="go"
-/>
+  }
+`} lang="go" />
 
 Then it's just `docker load -i assembled.tar` and the deploy is complete.
 
@@ -278,7 +281,7 @@ Then it's just `docker load -i assembled.tar` and the deploy is complete.
   ✓ Deploy complete
 `} lang="text" />
 
-From 939MB down to 65MB. The first time I saw this work, I thought the deploy had failed because it finished so fast. The base image, node runtime, and most dependencies were already on the server.
+From 939MB down to 65MB. What used to take minutes now finished in seconds. The base image, node runtime, and most dependencies were already on the server.
 
 If you deploy multiple apps that share a base image (say, three services all using `node:22-alpine`), those base layers are cached once and shared across all of them.
 
@@ -290,7 +293,7 @@ If you deploy multiple apps that share a base image (say, three services all usi
 
 **Initial deploy is the same**: The first deploy still uploads everything. The wins come on subsequent deploys.
 
-**The BuildKit Headache**: This was the hardest part. `docker save` produces different directory structures and `manifest.json` formats depending on whether you use the classic builder or BuildKit (OCI layout). I had to reverse-engineer the OCI layout to find the actual layer blobs, as they aren't always in the root level like legacy archives.
+**Problems with BuildKit**: Modern Docker (23.0+) uses BuildKit by default, but `docker save` produces different directory structures and `manifest.json` formats depending on whether you use the classic builder or BuildKit (OCI layout). I had to reverse-engineer the OCI layout to find the actual layer blobs, as they aren't always in the root level like legacy archives.
 
 Layer compression is next on the list, which should cut upload times further for text-heavy layers.
 
