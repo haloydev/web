@@ -257,40 +257,6 @@ Rollback to a specific deployment.
 
 **Note**: Rollback availability depends on `image.history.strategy` configuration. See [Image Configuration](/docs/image-configuration#image-history--rollback) for more information.
 
-### server setup
-
-Provision a remote Haloy server over SSH. This requires root access to install dependencies and configure system services.
-
-<Code code={`
-  # Basic setup
-  haloy server setup <host>
-
-  # Setup with API domain and email
-  haloy server setup 192.168.1.100 --api-domain api.example.com --acme-email admin@example.com
-
-  # Setup with specific user and identity file
-  haloy server setup myserver.com -u ubuntu --ssh-identity ~/.ssh/id_rsa
-`} lang="bash" />
-
-**Arguments:**
-
-<div class="list-unstyled">
-- `<host>` - The hostname or IP address of the server
-</div>
-
-**Options:**
-
-<div class="list-unstyled">
-- `--user, -u <user>` - SSH username (default: root)
-- `--port, -p <port>` - SSH port (default: 22)
-- `--api-domain <domain>` - Domain for the haloyd API
-- `--acme-email <email>` - Email address for Let's Encrypt
-- `--ssh-identity <path>` - Path to SSH private key
-- `--override` - Override existing Haloy data/config
-- `--no-services` - Don't start HAProxy and haloyd containers
-- `--no-logs` - Don't stream haloyd initialization logs
-</div>
-
 ### server add
 
 Add a server to your local configuration.
@@ -356,6 +322,31 @@ Get the version from a haloyd server.
 - `--config, -c` - Path to config file or directory
 - `--target, -t <name>` - Apply to specific target(s) (comma-separated for multiple)
 - `--all, -a` - Get version for all targets
+</div>
+
+### server upgrade
+
+Upgrade the haloyd daemon on a server to the latest version.
+
+<Code code={`
+  # Upgrade via API (recommended)
+  haloy server upgrade
+
+  # Upgrade specific target
+  haloy server upgrade --target production
+
+  # Show manual upgrade instructions
+  haloy server upgrade --manual
+`} lang="bash" />
+
+**Flags:**
+
+<div class="list-unstyled">
+- `--server, -s` - Server URL (overrides config file)
+- `--config, -c` - Path to config file or directory
+- `--target, -t <name>` - Apply to specific target(s) (comma-separated for multiple)
+- `--all, -a` - Upgrade all targets
+- `--manual` - Display manual SSH upgrade instructions instead of performing API upgrade
 </div>
 
 ### version
@@ -461,8 +452,8 @@ The `--target` flag controls which target(s) your command applies to:
 ### Multi-Server Setup
 
 <Code code={`
-  # On each server, generate token
-  sudo haloyadm api token
+  # On each server, get the API token
+  sudo haloyd config get api-token
 
   # On local machine, add all servers
   haloy server add prod.haloy.com <prod-token>

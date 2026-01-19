@@ -79,9 +79,50 @@ Check that the upgrade was successful:
 
 ## Upgrading Server Components
 
-To upgrade `haloyadm` and `haloyd` on your server, use the upgrade script:
+There are several ways to upgrade `haloyd` on your server:
+
+### Via haloy CLI (Recommended)
+
+From your local machine, use the `haloy server upgrade` command:
+
+<Code code="haloy server upgrade" lang="bash" />
+
+This connects to the server's API and triggers a self-upgrade. The service will restart automatically after the upgrade.
+
+### Via Upgrade Script
+
+SSH into your server and run the upgrade script:
 
 <Code code="curl -fsSL https://sh.haloy.dev/upgrade-server.sh | sudo sh" lang="bash" />
 
-This script will upgrade both components to the latest version while preserving your configuration and data.
+This script will:
+1. Download the latest `haloyd` binary
+2. Stop the service
+3. Replace the binary
+4. Restart the service
 
+### Via haloyd Self-Upgrade
+
+SSH into your server and use the built-in upgrade command:
+
+<Code code="sudo haloyd upgrade" lang="bash" />
+
+This downloads and installs the latest version, then restarts the service.
+
+### Manual Upgrade Instructions
+
+If you prefer to upgrade manually or need specific instructions:
+
+<Code code="haloy server upgrade --manual" lang="bash" />
+
+This displays step-by-step instructions for upgrading via SSH.
+
+### Verify Server Upgrade
+
+Check the server version from your local machine:
+
+<Code code="haloy server version" lang="bash" />
+
+Or on the server:
+
+<Code code="haloyd version" lang="bash" />

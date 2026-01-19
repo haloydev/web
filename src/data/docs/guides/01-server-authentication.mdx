@@ -22,8 +22,8 @@ Haloy checks for API tokens in this order:
 Get API tokens from each server and add them to your local client:
 
 <Code code={`
-  # Generate token on the server
-  sudo haloyadm api token
+  # Get token on the server
+  sudo haloyd config get api-token
 
   # Add server on your local machine
   haloy server add production.haloy.com <production-token>
@@ -321,8 +321,8 @@ When adding servers:
 **Solution**:
 
 <Code code={`
-  # Generate new token on server
-  sudo haloyadm api token
+  # Get the current token on server (or generate new one via haloyd init)
+  sudo haloyd config get api-token
 
   # Update local config
   haloy server add <server-domain> <new-token> --force
@@ -372,7 +372,7 @@ When adding servers:
 
 ## Next Steps
 
-- View [haloyadm CLI Command Reference](/docs/haloyadm) for server management commands
+- View [haloyd Command Reference](/docs/haloyd) for server-side commands
 - [Configure Secret Providers](/docs/secret-providers)
 - [Set up Multi-Server Deployments](/docs/multi-server-deployments)
 - [Learn about Environment Variables](/docs/environment-variables)

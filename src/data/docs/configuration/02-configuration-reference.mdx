@@ -340,7 +340,7 @@ By default, containers are attached to the `haloy` network. You can override thi
 
 **Important**: If you override the default network (`haloy`), the Haloy proxy will not be able to discover your containers. This means:
 
-- Your application containers will not be included in the HAProxy configuration
+- Your application containers will not be included in the proxy routing
 - Traffic will not be routed to your application
 - Your domains will not work, even though the containers are running
 - The containers will be completely ignored by the routing system after they start

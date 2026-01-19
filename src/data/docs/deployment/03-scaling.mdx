@@ -27,20 +27,20 @@ acme_email: "you@email.com"`}
 Haloy automatically:
 
 - Starts the specified number of containers
-- Configures HAProxy load balancing
+- Configures load balancing in the built-in reverse proxy
 - Distributes traffic across all healthy instances
 - Monitors health checks
 
 ## Load Balancing
 
-HAProxy distributes traffic using round-robin by default, sending requests to each healthy container in turn.
+The built-in reverse proxy distributes traffic using round-robin by default, sending requests to each healthy container in turn.
 
 ### Traffic Flow
 
 <Code
-  code={`Internet → HAProxy (80/443) → Container 1 (8080)
-                        → Container 2 (8080)
-                        → Container 3 (8080)`}
+  code={`Internet → haloyd (80/443) → Container 1 (8080)
+                         → Container 2 (8080)
+                         → Container 3 (8080)`}
   lang="bash"
 />
 
@@ -153,7 +153,7 @@ replicas: 5
 health_check_path: "/health"
 port: "8080"
 
-# HAProxy only routes to healthy containers
+# haloyd only routes to healthy containers
 
 # Unhealthy containers are automatically excluded`} lang="yaml" />
 

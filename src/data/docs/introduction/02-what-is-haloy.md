@@ -8,18 +8,17 @@ section: introduction
 
 **Haloy is open source, MIT licensed, and completely free.**
 
-Haloy consists of three main parts:
+Haloy consists of two main parts:
 
 1. **haloy:** CLI tool that runs on your local machine and handles deployments, build workflows, logs, rollbacks, and multi‑server targeting.
-1. **haloyadm:** Admin CLI tool that installs and manages the Haloy daemon and HAProxy on your server.
-1. **haloyd**: A small service (daemon) that handles container orchestration, service discovery, SSL certificates and proxy configration (routing), and deployment logic.
+2. **haloyd:** A lightweight daemon that runs on your server and handles container orchestration, service discovery, SSL certificates, reverse proxy routing, and deployment logic.
 
 ## How Haloy Works
 
 - You write a **haloy.yaml** (or whatever you want to call it) file describing how your app should be built and deployed.
 - The Haloy CLI builds your image (if configured), uploads or pushes it, and triggers deployment on the server.
 - haloyd launches and monitors your application containers, updates routing automatically, and manages SSL with Let's Encrypt.
-- [HAProxy](https://www.haproxy.org/) (managed by haloyd ) handles load balancing and HTTPS termination.
+- The built‑in reverse proxy handles load balancing and HTTPS termination.
 
 ## Key Features
 
@@ -76,5 +75,6 @@ All while still being powerful enough for production workloads.
 
 ## Next Steps
 - [Install Haloy](/docs/quickstart)
-- [Learn about The Architecture](/docs/architecture)
+- [Learn about the Architecture](/docs/architecture)
 - [haloy CLI Command Reference](/docs/haloy)
+- [haloyd Server Commands](/docs/haloyd)

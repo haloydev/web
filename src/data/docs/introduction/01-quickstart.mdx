@@ -21,11 +21,23 @@ This guide will walk you through setting up Haloy and deploying your first appli
 
 ## 2. Server Setup
 
-Use the `server setup` command to provision your server automatically. This command will SSH into your server as `root` (default), install Docker if needed, install `haloyadm`, and configure the remote `haloyd` service.
+SSH into your server and run the install script:
 
-<Code code="haloy server setup <server-ip> --api-domain haloy.yourserver.com --acme-email you@email.com" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh" lang="bash" />
 
-**Note:** This command requires SSH access to the `root` user on the server. If you don't have this or if you prefer to install manually, check the [Server Installation](/docs/server-installation#manual-installation) guide.
+The script will prompt you for:
+- **API domain**: A subdomain pointing to your server (e.g., `haloy.yourserver.com`)
+- **ACME email**: Your email for Let's Encrypt certificates
+
+Or provide them directly:
+
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo API_DOMAIN=haloy.yourserver.com ACME_EMAIL=you@email.com sh" lang="bash" />
+
+After installation completes, copy the API token from the output and add the server to your local machine:
+
+<Code code="haloy server add haloy.yourserver.com <token>" lang="bash" />
+
+See the [Server Installation](/docs/server-installation) guide for more details.
 
 ## 3. Create haloy.yaml
 
