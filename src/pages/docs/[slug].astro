@@ -16,3 +16,5 @@ const { Content, headings } = await render(page);
 <DocsLayout title={page.data.title} activeSlug={page.data.slug} headings={headings}>
   <Content />
 </DocsLayout>
+
+<meta name="page-slug" content={page.data.slug} />

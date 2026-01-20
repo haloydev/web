@@ -1,6 +1,7 @@
 import { defineCollection, reference, z } from 'astro:content';
 
 import { file, glob } from 'astro/loaders';
+import { docsLoader } from './lib/docs-loader';
 
 const docSections = defineCollection({
   loader: file('./src/data/docs/sections.json'),
@@ -11,7 +12,7 @@ const docSections = defineCollection({
 });
 
 const docPages = defineCollection({
-  loader: glob({ pattern: '**/*.{md,mdx}', base: './src/data/docs' }),
+  loader: docsLoader({ pattern: '**/*.{md,mdx}', base: './src/data/docs' }),
   schema: z.object({
     title: z.string(),
     slug: z.string(),

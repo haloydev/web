@@ -3,6 +3,7 @@ import type { MarkdownHeading } from 'astro';
 import { Navbar } from '@/components/navbar';
 import { DocsNavigation } from '@/components/docs-navigation';
 import { DocsTableOfContents } from '@/components/docs-table-of-contents';
+import { CopyPageButton } from '@/components/copy-page-button';
 import BaseLayout from '@/layouts/base.astro';
 import Prose from '@/components/prose.astro';
 import { getCollection } from 'astro:content';
@@ -38,7 +39,10 @@ const { title, activeSlug, headings } = Astro.props;
     <DocsNavigation client:load activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />
     <main class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
       <Prose>
-        <h1>{title}</h1>
+        <div class="flex items-center justify-between gap-4">
+          <h1 class="!mb-0">{title}</h1>
+          <CopyPageButton client:load />
+        </div>
         <slot />
       </Prose>
       <aside class="hidden lg:block xl:ml-24">
