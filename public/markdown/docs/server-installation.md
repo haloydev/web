@@ -1,5 +1,7 @@
 The Haloy daemon (`haloyd`) runs on your server and manages container deployments, service discovery, and traffic routing.
 
+After running the installation script, you'll need to configure your server with a domain for remote access.
+
 ## Prerequisites
 
 - Linux server (Debian/Ubuntu, RHEL/CentOS, Alpine, or other distributions)
@@ -7,46 +9,41 @@ The Haloy daemon (`haloyd`) runs on your server and manages container deployment
 - Root or sudo access
 - A domain or subdomain pointing to your server (for HTTPS API access)
 
-## Quick Install
+## Quick Install (with configuration)
 
-SSH into your server and run the install script:
+If you already have a domain pointing to your server:
+
+```bash
+API_DOMAIN=api.example.com ACME_EMAIL=admin@example.com \\
+  curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh
+```
+
+## Standard Install (configure after)
 
 ```bash
 curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh
 ```
 
-The installer will:
-1. Detect your init system (systemd, OpenRC, or SysVinit)
-2. Create a dedicated `haloy` system user
-3. Download and install the `haloyd` binary
-4. Run `haloyd init` to set up configuration
-5. Install and start the service
-6. Display the API token for your local machine
+After installation, the script will display your server's public IP address. You'll need to:
 
-### Environment Variables
+### 1. Point your domain to the server
 
-You can configure the installation with environment variables:
+Create a DNS A record pointing your chosen domain to the server's IP address.
+
+### 2. Configure haloy
 
 ```bash
-# Skip interactive prompts
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo \\
-  API_DOMAIN=haloy.yourserver.com \\
-  ACME_EMAIL=you@example.com \\
-  sh
-
-# Install specific version
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo VERSION=1.0.0 sh
-
-# Install without starting the service
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo SKIP_START=1 sh
+sudo haloyd config set api-domain YOUR_DOMAIN
+sudo haloyd config set acme-email YOUR_EMAIL
+sudo systemctl restart haloyd
 ```
 
-## Add Server to Local Machine
+### 3. Add the server to your local CLI
 
-After installation, copy the API token from the output and add the server to your local haloy CLI:
+On your local machine, run the command shown at the end of installation:
 
 ```bash
-haloy server add haloy.yourserver.com <token>
+haloy server add YOUR_DOMAIN YOUR_API_TOKEN
 ```
 
 You can retrieve the API token later by running on the server:
@@ -54,6 +51,14 @@ You can retrieve the API token later by running on the server:
 ```bash
 sudo haloyd config get api-token
 ```
+
+## Environment Variables
+
+| Variable | Description |
+|----------|-------------|
+| `API_DOMAIN` | Domain for the haloy API (e.g., api.example.com) |
+| `ACME_EMAIL` | Email for Let's Encrypt certificate notifications |
+| `SKIP_START` | Set to `true` to skip starting the service |
 
 ## Manual Installation
 
