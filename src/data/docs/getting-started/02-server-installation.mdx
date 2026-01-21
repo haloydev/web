@@ -13,7 +13,7 @@ After running the installation script, you'll need to configure your server with
 ## Prerequisites
 
 - Linux server (Debian/Ubuntu, RHEL/CentOS, Alpine, or other distributions)
-- Docker installed and running
+- Docker installed and running (can be [auto-installed](#docker-installation))
 - Root or sudo access
 - A domain or subdomain pointing to your server (for HTTPS API access)
 
@@ -56,7 +56,31 @@ You can retrieve the API token later by running on the server:
 |----------|-------------|
 | `API_DOMAIN` | Domain for the haloy API (e.g., api.example.com) |
 | `ACME_EMAIL` | Email for Let's Encrypt certificate notifications |
+| `INSTALL_DOCKER` | Set to `true` to automatically install Docker if not present |
 | `SKIP_START` | Set to `true` to skip starting the service |
+
+## Docker Installation
+
+If Docker is not installed on your server, you have two options:
+
+### Option 1: Auto-install with haloyd
+
+Add `INSTALL_DOCKER=true` to automatically install Docker before proceeding with the Haloy installation:
+
+<Code code="INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh" lang="bash" />
+
+### Option 2: Standalone Docker install script
+
+Install Docker separately using the standalone script:
+
+<Code code="curl -fsSL https://sh.haloy.dev/docker-install.sh | sudo sh" lang="bash" />
+
+This script automatically detects your Linux distribution and installs Docker accordingly:
+
+- **Alpine Linux**: Uses `apk add docker docker-cli-compose`
+- **Ubuntu, Debian, CentOS, Fedora, RHEL, and others**: Uses the official Docker installation script from get.docker.com
+
+The script enables and starts the Docker daemon automatically.
 
 ## Manual Installation
 
@@ -256,6 +280,18 @@ This is useful for:
 - Situations where external API access isn't available
 
 ## Troubleshooting
+
+### Docker Not Installed
+
+If the installation script shows:
+
+<Code code={`✗ Docker is not installed
+
+  Troubleshooting:
+    - Auto-install: INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
+    - Or run: curl -fsSL https://sh.haloy.dev/docker-install.sh | sh`} lang="text" />
+
+See [Docker Installation](#docker-installation) for installation options.
 
 ### Service Won't Start
 
