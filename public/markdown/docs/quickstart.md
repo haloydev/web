@@ -38,8 +38,10 @@ bun add -g haloy
 SSH into your server and run the install script:
 
 ```bash
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh
+curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
 ```
+
+**Note:** If you're not logged in as root, prefix the command with `sudo`.
 
 The script will prompt you for:
 - **API domain**: A subdomain pointing to your server (e.g., `haloy.yourserver.com`)
@@ -48,7 +50,7 @@ The script will prompt you for:
 Or provide them directly:
 
 ```bash
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo API_DOMAIN=haloy.yourserver.com ACME_EMAIL=you@email.com sh
+curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=haloy.yourserver.com ACME_EMAIL=you@email.com sh
 ```
 
 After installation completes, copy the API token from the output and add the server to your local machine:

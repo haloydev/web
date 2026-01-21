@@ -22,11 +22,13 @@ After running the installation script, you'll need to configure your server with
 If you already have a domain pointing to your server:
 
 <Code code={`API_DOMAIN=api.example.com ACME_EMAIL=admin@example.com \\
-  curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh`} lang="bash" />
+  curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh`} lang="bash" />
 
 ## Standard Install (configure after)
 
-<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
+
+**Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
 
 After installation, the script will display your server's public IP address. You'll need to:
 
@@ -67,13 +69,13 @@ If Docker is not installed on your server, you have two options:
 
 Add `INSTALL_DOCKER=true` to automatically install Docker before proceeding with the Haloy installation:
 
-<Code code="INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh" lang="bash" />
+<Code code="INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
 
 ### Option 2: Standalone Docker install script
 
 Install Docker separately using the standalone script:
 
-<Code code="curl -fsSL https://sh.haloy.dev/docker-install.sh | sudo sh" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/docker-install.sh | sh" lang="bash" />
 
 This script automatically detects your Linux distribution and installs Docker accordingly:
 
@@ -330,7 +332,7 @@ sudo -u haloy docker ps
 
 To completely remove Haloy from your server:
 
-<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh" lang="bash" />
+<Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sh" lang="bash" />
 
 This will:
 - Stop and remove the haloyd service

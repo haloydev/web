@@ -81,7 +81,7 @@ This connects to the server's API and triggers a self-upgrade. The service will 
 SSH into your server and run the upgrade script:
 
 ```bash
-curl -fsSL https://sh.haloy.dev/upgrade-server.sh | sudo sh
+curl -fsSL https://sh.haloy.dev/upgrade-server.sh | sh
 ```
 
 This script will:

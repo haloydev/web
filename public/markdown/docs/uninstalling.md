@@ -89,7 +89,7 @@ Remove Haloy components from your server.
 Remove all Haloy components, data, and configurations:
 
 ```bash
-curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 ```
 
 The uninstall script will:
@@ -157,7 +157,7 @@ docker ps --filter "label=dev.haloy.role=app" -q | xargs docker stop
 docker ps --filter "label=dev.haloy.role=app" -qa | xargs docker rm
 
 # 2. Remove server components
-curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 
 # 3. Optional: Remove application data volumes
 docker volume ls --filter "label=dev.haloy.role=app" -q | xargs docker volume rm
@@ -203,7 +203,7 @@ Remove Haloy but keep applications running:
 sudo systemctl stop haloyd
 
 # Remove Haloy components
-curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 
 # Applications still running
 docker ps --filter "label=dev.haloy.role=app"
@@ -249,7 +249,7 @@ curl -fsSL https://sh.haloy.dev/install-haloy.sh | sh
 
 ```bash
 # Install haloyd
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh
+curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
 
 # If you preserved /etc/haloy/ and /var/lib/haloy/,
 # haloyd will use the existing configuration

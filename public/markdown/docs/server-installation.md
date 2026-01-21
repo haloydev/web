@@ -5,7 +5,7 @@ After running the installation script, you'll need to configure your server with
 ## Prerequisites
 
 - Linux server (Debian/Ubuntu, RHEL/CentOS, Alpine, or other distributions)
-- Docker installed and running
+- Docker installed and running (can be [auto-installed](#docker-installation))
 - Root or sudo access
 - A domain or subdomain pointing to your server (for HTTPS API access)
 
@@ -15,14 +15,16 @@ If you already have a domain pointing to your server:
 
 ```bash
 API_DOMAIN=api.example.com ACME_EMAIL=admin@example.com \\
-  curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh
+  curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
 ```
 
 ## Standard Install (configure after)
 
 ```bash
-curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sudo sh
+curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
 ```
+
+**Note:** If you're not logged in as root, prefix the command with `sudo`.
 
 After installation, the script will display your server's public IP address. You'll need to:
 
@@ -58,7 +60,35 @@ sudo haloyd config get api-token
 |----------|-------------|
 | `API_DOMAIN` | Domain for the haloy API (e.g., api.example.com) |
 | `ACME_EMAIL` | Email for Let's Encrypt certificate notifications |
+| `INSTALL_DOCKER` | Set to `true` to automatically install Docker if not present |
 | `SKIP_START` | Set to `true` to skip starting the service |
+
+## Docker Installation
+
+If Docker is not installed on your server, you have two options:
+
+### Option 1: Auto-install with haloyd
+
+Add `INSTALL_DOCKER=true` to automatically install Docker before proceeding with the Haloy installation:
+
+```bash
+INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
+```
+
+### Option 2: Standalone Docker install script
+
+Install Docker separately using the standalone script:
+
+```bash
+curl -fsSL https://sh.haloy.dev/docker-install.sh | sh
+```
+
+This script automatically detects your Linux distribution and installs Docker accordingly:
+
+- **Alpine Linux**: Uses `apk add docker docker-cli-compose`
+- **Ubuntu, Debian, CentOS, Fedora, RHEL, and others**: Uses the official Docker installation script from get.docker.com
+
+The script enables and starts the Docker daemon automatically.
 
 ## Manual Installation
 
@@ -265,6 +295,20 @@ This is useful for:
 
 ## Troubleshooting
 
+### Docker Not Installed
+
+If the installation script shows:
+
+```text
+✗ Docker is not installed
+
+  Troubleshooting:
+    - Auto-install: INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
+    - Or run: curl -fsSL https://sh.haloy.dev/docker-install.sh | sh
+```
+
+See [Docker Installation](#docker-installation) for installation options.
+
 ### Service Won't Start
 
 Check the logs:
@@ -305,7 +349,7 @@ sudo -u haloy docker ps
 To completely remove Haloy from your server:
 
 ```bash
-curl -sL https://sh.haloy.dev/uninstall-server.sh | sudo sh
+curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 ```
 
 This will:
