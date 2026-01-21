@@ -8,6 +8,7 @@ import { ButtonLink } from '@/components/ui/button-link';
 import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
 import InstallHaloy from '@/components/install-haloy.astro';
+import TerminalVideo from '@/components/terminal-video.astro';
 ---
 
 <BaseLayout title="Haloy - Cloudless Deploys" class="bg-background-sky">
@@ -48,17 +49,8 @@ import InstallHaloy from '@/components/install-haloy.astro';
       </div>
     </div>
     <div class="mt-20 flex justify-center">
-      <div class="max-w-3xl px-6">
-        <video
-          autoplay
-          muted
-          loop
-          playsinline
-          preload="auto"
-          class="h-auto w-full rounded shadow-lg shadow-black/50 dark:shadow-black/40"
-        >
-          <source src="/haloy-deploy-demo.webm" type="video/webm" />
-        </video>
+      <div class="w-full max-w-3xl px-6">
+        <TerminalVideo src="/haloy-deploy-demo.webm" title="haloy deploy" />
       </div>
     </div>
   </div>
