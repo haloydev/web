@@ -10,6 +10,7 @@ import { Navbar } from '@/components/navbar';
 import InstallHaloy from '@/components/install-haloy.astro';
 import TerminalVideo from '@/components/terminal-video.astro';
 import FeaturesGrid from '@/components/features-grid.astro';
+import ConfigPreview from '@/components/config-preview.astro';
 ---
 
 <BaseLayout title="Haloy - Cloudless Deploys" class="bg-background-sky">
@@ -56,5 +57,7 @@ import FeaturesGrid from '@/components/features-grid.astro';
     </div>
 
     <FeaturesGrid />
+
+    <ConfigPreview />
   </div>
 </BaseLayout>
