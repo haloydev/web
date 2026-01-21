@@ -9,6 +9,7 @@ import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
 import InstallHaloy from '@/components/install-haloy.astro';
 import TerminalVideo from '@/components/terminal-video.astro';
+import FeaturesGrid from '@/components/features-grid.astro';
 ---
 
 <BaseLayout title="Haloy - Cloudless Deploys" class="bg-background-sky">
@@ -53,5 +54,7 @@ import TerminalVideo from '@/components/terminal-video.astro';
         <TerminalVideo src="/haloy-deploy-demo.webm" title="haloy deploy" />
       </div>
     </div>
+
+    <FeaturesGrid />
   </div>
 </BaseLayout>
