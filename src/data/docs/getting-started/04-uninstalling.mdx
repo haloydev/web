@@ -109,10 +109,10 @@ Remove all Haloy components, data, and configurations:
 
 The uninstall script will:
 - Detect what's installed before removing
-- Offer to back up your data before deletion
-- Ask for confirmation before destructive actions
+- Stop and remove the service
+- Remove the binary, config, and data directories
+- Remove the `haloy` system user
 - Support all init systems (systemd, OpenRC, SysVinit)
-- Optionally remove the `haloy` system user
 
 This removes:
 
@@ -246,7 +246,7 @@ docker ps --filter "label=dev.haloy.role=app"
 | Configuration          | `/etc/haloy/`             | Yes            |
 | Data                   | `/var/lib/haloy/`         | Yes            |
 | Docker network         | `haloy`                   | Yes            |
-| `haloy` user           | System user               | Optional       |
+| `haloy` user           | System user               | Yes            |
 | Application containers | User-deployed             | No (manual)    |
 | Application volumes    | User-created              | No (manual)    |
 
