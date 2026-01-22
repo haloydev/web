@@ -40,6 +40,8 @@ Create a DNS A record pointing your chosen domain to the server's IP address.
 <Code code={`sudo haloyd config set api-domain YOUR_DOMAIN
 sudo systemctl restart haloyd`} lang="bash" />
 
+**Alpine Linux (OpenRC):** Use `sudo rc-service haloyd restart` instead of `systemctl restart`.
+
 ### 3. Add the server to your local CLI
 
 On your local machine, run the command shown at the end of installation:
