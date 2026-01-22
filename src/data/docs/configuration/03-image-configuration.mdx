@@ -225,7 +225,6 @@ Build locally and upload directly to your server:
       # push: "server" is automatically detected
   domains:
     - domain: "my-app.com"
-  acme_email: "you@email.com"
 `} lang="yaml" />
 
 When pushing to the server, Haloy automatically optimizes uploads using layer-based caching—similar to how Docker registries work. Only layers that don't already exist on the server are uploaded, so shared base layers (like `node:22-alpine` or `nginx:alpine`) are cached and reused across all your applications, making subsequent deploys significantly faster.
@@ -254,7 +253,6 @@ Build locally and push to a registry:
       # push: "registry" is automatically detected
   domains:
     - domain: "my-app.com"
-  acme_email: "you@email.com"
 `} lang="yaml" />
 
 ### Build Arguments
@@ -486,7 +484,6 @@ Useful when:
 
   domains:
     - domain: "production-app.com"
-  acme_email: "admin@production-app.com"
 `} lang="yaml" />
 
 ## Security Best Practices

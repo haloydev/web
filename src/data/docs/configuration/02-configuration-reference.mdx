@@ -72,7 +72,6 @@ These options define a deployment unit.
 | `api_token`           | object         | No          | API token configuration (see [Authentication](/docs/server-authentication))                                 |
 | `deployment_strategy` | string         | No          | Deployment strategy: "rolling" (default) or "replace"                                                       |
 | `domains`             | array          | No          | Domain configuration                                                                                        |
-| `acme_email`          | string         | No          | Let's Encrypt email (required with domains)                                                                 |
 | `replicas`            | integer        | No          | Number of container instances (default: 1)                                                                  |
 | `port`                | string/integer | No          | Container port to expose (default: "8080"). The port your application listens on inside the container.      |
 | `health_check_path`   | string         | No          | Health check endpoint (default: "/")                                                                        |
@@ -272,7 +271,6 @@ When using multi-target deployments, each target can override base configuration
 | `api_token`         | object  | Override the API token configuration                 |
 | `image`             | object  | Override image configuration (repository, tag, etc.) |
 | `domains`           | array   | Override domain configuration                        |
-| `acme_email`        | string  | Override ACME email                                  |
 | `env`               | array   | Override environment variables                       |
 | `replicas`          | integer | Override number of replicas                          |
 | `preset`            | string  | Override preset                                      |

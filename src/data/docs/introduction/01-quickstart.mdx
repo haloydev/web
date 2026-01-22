@@ -29,11 +29,10 @@ SSH into your server and run the install script:
 
 The script will prompt you for:
 - **API domain**: A subdomain pointing to your server (e.g., `haloy.yourserver.com`)
-- **ACME email**: Your email for Let's Encrypt certificates
 
-Or provide them directly:
+Or provide it directly:
 
-<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=haloy.yourserver.com ACME_EMAIL=you@email.com sh" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=haloy.yourserver.com sh" lang="bash" />
 
 After installation completes, copy the API token from the output and add the server to your local machine:
 

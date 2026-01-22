@@ -34,7 +34,6 @@ Haloy tags images with deployment IDs and keeps them locally for fast rollbacks.
       count: 5  # Keep 5 previous images
   domains:
     - domain: "my-app.com"
-  acme_email: "you@email.com"
 `} lang="yaml" />
 
 ### How It Works
@@ -72,7 +71,6 @@ Rely on registry tags for rollbacks. Requires disciplined tagging.
       pattern: "v*"  # Match versioned tags
   domains:
     - domain: "my-app.com"
-  acme_email: "you@email.com"
 `} lang="yaml" />
 
 ### Requirements
@@ -115,7 +113,6 @@ Disables rollback capability entirely.
       strategy: "none"
   domains:
     - domain: "my-app.com"
-  acme_email: "you@email.com"
 `} lang="yaml" />
 
 ### Use Cases
@@ -174,7 +171,6 @@ Disables rollback capability entirely.
   deployment_strategy: "rolling"
   domains:
     - domain: "web-app.com"
-    acme_email: "admin@web-app.com"
 `} lang="yaml" />
 
 **Workflow:**
@@ -221,7 +217,6 @@ Disables rollback capability entirely.
 
   domains:
     - domain: "api.example.com"
-  acme_email: "devops@example.com"
 `} lang="yaml" />
 
 **Workflow:**

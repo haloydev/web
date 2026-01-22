@@ -41,7 +41,6 @@ Haloy supports YAML, JSON, and TOML for configuration files.
     - domain: "my-app.com"
       aliases:
         - "www.my-app.com"
-  acme_email: "you@example.com"
   health_check_path: "/health"
 `} lang="yaml" />
 
@@ -56,7 +55,6 @@ Haloy supports YAML, JSON, and TOML for configuration files.
         "aliases": ["www.my-app.com"]
       }
     ],
-    "acme_email": "you@example.com",
     "health_check_path": "/health"
   }
 `} lang="json" />
@@ -66,7 +64,6 @@ Haloy supports YAML, JSON, and TOML for configuration files.
 <Code code={`
   name = "my-app"
   server = "haloy.yourserver.com"
-  acme_email = "you@example.com"
   health_check_path = "/health"
 
   [[domains]]
@@ -76,8 +73,8 @@ Haloy supports YAML, JSON, and TOML for configuration files.
 
 **Naming Convention:**
 
-- YAML/TOML: Use `snake_case` (e.g., `acme_email`)
-- JSON: Use `camelCase` (e.g., `acmeEmail`)
+- YAML/TOML: Use `snake_case` (e.g., `health_check_path`)
+- JSON: Use `camelCase` (e.g., `healthCheckPath`)
 
 ## Adding a Domain
 
@@ -88,7 +85,6 @@ To make your app accessible via a domain:
   server: haloy.yourserver.com
   domains:
     - domain: "my-app.com"
-  acme_email: "you@email.com"  # If not added haloy will use email configured when setting up the api domain
 `} lang="yaml" />
 
 ## Multiple Domains and Aliases
@@ -100,7 +96,6 @@ To make your app accessible via a domain:
         - "www.my-app.com"
         - "app.my-app.com"
     - domain: "another-domain.com"
-  acme_email: "you@email.com"
 `}
   lang="yaml"
 />

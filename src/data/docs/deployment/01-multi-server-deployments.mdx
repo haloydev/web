@@ -22,7 +22,6 @@ Deploy your application to multiple servers with a single configuration file. Pe
   image:
     repository: "ghcr.io/your-username/my-app"
     tag: "latest"
-  acme_email: "you@email.com"
 
   targets:
     production:
@@ -116,7 +115,6 @@ Complete setup for production, staging, and development:
     tag: "latest"
   replicas: 1
   port: "8080"
-  acme_email: "devops@my-app.com"
 
   # Global hooks run once before/after all deployments
   global_pre_deploy:
