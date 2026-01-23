@@ -258,7 +258,8 @@ For multi-target deployments, use global hooks:
         - "npm run test:production"
     staging:
       server: staging.haloy.com
-      pre_deploy: - "npm run test:staging"
+      pre_deploy:
+        - "npm run test:staging"
 `} lang="yaml" />
 
 ## Multi-Target Overrides

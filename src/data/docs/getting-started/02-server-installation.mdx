@@ -220,15 +220,15 @@ sudo rc-service haloyd status
 
 The haloyd configuration file is located at `/etc/haloy/haloyd.yaml`:
 
-<Code code={`
-api_domain: haloy.yourserver.com
-health_monitor:
-  enabled: true
-  interval: "15s"
-  fall: 3
-  rise: 2
-  timeout: "5s"
-`} lang="yaml" />
+<Code lang="yaml" code={`
+  api_domain: haloy.yourserver.com
+  health_monitor:
+    enabled: true
+    interval: "15s"
+    fall: 3
+    rise: 2
+    timeout: "5s"
+`} />
 
 ### View or Update Configuration
 
