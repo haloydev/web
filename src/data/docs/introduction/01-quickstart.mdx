@@ -21,18 +21,11 @@ This guide will walk you through setting up Haloy and deploying your first appli
 
 ## 2. Server Setup
 
-SSH into your server and run the install script:
-
-<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
-
-**Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
-
-The script will prompt you for:
-- **API domain**: A subdomain pointing to your server (e.g., `haloy.yourserver.com`)
-
-Or provide it directly:
+SSH into your server and run the install script with your API domain:
 
 <Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=haloy.yourserver.com sh" lang="bash" />
+
+**Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
 
 After installation completes, copy the API token from the output and add the server to your local machine:
 
