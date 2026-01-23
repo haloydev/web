@@ -21,7 +21,7 @@ After running the installation script, you'll need to configure your server with
 
 If you already have a domain pointing to your server:
 
-<Code code={`API_DOMAIN=api.example.com curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh`} lang="bash" />
+<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=api.example.com sh`} lang="bash" />
 
 ## Standard Install (configure after)
 
@@ -52,29 +52,36 @@ You can retrieve the API token later by running on the server:
 
 <Code code="sudo haloyd config get api-token" lang="bash" />
 
-## Environment Variables
+## Options
 
-| Variable | Description |
-|----------|-------------|
-| `API_DOMAIN` | Domain for the haloy API (e.g., api.example.com) |
-| `INSTALL_DOCKER` | Set to `true` to automatically install Docker if not present |
-| `SKIP_START` | Set to `true` to skip starting the service |
+The install script accepts both command-line flags and environment variables:
+
+| Flag | Environment Variable | Description |
+|------|---------------------|-------------|
+| `--api-domain=DOMAIN` | `API_DOMAIN` | Domain for the haloy API (e.g., api.example.com) |
+| `--version=VERSION` | `VERSION` | Install a specific version (default: latest) |
+| `--skip-start` | `SKIP_START=true` | Don't start the service after installation |
+| `--skip-docker-install` | `SKIP_DOCKER_INSTALL=true` | Skip automatic Docker installation |
+
+Examples:
+
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh -s -- --api-domain=api.example.com" lang="bash" />
+
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | VERSION=v0.1.0 sh" lang="bash" />
 
 ## Docker Installation
 
-If Docker is not installed on your server, you have two options:
+If Docker is not installed on your server, the install script will automatically install it for you. This is the default behavior.
 
-### Option 1: Auto-install with haloyd
+If you prefer to install Docker manually or use a custom Docker installation, you can skip automatic installation:
 
-Add `INSTALL_DOCKER=true` to automatically install Docker before proceeding with the Haloy installation:
+<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh -s -- --skip-docker-install" lang="bash" />
 
-<Code code="INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
+### Standalone Docker Install Script
 
-### Option 2: Standalone Docker install script
+You can also install Docker separately using the standalone script:
 
-Install Docker separately using the standalone script:
-
-<Code code="curl -fsSL https://sh.haloy.dev/docker-install.sh | sh" lang="bash" />
+<Code code="curl -fsSL https://sh.haloy.dev/install-docker.sh | sh" lang="bash" />
 
 This script automatically detects your Linux distribution and installs Docker accordingly:
 
@@ -283,13 +290,13 @@ This is useful for:
 
 ### Docker Not Installed
 
-If the installation script shows:
+If you used `--skip-docker-install` and Docker is not installed, the script will show:
 
 <Code code={`✗ Docker is not installed
 
   Troubleshooting:
-    - Auto-install: INSTALL_DOCKER=true curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
-    - Or run: curl -fsSL https://sh.haloy.dev/docker-install.sh | sh`} lang="text" />
+    - Install Docker manually: curl -fsSL https://sh.haloy.dev/install-docker.sh | sh
+    - Or remove SKIP_DOCKER_INSTALL to install automatically`} lang="text" />
 
 See [Docker Installation](#docker-installation) for installation options.
 
