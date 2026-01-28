@@ -35,6 +35,8 @@ After installation, the script will display your server's public IP address. You
 
 Create a DNS A record pointing your chosen domain to the server's IP address.
 
+**Cloudflare users:** Set the proxy status to **"DNS only"** (grey cloud), or ensure your SSL/TLS encryption mode is set to **"Full (Strict)"**. See [Troubleshooting](#redirect-loop-err_too_many_redirects) if you experience redirect loops.
+
 ### 2. Configure haloy
 
 <Code code={`sudo haloyd config set api-domain YOUR_DOMAIN
@@ -332,6 +334,23 @@ curl -k https://localhost/health
 # Test that haloy user can access Docker
 sudo -u haloy docker ps
 `} lang="bash" />
+
+### Redirect Loop (ERR_TOO_MANY_REDIRECTS)
+
+If you see "too many redirects" errors in the browser, this is typically caused by Cloudflare proxy settings.
+
+**Cause:** Cloudflare's "Flexible" SSL mode connects to your origin via HTTP. Haloy redirects HTTP to HTTPS, creating an infinite loop.
+
+**Solutions:**
+
+1. **Use DNS-only mode** (recommended for simplicity): In Cloudflare, click the orange cloud icon to turn it grey. This disables the proxy and lets traffic go directly to your server.
+
+2. **Use Full (Strict) SSL mode**: In Cloudflare dashboard, go to SSL/TLS → Overview and change the mode to "Full (Strict)". This makes Cloudflare connect to your origin via HTTPS.
+
+After changing settings, you may need to:
+- Clear your browser cache or use incognito mode
+- Flush your local DNS cache: `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder` (macOS)
+- Wait a few minutes for DNS changes to propagate
 
 ## Uninstalling
 
