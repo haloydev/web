@@ -1,0 +1,75 @@
+---
+title: 'Agent Skills'
+slug: 'agent-skills'
+section: configuration
+---
+
+import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
+
+Agent skills are packaged instructions that extend AI coding assistants with specialized capabilities for Haloy deployment.
+
+**Supported tools:**
+
+- [Claude Code](https://code.claude.com/docs/en/skills)
+- [Codex CLI](https://developers.openai.com/codex/skills/)
+- [Amp Code](https://ampcode.com/manual#agent-skills)
+- [OpenCode](https://opencode.ai/docs/skills)
+
+## Installation
+
+<CodeTabs defaultValue="npx">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npx">npx</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bunx">bunx</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="npx">
+    <Code code="npx skills add haloydev/agent-skills" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm dlx skills add haloydev/agent-skills" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bunx">
+    <Code code="bunx skills add haloydev/agent-skills" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
+
+## Dockerize
+
+Creates production-ready Dockerfiles optimized for Haloy deployment.
+
+**What it does:**
+
+1. Detects your project type (package.json, Cargo.toml, go.mod, requirements.txt, etc.)
+2. Checks for health endpoint and offers to create one if missing
+3. Creates optimized multi-stage Dockerfile with appropriate base images and non-root user
+4. Generates .dockerignore
+5. Suggests haloy.yaml configuration
+
+**Supported frameworks:** TanStack Start, Next.js, Vite/React, Node.js/Express, Python/FastAPI, Django, Go, Rust, Ruby/Rails, PHP/Laravel
+
+## Haloy Config
+
+Generates `haloy.yaml` configuration files for deployment.
+
+**What it does:**
+
+1. Checks for Dockerfile (suggests dockerize skill if missing)
+2. Detects project type and infers defaults (app name, port, health check path)
+3. Asks for server URL and domain
+4. Generates complete haloy.yaml ready for deployment
+
+**Framework port defaults:**
+
+| Framework | Port |
+|-----------|------|
+| Next.js, TanStack Start, Express, Rails | 3000 |
+| Django, FastAPI, PHP/Laravel | 8000 |
+| Flask | 5000 |
+| Go, Rust | 8080 |
