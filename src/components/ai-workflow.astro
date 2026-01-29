@@ -1,0 +1,88 @@
+---
+const steps = [
+  { number: '1', label: 'Install skills', command: 'npx skills add haloydev/agent-skills' },
+  { number: '2', label: 'Dockerize', command: '/dockerize' },
+  { number: '3', label: 'Configure', command: '/haloy-config' },
+  { number: '4', label: 'Deploy', command: 'haloy deploy' },
+];
+---
+
+<section class="relative px-6 py-20">
+  <div class="mx-auto max-w-5xl">
+    <div class="text-center">
+      <span
+        class="workflow-label text-muted-foreground mb-4 inline-block rounded-full border border-emerald-500/20 px-3.5 py-1.5 font-mono text-xs font-medium tracking-widest uppercase dark:border-emerald-500/30"
+      >
+        Agent Skills
+      </span>
+      <h2 class="font-figtree text-foreground mb-4 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl">
+        From idea to deployed in 4 commands
+      </h2>
+      <p class="text-muted-foreground mx-auto mb-12 max-w-2xl text-lg leading-relaxed">
+        AI agents handle the boilerplate. You focus on your app.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {
+        steps.map((step, index) => (
+          <div class="relative">
+            <div class="flex flex-col items-center">
+              <div class="mb-3 flex size-8 items-center justify-center rounded-full bg-emerald-500/10 text-sm font-bold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                {step.number}
+              </div>
+              <div class="text-foreground mb-2 text-sm font-medium">{step.label}</div>
+              <code class="text-foreground rounded-md bg-black/5 px-3 py-1.5 font-mono text-xs dark:bg-white/10">
+                {step.command}
+              </code>
+            </div>
+            {index < steps.length - 1 && (
+              <div class="text-muted-foreground/40 absolute top-4 right-0 hidden translate-x-1/2 lg:block">
+                <svg
+                  class="size-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </div>
+            )}
+          </div>
+        ))
+      }
+    </div>
+
+    <div class="mt-12 flex justify-center">
+      <a
+        href="/docs/agent-skills"
+        class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300"
+      >
+        View the full guide
+        <svg
+          class="size-4"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<style>
+  .workflow-label {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
+  }
+  :global(.dark) .workflow-label {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
+  }
+</style>

@@ -1,0 +1,133 @@
+---
+title: 'Deploy an Existing Project'
+slug: 'deploy-existing-project'
+section: getting-started
+---
+
+import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
+
+This guide shows how to add Haloy deployment to any existing project using AI-powered agent skills. The skills automatically detect your framework and generate the necessary configuration.
+
+## Prerequisites
+
+- An existing web application (any framework)
+- Haloy CLI installed ([Client Installation](/docs/client-installation))
+- A haloy server configured ([Server Setup](/docs/server-setup))
+- A domain pointing to your server
+- An AI coding assistant ([Claude Code](https://docs.anthropic.com/en/docs/claude-code), [Cursor](https://cursor.sh), or similar)
+
+## 1. Install Agent Skills
+
+In your project directory, install the haloy agent skills:
+
+<CodeTabs defaultValue="npx">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="npx">npx</CodeTabTrigger>
+    <CodeTabTrigger value="pnpm">pnpm</CodeTabTrigger>
+    <CodeTabTrigger value="bunx">bunx</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="npx">
+    <Code code="npx skills add haloydev/agent-skills" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="pnpm">
+    <Code code="pnpm dlx skills add haloydev/agent-skills" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="bunx">
+    <Code code="bunx skills add haloydev/agent-skills" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
+
+This adds two skills to your project: `dockerize` and `haloy-config`.
+
+## 2. Create a Dockerfile
+
+Run the dockerize skill in your AI coding assistant:
+
+<Code code="/dockerize" lang="bash" />
+
+The skill will:
+- Detect your project type (Next.js, TanStack Start, Django, Go, etc.)
+- Check for a health endpoint and offer to create one if missing
+- Generate an optimized multi-stage Dockerfile
+- Create a `.dockerignore` file
+
+**Supported frameworks:** Next.js, TanStack Start, Vite/React, Express, FastAPI, Django, Flask, Go, Rust, Rails, Laravel, and more.
+
+## 3. Create haloy.yaml
+
+Run the haloy-config skill:
+
+<Code code="/haloy-config" lang="bash" />
+
+The skill will:
+- Detect your configured haloy servers
+- Ask for your deployment domain
+- Infer the correct port and health check path for your framework
+- Generate a complete `haloy.yaml`
+
+You'll end up with something like:
+
+<Code lang="yaml" code={`
+  name: my-app
+  server: haloy.yourserver.com
+  domains:
+    - domain: my-app.example.com
+  port: 3000
+  health_check_path: /health
+`} />
+
+## 4. Configure DNS
+
+Point your domain to your haloy server's IP address:
+
+| Record Type | Name | Value |
+|-------------|------|-------|
+| A | my-app.example.com | Your server's IP |
+
+If using a subdomain with an existing domain, you can also use a CNAME record pointing to your server's hostname.
+
+## 5. Deploy
+
+Validate your configuration:
+
+<Code code="haloy validate-config" lang="bash" />
+
+Deploy to your server:
+
+<Code code="haloy deploy" lang="bash" />
+
+Haloy will build your Docker image, push it to your server, and configure HTTPS automatically.
+
+## 6. Verify
+
+<Code lang="bash" code={`
+  # Check deployment status
+  haloy status
+
+  # View application logs
+  haloy logs
+`} />
+
+Your app is now live at your configured domain.
+
+## Adding a Database
+
+If your app needs a database, re-run `/haloy-config`. The skill will detect database dependencies (Prisma, Drizzle, SQLAlchemy, etc.) and offer to either:
+
+- **Self-hosted**: Generate a multi-target config with a PostgreSQL or MySQL container
+- **External**: Remind you to configure `DATABASE_URL` for services like Supabase, Neon, or RDS
+
+For SQLite, you'll need a persistent volume. The skill will configure this automatically.
+
+## Next Steps
+
+- [Volumes](/docs/volumes) - Persistent storage for databases and uploads
+- [Environment Variables](/docs/environment-variables) - Managing secrets and configuration
+- [Rollbacks](/docs/rollbacks) - Rolling back to previous versions
+- [Agent Skills Reference](/docs/agent-skills) - Full documentation for the skills
