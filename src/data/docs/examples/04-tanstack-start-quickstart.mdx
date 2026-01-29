@@ -1,0 +1,138 @@
+---
+title: 'TanStack Start Quickstart'
+slug: 'tanstack-start-quickstart'
+section: examples
+---
+
+import Code from '@/components/code.astro';
+
+This guide walks you through deploying a TanStack Start application using the official CLI and AI-powered deployment tools. We'll go from zero to deployed in just a few steps.
+
+## What You'll Build
+
+A TanStack Start application deployed to your own server with:
+
+- **TanStack Start CLI** - Official scaffolding tool for quick project setup
+- **Docker** - Container for consistent deployments
+- **Haloy** - Simple deployment to your own server with automatic HTTPS
+
+## Prerequisites
+
+- Node.js 20+ installed
+- Haloy CLI installed ([Client Installation](/docs/client-installation))
+- A linux server with haloy configured ([Server Setup](/docs/server-setup))
+- A domain pointing to your server
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) or another AI coding assistant
+
+## 1. Create Your Project
+
+Use the official TanStack Start CLI to scaffold a new project:
+
+<Code code="pnpm create @tanstack/start@latest my-app" lang="bash" />
+
+Follow the prompts to configure your project. The CLI will set up everything you need: TypeScript, routing, and the build configuration.
+
+<Code code="cd my-app" lang="bash" />
+
+## 2. Run the Development Server
+
+Verify the project works locally:
+
+<Code code="pnpm install && pnpm dev" lang="bash" />
+
+Visit `http://localhost:3000` to see your app running.
+
+## 3. Install Haloy Agent Skills
+
+The haloy agent skills extend your AI coding assistant with deployment capabilities. Install them using the [skills CLI](https://agentskills.io):
+
+<Code code="npx skills add haloydev/agent-skills" lang="bash" />
+
+This adds the `dockerize` and `haloy-config` skills to your project.
+
+## 4. Dockerize with AI
+
+Use the `dockerize` skill to create a production-ready Dockerfile:
+
+<Code code="/dockerize" lang="bash" />
+
+The agent will:
+- Detect your TanStack Start project
+- Check for a health endpoint (and offer to create one if missing)
+- Generate an optimized multi-stage Dockerfile
+- Create a `.dockerignore` file
+
+If you prefer to create the Dockerfile manually, see [TanStack Start with SQLite](/docs/examples/tanstack-start-sqlite#docker-configuration).
+
+## 5. Configure Haloy
+
+Use the `haloy-config` agent skill to create your deployment configuration:
+
+<Code code="/haloy-config" lang="bash" />
+
+The agent will:
+- Detect your configured haloy servers
+- Ask for your deployment domain
+- Generate a `haloy.yaml` with the correct settings
+
+You'll end up with something like:
+
+<Code lang="yaml" code={`
+  name: my-app
+  server: your-server.haloy.dev
+  domains:
+    - domain: my-app.example.com
+  port: 3000
+  health_check_path: /health
+`} />
+
+## 6. Deploy
+
+Validate your configuration:
+
+<Code code="haloy validate-config" lang="bash" />
+
+Deploy to your server:
+
+<Code code="haloy deploy" lang="bash" />
+
+Haloy will build your Docker image, push it to your server, and set up HTTPS automatically.
+
+## 7. Verify
+
+Check your deployment:
+
+<Code lang="bash" code={`
+  haloy status
+  haloy logs
+`} />
+
+Your app should now be live at your configured domain.
+
+## Adding a Database
+
+If your app needs a database, you have two options:
+
+### Option A: SQLite (Simplest)
+
+Add SQLite with Drizzle ORM:
+
+<Code code="pnpm add drizzle-orm @libsql/client drizzle-kit" lang="bash" />
+
+Then run `/haloy-config` again. The agent will detect the database dependency and offer to configure persistent storage.
+
+For a complete SQLite setup, see [TanStack Start with SQLite](/docs/examples/tanstack-start-sqlite).
+
+### Option B: PostgreSQL (Self-hosted or External)
+
+For PostgreSQL, run `/haloy-config` and choose either:
+- **Self-hosted**: The agent will generate a multi-target config with a PostgreSQL container
+- **External**: Use a managed service like Supabase, Neon, or RDS
+
+For a complete PostgreSQL setup, see [TanStack Start with PostgreSQL](/docs/examples/tanstack-start-postgres).
+
+## Next Steps
+
+- [Volumes](/docs/volumes) - Persistent storage for databases and files
+- [Environment Variables](/docs/configuration-reference#env) - Managing secrets and configuration
+- [Rollbacks](/docs/rollbacks) - Rolling back to previous versions
