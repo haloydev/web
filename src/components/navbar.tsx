@@ -1,12 +1,14 @@
 import { IconBrandGithub } from '@tabler/icons-react';
 import { ModeToggle } from './mode-toggle';
 import { ButtonLink } from './ui/button-link';
+import { VersionBadge } from './version-badge';
 
 type NavbarProps = {
   showLinks?: boolean;
+  version?: string;
 };
 
-export function Navbar({ showLinks = true }: NavbarProps) {
+export function Navbar({ showLinks = true, version }: NavbarProps) {
   return (
     <nav className="flex justify-center py-4 pr-6 pl-2">
       <div className="flex w-full justify-between">
@@ -28,6 +30,7 @@ export function Navbar({ showLinks = true }: NavbarProps) {
             </div>
           )}
 
+          {version && <VersionBadge version={version} />}
           <ModeToggle />
           <ButtonLink
             href="https://github.com/haloydev/haloy"

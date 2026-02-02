@@ -13,6 +13,9 @@ import FeaturesGrid from '@/components/features-grid.astro';
 import AiWorkflow from '@/components/ai-workflow.astro';
 import ConfigPreview from '@/components/config-preview.astro';
 import Footer from '@/components/footer.astro';
+import versionData from '@/data/version.json';
+
+const { version } = versionData;
 ---
 
 <BaseLayout title="Haloy - Cloudless Deploys" class="bg-background-sky">
@@ -26,7 +29,7 @@ import Footer from '@/components/footer.astro';
   </div>
 
   <div class="relative min-h-screen pb-20">
-    <Navbar client:load />
+    <Navbar client:load version={version} />
     <div class="flex justify-center">
       <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
         <h1 class="relative inline-block">
