@@ -1,0 +1,161 @@
+---
+title: 'Self-Hosted Deployment Tools Compared: Coolify, Dokploy, Kamal, Dokku, and Haloy'
+slug: 'self-hosted-deployment-tools-compared'
+description: 'A practical comparison of the most popular self-hosted deployment tools in 2026. What each one does well, where they fall short, and how to pick the right one for your project.'
+pubDate: 2026-02-08
+author: 'Andreas Meistad'
+tags: ['deployment', 'self-hosted', 'docker', 'devops', 'comparison']
+draft: false
+---
+
+The self-hosted deployment space has grown significantly over the past few years. Developers who want to deploy to their own servers without Kubernetes complexity or expensive PaaS bills now have real options to choose from. But the tools take very different approaches, and picking the wrong one means either fighting the tool or migrating later.
+
+This post compares five of the most popular self-hosted deployment tools: Coolify, Dokploy, Kamal, Dokku, and Haloy. I'll cover what each one does well, where each falls short, and who each is best suited for.
+
+## The Quick Summary
+
+Before going deep, here's a high-level overview:
+
+| | Approach | Interface | Multi-Server | Docker Registry Required | AI/LLM Support | Best For |
+|---|---|---|---|---|---|---|
+| **Coolify** | Self-hosted PaaS | Web GUI | Yes (Docker Swarm) | No | MCP servers, llms.txt | Teams wanting a visual dashboard |
+| **Dokploy** | Self-hosted PaaS | Web GUI | Yes (Docker Swarm) | No | Official MCP server | Docker-centric teams needing monitoring |
+| **Kamal** | CLI deployment tool | CLI only | Yes (SSH-based) | Yes | None | Rails teams, zero-overhead deploys |
+| **Dokku** | Mini-Heroku | CLI only | No (single server) | No | Early-stage MCP | Solo devs wanting git-push simplicity |
+| **Haloy** | CLI deployment tool | CLI only | Yes (REST API) | No | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
+
+## Coolify
+
+[Coolify](https://coolify.io) is the most popular self-hosted PaaS option right now, with over 50,000 GitHub stars. It positions itself as a self-hosted alternative to Vercel, Netlify, and Heroku. You install it on a server, and it gives you a polished web dashboard to manage applications, databases, and services.
+
+**What it does well:**
+
+Coolify has the richest feature set of any tool on this list. It offers 280+ one-click application templates (Supabase, Plausible, n8n, and more), built-in database management with automated backups, Git integration for deploying from GitHub or GitLab, and monitoring via Grafana. It supports Docker Compose natively and can manage multiple servers. If you want a single pane of glass to manage everything on your infrastructure, Coolify is the most complete option.
+
+The community is large and active, with releases roughly every few days and hundreds of contributors. If you run into an issue, you'll likely find someone who has solved it.
+
+**Where it falls short:**
+
+The web UI, despite being the core selling point, gets mixed reviews. Managing complex setups can feel clunky. The platform consumes meaningful resources on your server just to run the dashboard and its dependencies, which matters on smaller VPS instances. Scaling is limited to Docker Swarm, with no Kubernetes path. Database restores require SSH access and manual commands rather than a dashboard button. Multi-server load balancing needs manual configuration.
+
+Security has also been a concern. An independent audit identified seven CVEs in the platform, which is worth considering for production workloads.
+
+**Best for:** Teams that want a Vercel-like experience on their own infrastructure and prefer managing everything through a web dashboard. If you reach for a GUI before a terminal, Coolify is the most natural fit.
+
+## Dokploy
+
+[Dokploy](https://dokploy.com) is a newer self-hosted PaaS that competes directly with Coolify. It's built on Docker and Traefik, with a focus on clean design and Docker-native workflows.
+
+**What it does well:**
+
+Dokploy's UI is frequently cited as cleaner and more intuitive than Coolify's. It has strong monitoring capabilities built in, showing CPU, memory, storage, and network metrics in real-time. The API is well-documented with Swagger/OpenAPI specs and proper JWT authentication, making it easier to build automations around. Docker Compose and Docker Swarm support are first-class. It also supports multiple deployment methods: Nixpacks, Heroku Buildpacks, and custom Dockerfiles.
+
+**Where it falls short:**
+
+Dokploy is a younger project with a smaller community (roughly 24,000 GitHub stars, about half of Coolify's). The one-click app template library is smaller. Because it's newer, there's less documentation, fewer tutorials, and fewer community answers to draw from. Like Coolify, it's a heavy platform that consumes server resources to run.
+
+**Best for:** Teams that want a web-based PaaS like Coolify but prefer a cleaner interface and stronger Docker-native workflows. If you tried Coolify and found the UI frustrating, Dokploy is worth evaluating.
+
+## Kamal
+
+[Kamal](https://kamal-deploy.org) is the deployment tool built by 37signals, the company behind Basecamp, HEY, and Ruby on Rails. It deploys Docker containers to any server via SSH, configured through a YAML file. No web dashboard, no server-side daemon, no platform overhead.
+
+**What it does well:**
+
+Kamal's biggest strength is its zero-overhead approach. There is nothing running on your server except your application and a small reverse proxy (kamal-proxy). No dashboards, no databases for the platform itself, no background processes consuming resources. It connects via SSH, pulls your Docker image, and does a zero-downtime swap.
+
+The tool is battle-tested at scale. 37signals runs HEY (their email service with hundreds of thousands of users) entirely on Kamal. It ships bundled with Rails 8 as the default deployment option, which gives it strong ecosystem support in the Ruby world.
+
+Multi-server deployments work well. You define your servers in YAML and Kamal deploys to all of them. Rolling deploys, canary deployments, and maintenance mode are all built in.
+
+**Where it falls short:**
+
+Kamal requires a Docker registry. Your CI or local machine builds an image, pushes it to a registry (Docker Hub, GitHub Container Registry, etc.), and then Kamal tells the servers to pull it. This is fine if you already have a registry workflow, but it's an extra moving part if you don't.
+
+Installation requires Ruby, which is a non-issue for Rails teams but adds friction for Go, Python, or Node.js developers who don't have Ruby in their toolchain. You can run Kamal via a Docker container instead, but that comes with its own limitations.
+
+There's no built-in monitoring, log aggregation, or database management. You handle all operational concerns yourself. The documentation is adequate but not comprehensive, and the best resource (the Kamal handbook) is a paid product.
+
+**Best for:** Developers who want maximum control with minimum overhead, particularly Rails teams. If you're comfortable managing your own monitoring and logging and want the simplest possible deployment primitive, Kamal is excellent.
+
+## Dokku
+
+[Dokku](https://dokku.com) is the veteran of this list, first released in 2013. It's a "mini Heroku" that gives you git-push deployments on a single server. Push your code, Dokku builds it with Heroku buildpacks or a Dockerfile, and runs it in a Docker container.
+
+**What it does well:**
+
+Dokku has the lowest barrier to entry. Install it on a fresh Ubuntu server, add a git remote, and `git push dokku main`. That's the entire workflow. The Heroku-compatible approach means existing buildpacks handle most language runtimes automatically. No Dockerfile needed unless you want one.
+
+After 13 years, Dokku is stable and well-documented. The documentation is some of the best in this space. The plugin ecosystem covers databases, caching, SSL, and more. Resource usage is minimal since there's no web dashboard consuming memory.
+
+**Where it falls short:**
+
+The biggest limitation is that Dokku is single-server only. There is no built-in way to deploy to multiple servers or do horizontal scaling across machines. If your application outgrows a single server, you need to migrate to a different tool.
+
+There's no multi-user support or role-based access control. The plugin ecosystem, while large, has quality variance. Some plugins are well-maintained, others are abandoned. Configuration sync across servers (if you set up multiple Dokku instances manually) requires external tooling like Ansible.
+
+**Best for:** Solo developers running personal projects, side projects, or small production workloads that fit on a single server. If you love the Heroku workflow and want it on a $5/month VPS, Dokku is the obvious choice.
+
+## Haloy
+
+[Haloy](https://haloy.dev) takes a different approach from both the PaaS tools and the SSH-based tools. It's a CLI that communicates with a lightweight server daemon (`haloyd`) over HTTPS. You configure your application with a YAML file, run `haloy deploy`, and it builds a Docker image locally, uploads only the changed layers to the server, and does a zero-downtime swap.
+
+**What it does well:**
+
+The direct-upload approach eliminates the need for a Docker registry. Haloy builds your image locally, checks which Docker layers the server already has cached, and only uploads the missing ones. After the first deploy, subsequent deploys typically transfer a fraction of the full image size. This makes the deploy workflow simpler: there's no registry to configure, no credentials to manage, no intermediate storage.
+
+Configuration is a single YAML file in your project root. Automatic HTTPS via Let's Encrypt, built-in health checks, rolling deployments, instant rollbacks, and secret management (including 1Password integration) are included. Multi-server deployments are supported natively, so you can define staging and production targets in the same config.
+
+The server daemon approach means the server can actively monitor your containers, handle health checks, auto-recover crashed containers, and serve as a reverse proxy, all without external dependencies. The CLI is designed to work well with AI coding assistants, with agent skills for generating Dockerfiles and configuration.
+
+**Where it falls short:**
+
+Haloy is the newest tool on this list, which means the smallest community, fewest tutorials, and least battle-testing in production. There's no web dashboard, so everything is done through the CLI. The server daemon, while lightweight, is an additional process running on your server that needs to be maintained and updated. If you're already invested in a Docker registry workflow, the direct-upload approach doesn't save you much.
+
+**Best for:** Developers who want simple Docker deployments to their own servers without the overhead of a full PaaS or the requirement of a Docker registry. Particularly well-suited for indie developers, small teams, and anyone who prefers a CLI-first workflow with minimal configuration.
+
+## LLM and AI Agent Support
+
+As AI coding assistants become a regular part of development workflows, it's worth looking at how well these tools integrate with LLMs and AI agents. The approaches vary significantly.
+
+**Coolify** has the most developed AI ecosystem. Multiple community-built MCP (Model Context Protocol) servers let AI assistants create applications, manage domains, check deployment status, and configure services through the Coolify API. Coolify also publishes an `llms.txt` file, making its documentation easy for LLMs to consume. If you're managing infrastructure through an AI assistant, Coolify gives you the most to work with.
+
+**Dokploy** takes a similar approach with an official first-party MCP server that exposes 67 tools covering most of the platform's functionality. Because it's maintained by the Dokploy team rather than the community, the integration stays in sync with the platform as it evolves.
+
+**Haloy** takes a different approach. Rather than exposing infrastructure management to AI, Haloy provides agent skills focused on project setup: detecting your framework, generating a Dockerfile, and creating your deployment config. The CLI-first design also means AI agents can invoke Haloy commands directly without needing to navigate a web dashboard or use a separate integration layer.
+
+**Kamal** has no AI integration. **Dokku** has an early-stage community MCP server, but it's not widely adopted yet.
+
+The distinction matters depending on your workflow. Coolify and Dokploy's MCP servers are oriented toward infrastructure management, letting AI handle operational tasks like spinning up databases or configuring domains. Haloy's approach is oriented toward getting projects deployed quickly, with AI handling the setup boilerplate. If you're already using an AI coding assistant, all three approaches reduce friction, just at different stages of the workflow.
+
+## How to Choose
+
+The tools break down along two main axes: GUI vs. CLI, and platform vs. tool.
+
+**If you want a web dashboard**, choose between Coolify (most features, biggest community) and Dokploy (cleaner UI, better monitoring). Both give you a Vercel-like experience on your own hardware.
+
+**If you want a CLI tool**, the choice depends on your workflow:
+
+- **Already using a Docker registry?** Kamal is a strong choice, especially for Rails teams. Zero server overhead, battle-tested at 37signals scale.
+- **Want the simplest possible setup?** If your app fits on a single server, Dokku's git-push workflow is hard to beat.
+- **Want Docker deploys without a registry?** Haloy's layer-caching upload eliminates the registry as a dependency while keeping deploys fast.
+
+**If you're a solo developer** running side projects on a single VPS, Dokku or Haloy give you the most straightforward path. Dokku if you prefer git-push, Haloy if you prefer explicit deploy commands with YAML config.
+
+**If you're a small team** that needs multi-server deployments, Coolify, Kamal, or Haloy are the practical options. Coolify if you want a dashboard, Kamal or Haloy if you prefer CLI workflows.
+
+**If AI-assisted workflows matter to you**, Coolify and Dokploy offer MCP servers that let AI assistants manage your infrastructure directly. Haloy provides agent skills for project setup and a CLI that AI tools can drive without any extra integration. Kamal and Dokku don't have meaningful AI support yet.
+
+## What About Managed Platforms?
+
+Tools like Fly.io, Railway, and Render compete for the same audience but with a different trade-off: convenience in exchange for recurring platform fees and vendor lock-in.
+
+Fly.io offers global edge deployment with usage-based pricing, great for latency-sensitive applications but costs can be hard to predict. Railway is the fastest way to get something deployed, ideal for prototypes, but limited for production workloads. Render offers predictable pricing at $19/month per user, with managed databases and auto-scaling.
+
+The self-hosted tools in this post all share one advantage over managed platforms: you control the infrastructure, you own the data, and your costs scale with the hardware, not with the platform's pricing model. A $10/month VPS can run a surprising amount of production workload when there's no platform overhead eating into your resources.
+
+## Final Thoughts
+
+There's no single "best" deployment tool. Coolify and Dokploy are building toward a full PaaS experience on your own servers. Kamal and Haloy are building focused deployment tools that do one thing well. Dokku has been quietly reliable for over a decade.
+
+The good news is that all of these tools are open source and free to use. Try a couple, see which workflow clicks, and go with that. The migration cost between them is low since they all run Docker containers at the end of the day.
