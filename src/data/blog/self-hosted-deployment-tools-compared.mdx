@@ -16,13 +16,13 @@ This post compares five of the most popular self-hosted deployment tools: Coolif
 
 Before going deep, here's a high-level overview:
 
-| | Approach | Interface | Multi-Server | Docker Registry Required | AI/LLM Support | Best For |
-|---|---|---|---|---|---|---|
-| **Coolify** | Self-hosted PaaS | Web GUI | Yes (Docker Swarm) | No | MCP servers, llms.txt | Teams wanting a visual dashboard |
-| **Dokploy** | Self-hosted PaaS | Web GUI | Yes (Docker Swarm) | No | Official MCP server | Docker-centric teams needing monitoring |
-| **Kamal** | CLI deployment tool | CLI only | Yes (SSH-based) | Yes | None | Rails teams, zero-overhead deploys |
-| **Dokku** | Mini-Heroku | CLI only | No (single server) | No | Early-stage MCP | Solo devs wanting git-push simplicity |
-| **Haloy** | CLI deployment tool | CLI only | Yes (REST API) | No | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
+| | Approach | Language | Reverse Proxy | Interface | Multi-Server | Docker Registry Required | AI/LLM Support | Best For |
+|---|---|---|---|---|---|---|---|---|
+| **Coolify** | Self-hosted PaaS | PHP | Traefik | Web GUI | Yes (Docker Swarm) | No | MCP servers, llms.txt | Teams wanting a visual dashboard |
+| **Dokploy** | Self-hosted PaaS | TypeScript | Traefik | Web GUI | Yes (Docker Swarm) | No | Official MCP server | Docker-centric teams needing monitoring |
+| **Kamal** | CLI deployment tool | Ruby | kamal-proxy | CLI only | Yes (SSH-based) | Yes | None | Rails teams, zero-overhead deploys |
+| **Dokku** | Mini-Heroku | Go | Nginx, Caddy, Traefik | CLI only | No (single server) | No | Early-stage MCP | Solo devs wanting git-push simplicity |
+| **Haloy** | CLI deployment tool | Go | Built-in | CLI only | Yes (REST API) | No | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
 
 ## Coolify
 
