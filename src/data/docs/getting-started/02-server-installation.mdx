@@ -5,6 +5,9 @@ section: getting-started
 ---
 
 import Code from '@/components/code.astro';
+import CodeTabs from '@/components/code-tabs/code-tabs.astro';
+import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
+import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
 
 The Haloy daemon (`haloyd`) runs on your server and manages container deployments, service discovery, and traffic routing.
 
@@ -21,11 +24,37 @@ After running the installation script, you'll need to configure your server with
 
 If you already have a domain pointing to your server:
 
-<Code code={`curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=api.example.com sh`} lang="bash" />
+<CodeTabs defaultValue="curl">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="curl">curl</CodeTabTrigger>
+    <CodeTabTrigger value="wget">wget</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="curl">
+    <Code code={`curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=api.example.com sh`} lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="wget">
+    <Code code={`wget -qO- https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=api.example.com sh`} lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
 
 ## Standard Install (configure after)
 
-<Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
+<CodeTabs defaultValue="curl">
+  <Fragment slot="tabs">
+    <CodeTabTrigger value="curl">curl</CodeTabTrigger>
+    <CodeTabTrigger value="wget">wget</CodeTabTrigger>
+  </Fragment>
+
+  <CodeTabPanel value="curl">
+    <Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
+  </CodeTabPanel>
+
+  <CodeTabPanel value="wget">
+    <Code code="wget -qO- https://sh.haloy.dev/install-haloyd.sh | sh" lang="bash" />
+  </CodeTabPanel>
+</CodeTabs>
 
 **Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
 
