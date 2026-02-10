@@ -22,7 +22,7 @@ Before going deep, here's a high-level overview:
 | **Dokploy** | Self-hosted PaaS | TypeScript | Traefik | Web GUI | Yes (Docker Swarm) | No | Official MCP server | Docker-centric teams needing monitoring |
 | **Kamal** | CLI deployment tool | Ruby | kamal-proxy | CLI only | Yes (SSH-based) | Yes | None | Rails teams, zero-overhead deploys |
 | **Dokku** | Mini-Heroku | Go | Nginx, Caddy, Traefik | CLI only | No (single server) | No | Early-stage MCP | Solo devs wanting git-push simplicity |
-| **Haloy** | CLI deployment tool | Go | Built-in | CLI only | Yes (REST API) | No | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
+| **Haloy** | CLI deployment tool | Go | Built-in | CLI only | Yes (REST API) | Optional | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
 
 ## Coolify
 
@@ -102,7 +102,7 @@ There's no multi-user support or role-based access control. The plugin ecosystem
 
 **What it does well:**
 
-The direct-upload approach eliminates the need for a Docker registry. Haloy builds your image locally, checks which Docker layers the server already has cached, and only uploads the missing ones. After the first deploy, subsequent deploys typically transfer a fraction of the full image size. This makes the deploy workflow simpler: there's no registry to configure, no credentials to manage, no intermediate storage.
+The direct-upload approach eliminates the need for a Docker registry. Haloy builds your image locally, checks which Docker layers the server already has cached, and only uploads the missing ones. After the first deploy, subsequent deploys typically transfer a fraction of the full image size. This makes the deploy workflow simpler: there's no registry to configure, no credentials to manage, no intermediate storage. That said, Haloy also supports Docker registries if you prefer that workflow. You can build and push your image elsewhere (in CI, for example) and use `haloy deploy` to trigger the server to pull the image from the registry instead. This gives you flexibility to use whichever approach fits your setup.
 
 Configuration is a single YAML file in your project root. Automatic HTTPS via Let's Encrypt, built-in health checks, rolling deployments, instant rollbacks, and secret management (including 1Password integration) are included. Multi-server deployments are supported natively, so you can define staging and production targets in the same config.
 
@@ -110,7 +110,7 @@ The server daemon approach means the server can actively monitor your containers
 
 **Where it falls short:**
 
-Haloy is the newest tool on this list, which means the smallest community, fewest tutorials, and least battle-testing in production. There's no web dashboard, so everything is done through the CLI. The server daemon, while lightweight, is an additional process running on your server that needs to be maintained and updated. If you're already invested in a Docker registry workflow, the direct-upload approach doesn't save you much.
+Haloy is the newest tool on this list, which means the smallest community, fewest tutorials, and least battle-testing in production. There's no web dashboard, so everything is done through the CLI. The server daemon, while lightweight, is an additional process running on your server that needs to be maintained and updated. If you're already invested in a Docker registry workflow, Haloy supports that too, though it's not required.
 
 **Best for:** Developers who want simple Docker deployments to their own servers without the overhead of a full PaaS or the requirement of a Docker registry. Particularly well-suited for indie developers, small teams, and anyone who prefers a CLI-first workflow with minimal configuration.
 
@@ -138,7 +138,7 @@ The tools break down along two main axes: GUI vs. CLI, and platform vs. tool.
 
 - **Already using a Docker registry?** Kamal is a strong choice, especially for Rails teams. Zero server overhead, battle-tested at 37signals scale.
 - **Want the simplest possible setup?** If your app fits on a single server, Dokku's git-push workflow is hard to beat.
-- **Want Docker deploys without a registry?** Haloy's layer-caching upload eliminates the registry as a dependency while keeping deploys fast.
+- **Want Docker deploys with or without a registry?** Haloy lets you upload images directly with layer caching, or pull from a Docker registry if you already have one. Either way, deploys are fast.
 
 **If you're a solo developer** running side projects on a single VPS, Dokku or Haloy give you the most straightforward path. Dokku if you prefer git-push, Haloy if you prefer explicit deploy commands with YAML config.
 
