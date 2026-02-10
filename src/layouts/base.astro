@@ -8,10 +8,17 @@ import { cn } from '@/lib/utils';
 
 interface Props {
   title: string;
+  description?: string;
   class?: string;
+  ogType?: string;
 }
 
-const { title, class: className } = Astro.props;
+const defaultDescription =
+  'Haloy is a lightweight deployment platform that lets you deploy Docker-based applications to your own servers with simple YAML configuration, automatic HTTPS, and built-in secret management.';
+
+const { title, description = defaultDescription, class: className, ogType = 'website' } = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <script is:inline>
@@ -44,18 +51,31 @@ const { title, class: className } = Astro.props;
   }
 </script>
 
-<html lang="en" class="scroll-smooth">
+<html lang="en" dir="ltr" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width" />
-    <meta
-      name="description"
-      content="Haloy is a lightweight deployment and orchestration system designed for developers who want a simple, reliable way to deploy Docker‑based applications to their own servers"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preload" as="font" type="font/woff2" href={interLatinWoff2} crossorigin="anonymous" />
     <link rel="preload" as="font" type="font/woff2" href={figtreeLatinWoff2} crossorigin="anonymous" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="Haloy" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
     <title>{title}</title>
+
+    <slot name="head" />
   </head>
   <body class={cn('min-h-screen bg-background font-sans text-foreground antialiased', className)}>
     <slot />

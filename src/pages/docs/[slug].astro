@@ -13,7 +13,7 @@ const { page } = Astro.props;
 const { Content, headings } = await render(page);
 ---
 
-<DocsLayout title={page.data.title} activeSlug={page.data.slug} headings={headings}>
+<DocsLayout title={page.data.title} description={page.data.description} activeSlug={page.data.slug} headings={headings}>
   <Content />
 </DocsLayout>
 

@@ -41,6 +41,7 @@ const links = {
                 <a
                   href={link.href}
                   class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  {...(link.href.startsWith('http') && { target: '_blank', rel: 'noopener noreferrer' })}
                 >
                   {link.label}
                 </a>
@@ -56,6 +57,7 @@ const links = {
                 <a
                   href={link.href}
                   class="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  {...(link.href.startsWith('http') && { target: '_blank', rel: 'noopener noreferrer' })}
                 >
                   {link.label}
                 </a>
@@ -73,6 +75,8 @@ const links = {
       </p>
       <a
         href="https://github.com/haloydev/haloy"
+        target="_blank"
+        rel="noopener noreferrer"
         class="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
         <svg class="size-5" viewBox="0 0 24 24" fill="currentColor">
