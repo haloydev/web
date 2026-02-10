@@ -26,14 +26,15 @@ const sectionsWithPages = await Promise.all(
 
 interface Props {
   title: string;
+  description?: string;
   activeSlug: string;
   headings: MarkdownHeading[];
 }
 
-const { title, activeSlug, headings } = Astro.props;
+const { title, description, activeSlug, headings } = Astro.props;
 ---
 
-<BaseLayout title={`${title} - Haloy Documentation`}>
+<BaseLayout title={`${title} - Haloy Documentation`} description={description}>
   <Navbar client:load showLinks={false} />
   <div class="lg:flex">
     <DocsNavigation client:load activeSlug={activeSlug} sectionsWithPages={sectionsWithPages} />

@@ -16,6 +16,7 @@ const docPages = defineCollection({
   schema: z.object({
     title: z.string(),
     slug: z.string(),
+    description: z.string().optional(),
     section: reference('docSections'),
   }),
 });
