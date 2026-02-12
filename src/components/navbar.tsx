@@ -19,7 +19,7 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
           {showLinks && (
             <div className="mr-12">
               <a
-                href="/docs/quickstart"
+                href="/docs"
                 className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium"
               >
                 Docs
