@@ -1,0 +1,243 @@
+---
+import BaseLayout from '@/layouts/base.astro';
+import { Navbar } from '@/components/navbar';
+import { DocsNavigation } from '@/components/docs-navigation';
+import { getCollection } from 'astro:content';
+
+const sections = await getCollection('docSections');
+const sectionsWithPages = await Promise.all(
+  sections.map(async (section) => {
+    const pages = await getCollection('docPages', ({ data }) => data.section.id === section.id);
+    const sortedPages = pages.sort((a, b) => {
+      const fa = a.filePath?.split('/').pop() ?? '';
+      const fb = b.filePath?.split('/').pop() ?? '';
+      return fa.localeCompare(fb);
+    });
+    return {
+      ...section,
+      pages: sortedPages,
+    };
+  }),
+);
+
+const sectionMeta: Record<string, { description: string; icon: string; accent: string }> = {
+  introduction: {
+    description: 'Understand what Haloy is, how it works, and get your first app deployed in minutes.',
+    icon: 'rocket',
+    accent: 'emerald',
+  },
+  'getting-started': {
+    description: 'Install the CLI and server daemon, configure shell completion, and manage upgrades.',
+    icon: 'terminal',
+    accent: 'sky',
+  },
+  'command-reference': {
+    description: 'Complete reference for the haloy CLI and haloyd server daemon commands.',
+    icon: 'book',
+    accent: 'violet',
+  },
+  configuration: {
+    description: 'Configure your haloy.yaml with domains, volumes, environment variables, secrets, and more.',
+    icon: 'gear',
+    accent: 'amber',
+  },
+  deployment: {
+    description: 'Multi-server deployments, rolling updates, horizontal scaling, and rollback strategies.',
+    icon: 'cloud',
+    accent: 'cyan',
+  },
+  examples: {
+    description: 'Step-by-step deployment guides for Next.js, TanStack Start, Django, and other frameworks.',
+    icon: 'code',
+    accent: 'rose',
+  },
+  guides: {
+    description: 'In-depth guides covering server authentication, build hooks, and advanced workflows.',
+    icon: 'map',
+    accent: 'indigo',
+  },
+};
+---
+
+<BaseLayout title="Documentation - Haloy" description="Haloy documentation. Learn how to deploy Docker-based applications to your own servers with simple YAML configuration.">
+  <Navbar client:load showLinks={false} />
+  <div class="lg:flex">
+    <DocsNavigation client:load activeSlug="" sectionsWithPages={sectionsWithPages} />
+    <main class="flex-1 px-6 pb-20 lg:flex lg:justify-center">
+      <div class="mt-6 w-full max-w-3xl">
+        <h1 class="font-figtree text-4xl font-black">Documentation</h1>
+        <p class="mt-3 max-w-xl text-lg text-muted-foreground">
+          Everything you need to deploy and manage applications with Haloy.
+        </p>
+
+        <div class="mt-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {sectionsWithPages.map((section, index) => {
+            const meta = sectionMeta[section.id];
+            const firstPage = section.pages[0];
+            if (!meta || !firstPage) return null;
+            return (
+              <a
+                href={`/docs/${firstPage.data.slug}`}
+                class={`docs-card docs-card--${meta.accent} group relative overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 ease-out hover:-translate-y-0.5 hover:border-black/10 hover:shadow-[0_16px_32px_-10px_rgba(0,0,0,0.08),0_6px_12px_-6px_rgba(0,0,0,0.04)] dark:border-white/[0.06] dark:bg-white/[0.03] dark:hover:border-white/10 dark:hover:shadow-[0_16px_32px_-10px_rgba(0,0,0,0.35)]`}
+                style={`--delay: ${index * 0.06}s`}
+              >
+                <div class="docs-icon-wrapper mb-3 flex size-10 items-center justify-center rounded-xl transition-transform duration-300 group-hover:scale-110">
+                  {meta.icon === 'rocket' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z" />
+                      <path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z" />
+                      <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 3 0 3 0" />
+                      <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-3 0-3" />
+                    </svg>
+                  )}
+                  {meta.icon === 'terminal' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="4 17 10 11 4 5" />
+                      <line x1="12" y1="19" x2="20" y2="19" />
+                    </svg>
+                  )}
+                  {meta.icon === 'book' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
+                      <line x1="8" y1="7" x2="16" y2="7" />
+                      <line x1="8" y1="11" x2="13" y2="11" />
+                    </svg>
+                  )}
+                  {meta.icon === 'gear' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="3" />
+                      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+                    </svg>
+                  )}
+                  {meta.icon === 'cloud' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z" />
+                      <polyline points="12 13 12 7" />
+                      <polyline points="9 10 12 7 15 10" />
+                    </svg>
+                  )}
+                  {meta.icon === 'code' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="16 18 22 12 16 6" />
+                      <polyline points="8 6 2 12 8 18" />
+                    </svg>
+                  )}
+                  {meta.icon === 'map' && (
+                    <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
+                      <line x1="8" y1="2" x2="8" y2="18" />
+                      <line x1="16" y1="6" x2="16" y2="22" />
+                    </svg>
+                  )}
+                </div>
+                <h2 class="font-figtree text-base font-bold tracking-tight text-foreground">
+                  {section.data.title}
+                </h2>
+                <p class="mt-1 text-sm leading-relaxed text-muted-foreground">
+                  {meta.description}
+                </p>
+                <span class="mt-3 inline-flex items-center text-xs font-medium text-muted-foreground transition-colors group-hover:text-foreground">
+                  {section.pages.length} {section.pages.length === 1 ? 'article' : 'articles'}
+                  <svg class="ml-1 size-3 transition-transform duration-200 group-hover:translate-x-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </span>
+                <div class="docs-glow absolute left-0 right-0 top-0 h-px opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              </a>
+            );
+          })}
+        </div>
+      </div>
+    </main>
+  </div>
+</BaseLayout>
+
+<style>
+  .docs-card {
+    animation: docs-appear 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    animation-delay: var(--delay);
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  @keyframes docs-appear {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .docs-card--emerald .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+    color: #10b981;
+  }
+  .docs-card--sky .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(14, 165, 233, 0.05));
+    color: #0ea5e9;
+  }
+  .docs-card--violet .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+    color: #8b5cf6;
+  }
+  .docs-card--amber .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.05));
+    color: #f59e0b;
+  }
+  .docs-card--cyan .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.15), rgba(6, 182, 212, 0.05));
+    color: #06b6d4;
+  }
+  .docs-card--rose .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(244, 63, 94, 0.05));
+    color: #f43f5e;
+  }
+  .docs-card--indigo .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05));
+    color: #6366f1;
+  }
+
+  :global(.dark) .docs-card--emerald .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.08));
+  }
+  :global(.dark) .docs-card--sky .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.2), rgba(14, 165, 233, 0.08));
+  }
+  :global(.dark) .docs-card--violet .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(139, 92, 246, 0.08));
+  }
+  :global(.dark) .docs-card--amber .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(245, 158, 11, 0.08));
+  }
+  :global(.dark) .docs-card--cyan .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.2), rgba(6, 182, 212, 0.08));
+  }
+  :global(.dark) .docs-card--rose .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.2), rgba(244, 63, 94, 0.08));
+  }
+  :global(.dark) .docs-card--indigo .docs-icon-wrapper {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.08));
+  }
+
+  .docs-card--emerald .docs-glow {
+    background: linear-gradient(90deg, transparent, #10b981, transparent);
+  }
+  .docs-card--sky .docs-glow {
+    background: linear-gradient(90deg, transparent, #0ea5e9, transparent);
+  }
+  .docs-card--violet .docs-glow {
+    background: linear-gradient(90deg, transparent, #8b5cf6, transparent);
+  }
+  .docs-card--amber .docs-glow {
+    background: linear-gradient(90deg, transparent, #f59e0b, transparent);
+  }
+  .docs-card--cyan .docs-glow {
+    background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+  }
+  .docs-card--rose .docs-glow {
+    background: linear-gradient(90deg, transparent, #f43f5e, transparent);
+  }
+  .docs-card--indigo .docs-glow {
+    background: linear-gradient(90deg, transparent, #6366f1, transparent);
+  }
+</style>
