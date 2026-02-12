@@ -208,8 +208,7 @@ Check status of all replicas:
 haloy status
 
 # View logs from all replicas
-
-haloy logs`} lang="bash" />
+haloy logs --all-containers`} lang="bash" />
 
 ## Geographic Scaling
 
@@ -335,8 +334,8 @@ replicas: 3  # Down from 10
 
 If containers keep restarting:
 
-<Code code={`# Check logs
-haloy logs
+<Code code={`# Check logs from all replicas
+haloy logs --all-containers
 
 # Common issues:
 
