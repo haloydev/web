@@ -120,18 +120,42 @@ Stop running application containers.
 
 ### logs
 
-View logs from your deployed application.
+Stream application container logs (stdout/stderr) in real-time, similar to `docker logs -f`. Shows the last N lines of history first, then follows new output until Ctrl+C.
 
 <Code code={`
-  # View logs
+  # Stream from the default container
   haloy logs
+
+  # Show last 50 lines, then follow
+  haloy logs --tail 50
+
+  # Stream from all replicas, prefixed with container IDs
+  haloy logs --all-containers
+
+  # Stream from a specific container
+  haloy logs --container abc123
+
+  # Multi-target: stream from prod target
+  haloy logs --target prod
 
   # Specify config file
   haloy logs --config path/to/config.yaml
-
-  # Logs from specific target
-  haloy logs --target staging
 `} lang="bash" />
+
+When `--all-containers` is used, each line is prefixed with `[<container-id>]`. When multiple targets are streamed, each line is prefixed with the target name.
+
+**Options:**
+
+<div class="list-unstyled">
+- `--config, -c <path>` - Path to config file or directory (default: current directory)
+- `--target, -t <name>` - Stream logs for specific target(s) (comma-separated for multiple)
+- `--all, -a` - Stream logs for all targets
+- `--tail <n>` - Number of historical log lines to show (default: 100)
+- `--container <id>` - Stream logs from a specific container ID
+- `--all-containers` - Stream logs from all containers (shows container ID prefix per line)
+</div>
+
+Requires a `haloy.yaml` config file. The server is determined from the config (no `--server` flag).
 
 ### exec
 
@@ -322,6 +346,33 @@ Get the version from a haloyd server.
 - `--config, -c` - Path to config file or directory
 - `--target, -t <name>` - Apply to specific target(s) (comma-separated for multiple)
 - `--all, -a` - Get version for all targets
+</div>
+
+### server logs
+
+Stream platform-level operational logs from the haloyd server daemon in real-time. These are internal logs showing deployments, health checks, proxy routing, etc.
+
+<Code code={`
+  # Stream platform logs using config
+  haloy server logs
+
+  # Stream from a specific server
+  haloy server logs --server my.server
+
+  # Show logs for specific target
+  haloy server logs --target production
+
+  # Show all target logs
+  haloy server logs --all
+`} lang="bash" />
+
+**Options:**
+
+<div class="list-unstyled">
+- `--config, -c <path>` - Path to config file or directory (default: current directory)
+- `--server, -s <url>` - Haloy server URL (direct connection without config)
+- `--target, -t <name>` - Show logs for specific target(s) (comma-separated for multiple)
+- `--all, -a` - Show all target logs
 </div>
 
 ### server upgrade
