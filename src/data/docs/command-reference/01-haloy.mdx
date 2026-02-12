@@ -350,7 +350,7 @@ Get the version from a haloyd server.
 
 ### server logs
 
-Stream platform-level operational logs from the haloyd server daemon in real-time. These are internal logs showing deployments, health checks, proxy routing, etc.
+Stream platform-level operational logs from the haloyd server daemon in real-time. These are internal logs showing deployments, health checks, proxy routing, etc. Proxy HTTP access logs (GET/POST requests) are hidden by default to keep the output focused on important platform events.
 
 <Code code={`
   # Stream platform logs using config
@@ -358,6 +358,9 @@ Stream platform-level operational logs from the haloyd server daemon in real-tim
 
   # Stream from a specific server
   haloy server logs --server my.server
+
+  # Include proxy HTTP access logs
+  haloy server logs --access-logs
 
   # Show logs for specific target
   haloy server logs --target production
@@ -373,6 +376,7 @@ Stream platform-level operational logs from the haloyd server daemon in real-tim
 - `--server, -s <url>` - Haloy server URL (direct connection without config)
 - `--target, -t <name>` - Show logs for specific target(s) (comma-separated for multiple)
 - `--all, -a` - Show all target logs
+- `--access-logs` - Include proxy HTTP access logs in output
 </div>
 
 ### server upgrade
