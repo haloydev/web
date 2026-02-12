@@ -8,6 +8,7 @@ import { ButtonLink } from '@/components/ui/button-link';
 import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
 import InstallHaloy from '@/components/install-haloy.astro';
+import Code from '@/components/code.astro';
 import TerminalVideo from '@/components/terminal-video.astro';
 import FeaturesGrid from '@/components/features-grid.astro';
 import AiWorkflow from '@/components/ai-workflow.astro';
@@ -52,7 +53,22 @@ const { version } = versionData;
     </div>
     <div class="mt-20 flex justify-center">
       <div class="w-full max-w-3xl px-6">
-        <InstallHaloy />
+        <div class="space-y-8">
+          <div>
+            <div class="mb-3 flex items-center gap-2.5">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">1</span>
+              <span class="text-sm font-medium text-muted-foreground">Install the CLI</span>
+            </div>
+            <InstallHaloy />
+          </div>
+          <div>
+            <div class="mb-3 flex items-center gap-2.5">
+              <span class="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/10 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">2</span>
+              <span class="text-sm font-medium text-muted-foreground">Setup your server via SSH</span>
+            </div>
+            <Code code="curl -fsSL https://sh.haloy.dev/install-haloyd.sh | API_DOMAIN=haloy.yourserver.com sh" lang="bash" />
+          </div>
+        </div>
       </div>
     </div>
     <div class="mt-20 flex justify-center">
