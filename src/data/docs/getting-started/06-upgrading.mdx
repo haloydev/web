@@ -79,7 +79,9 @@ Check that the upgrade was successful:
 
 ## Upgrading Server Components
 
-There are several ways to upgrade `haloyd` on your server:
+There are several ways to upgrade `haloyd` on your server.
+
+**Note:** Do not re-run the original `install-haloyd.sh` script to upgrade. While it won't overwrite your configuration or data, it will replace your systemd/OpenRC service file, discarding any manual customizations. Use one of the methods below instead.
 
 ### Via haloy CLI (Recommended)
 
