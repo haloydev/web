@@ -49,9 +49,7 @@ Gradually replaces old containers with new ones, ensuring zero downtime.
   deployment_strategy: "rolling"
   replicas: 5
   health_check_path: "/health"
-  image:
-    repository: "my-org/ha-app"
-    tag: "v2.0.0"
+  image: "my-org/ha-app:v2.0.0"
   domains:
     - domain: "ha-app.com"
 `} lang="yaml" />
@@ -106,9 +104,7 @@ This strategy is required when using `naming_strategy: "static"`, as it ensures 
   deployment_strategy: "replace"
   replicas: 2
   health_check_path: "/status"
-  image:
-    repository: "my-org/batch-app"
-    tag: "v1.5.0"
+  image: "my-org/batch-app:v1.5.0"
   env:
     - name: "BATCH_SIZE"
       value: "1000"

@@ -500,8 +500,7 @@ For PostgreSQL, we need to deploy two services: the database and the application
     # Database Service
     postgres:
       preset: database
-      image:
-        repository: postgres:18
+      image: "postgres:18"
       port: 5432
       volumes:
         - postgres-data:/var/lib/postgresql
