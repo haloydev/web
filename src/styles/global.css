@@ -131,7 +131,7 @@
 }
 
 article .prose :where(table):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-  --breakout-extra: 6rem;
+  --breakout-extra: 16rem;
   width: calc(100% + var(--breakout-extra));
   max-width: calc(100% + var(--breakout-extra));
   margin-left: calc(var(--breakout-extra) / -2);
