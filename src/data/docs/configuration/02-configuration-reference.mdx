@@ -20,18 +20,14 @@ The configuration file supports **two modes** of operation:
 <Code code={`
   name: "my-app"
   server: "haloy.yourserver.com"
-  image:
-    repository: "my-app"
-    tag: "latest"
+  image: "my-app:latest"
 `} lang="yaml" />
 
 ### Multi-Target Example
 
 <Code code={`
   # Base settings inherited by all targets
-  image:
-    repository: "my-app"
-    tag: "latest"
+  image: "my-app:latest"
 
   targets:
     prod:
@@ -49,7 +45,7 @@ These options are **only** available at the top level of the configuration file.
 | Key                  | Type   | Description                                                                                     |
 | -------------------- | ------ | ----------------------------------------------------------------------------------------------- |
 | `targets`            | object | Define multiple deployment targets (see [Multi-Server Deployments](/docs/multi-server-deployments)) |
-| `images`             | map    | Define named images that can be referenced by targets                                           |
+| `images`             | map    | Define named images that can be referenced by targets. Values can be strings or objects.        |
 | `secret_providers`   | object | Configure secret providers (see [Secret Providers](/docs/secret-providers))                     |
 | `global_pre_deploy`  | array  | Commands to run once before **any** deployment starts                                           |
 | `global_post_deploy` | array  | Commands to run once after **all** deployments finish                                           |
@@ -67,7 +63,7 @@ These options define a deployment unit.
 | `preset`              | string         | No          | Apply preset configuration (Options: database, service)  (see [Presets](#presets))                          |
 | `protected`           | boolean        | No          | Exclude from `--all` deployments (default: false)  (see [Protected Targets](#protected-targets))            |
 | `naming_strategy`     | string         | No          | Container naming: "dynamiAc" (default) or "static" (see [Naming Strategy](#naming-strategy))                |
-| `image`               | object         | No          | Docker image configuration (see [Image Configuration](/docs/image-configuration))                           |
+| `image`               | string/object  | No          | Docker image configuration. A string is shorthand for `repository`. (see [Image Configuration](/docs/image-configuration)) |
 | `server`              | string         | No          | Haloy server API URL                                                                                        |
 | `api_token`           | object         | No          | API token configuration (see [Authentication](/docs/server-authentication))                                 |
 | `deployment_strategy` | string         | No          | Deployment strategy: "rolling" (default) or "replace"                                                       |
@@ -120,9 +116,7 @@ Use `preset: "database"` for stateful database services. This automatically appl
 <Code code={`
   postgres:
     preset: database
-    image:
-      repository: postgres
-      tag: "18"
+    image: "postgres:18"
     volumes:
       - /data/postgres:/var/lib/postgresql/data
 `} lang="yaml" />
@@ -138,9 +132,7 @@ Use `preset: "service"` for stateful services that share similar requirements to
 <Code code={`
   redis:
     preset: service
-    image:
-      repository: "henrygd/beszel"
-      tag: "latest"
+    image: "henrygd/beszel:latest"
 `} lang="yaml" />
 
 ## Protected Targets
@@ -270,7 +262,7 @@ When using multi-target deployments, each target can override base configuration
 | ------------------- | ------- | ---------------------------------------------------- |
 | `server`            | string  | Override the server for this target                  |
 | `api_token`         | object  | Override the API token configuration                 |
-| `image`             | object  | Override image configuration (repository, tag, etc.) |
+| `image`             | string/object | Override image configuration (repository, tag, etc.) |
 | `domains`           | array   | Override domain configuration                        |
 | `env`               | array   | Override environment variables                       |
 | `replicas`          | integer | Override number of replicas                          |

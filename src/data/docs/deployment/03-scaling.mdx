@@ -14,9 +14,7 @@ Set the number of replicas in your configuration:
 
 <Code
   code={`name: "my-scalable-app"
-image:
-  repository: "my-org/my-app"
-  tag: "1.2.0"
+image: "my-org/my-app:1.2.0"
 replicas: 3  # Run 3 instances
 domains:
   - domain: "api.example.com"`}
@@ -95,9 +93,7 @@ replicas: 3  # Minimum for HA
 deployment_strategy: "rolling"  # Zero-downtime updates
 health_check_path: "/health"
 
-image:
-repository: "my-org/critical-app"
-tag: "v2.0.0"
+image: "my-org/critical-app:v2.0.0"
 
 domains:
 
@@ -215,9 +211,7 @@ haloy logs --all-containers`} lang="bash" />
 Scale across multiple regions:
 
 <Code code={`name: "global-api"
-image:
-  repository: "my-org/api"
-  tag: "v2.0.0"
+image: "my-org/api:v2.0.0"
 
 targets:
 us-east:

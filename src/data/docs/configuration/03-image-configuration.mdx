@@ -20,9 +20,53 @@ Configure Docker images, registry authentication, local building, and rollback s
 | `history`      | object  | No       | Image history and rollback strategy                                                    |
 | `build_config` | object  | No       | Build configuration for local building                                                 |
 
+## String Shorthand
+
+Anywhere an image is expected, you can use a plain string instead of the object form. The string is treated as the `repository` field.
+
+<Code code={`
+  name: "my-app"
+  image: "nginx:alpine"
+`} lang="yaml" />
+
+This is equivalent to:
+
+<Code code={`
+  name: "my-app"
+  image:
+    repository: "nginx:alpine"
+`} lang="yaml" />
+
+The shorthand also works in the `images` map:
+
+<Code code={`
+  images:
+    db: "postgres:18"
+    cache: "redis:7"
+`} lang="yaml" />
+
+You can mix shorthand and object forms in the same file:
+
+<Code code={`
+  image: "nginx:alpine"
+  images:
+    db: "postgres:18"
+    api:
+      repository: "node"
+      tag: "20"
+      registry:
+        username:
+          value: "user"
+        password:
+          from:
+            secret: "registry-pass"
+`} lang="yaml" />
+
+Tags embedded in the string (e.g., `"nginx:1.21"`) work the same way as in the `repository` field. All other image fields (`tag`, `registry`, `history`, `build`, `build_config`) require the object form.
+
 ## Simple Configuration
 
-Pull from a public registry:
+Pull from a public registry using the object form:
 
 <Code code={`
   name: "my-app"
