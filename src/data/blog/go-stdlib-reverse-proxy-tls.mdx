@@ -1,0 +1,459 @@
+---
+title: "Building a Reverse Proxy with Automatic TLS Using Go's Standard Library"
+slug: 'go-stdlib-reverse-proxy-tls'
+description: 'How Haloy uses httputil.ReverseProxy, tls.Config.GetCertificate, and http.Hijacker to build a production reverse proxy with automatic Let''s Encrypt certificates, with almost no third-party dependencies.'
+pubDate: 2026-02-13
+author: 'Andreas Meistad'
+tags: ['go', 'tls', 'reverse-proxy', 'deployment']
+draft: false
+---
+
+import Code from '@/components/code.astro';
+
+Haloy's reverse proxy and certificate manager weren't always built on Go's standard library. The project went through two earlier architectures before landing here, and the progression is worth sharing because each step made the case for stdlib stronger.
+
+## How We Got Here
+
+The first version used [Traefik](https://traefik.io/) as the reverse proxy, running as a separate Docker container with its built-in certificate manager handling Let's Encrypt. It worked, but it meant managing an extra container, writing Traefik-specific configuration, and debugging issues through Traefik's abstraction layer on top of the actual problem.
+
+The second version swapped Traefik for [HAProxy](https://www.haproxy.org/) and used [Lego](https://github.com/go-acme/lego) for certificate management. HAProxy is fast and battle-tested, but it came with its own friction. Configuration reloads required generating HAProxy config files and sending SIGHUP signals over sockets. Certificate updates meant coordinating between Lego, the filesystem, and HAProxy's reload cycle. Another Docker container to manage, another set of esoteric config syntax to maintain.
+
+Both approaches felt like hacks. The core of Haloy is a single Go binary that runs as a systemd service (or rc service on Alpine). Having the proxy layer depend on external containers and tool-specific configuration didn't fit.
+
+So I tried building it on Go's stdlib, and was genuinely surprised how smoothly everything came together. `httputil.ReverseProxy` handles the proxying. `tls.Config.GetCertificate` handles dynamic certificate loading. `golang.org/x/crypto/acme` handles Let's Encrypt directly. Certificate fetching is faster now than it was with either previous setup, and the whole thing runs as part of `haloyd` with no external dependencies, no extra containers, no config file generation, no reload signals.
+
+The only non-stdlib networking dependency is `golang.org/x/crypto/acme`, which feels close enough to stdlib that I'm comfortable calling it one.
+
+## The Reverse Proxy
+
+`net/http/httputil.ReverseProxy` does most of the heavy lifting. Each incoming request gets matched to a backend based on the `Host` header, and the proxy forwards it with the right headers set:
+
+<Code code={`
+  proxy := &httputil.ReverseProxy{
+      Rewrite: func(pr *httputil.ProxyRequest) {
+          pr.SetURL(targetURL)
+          pr.SetXForwarded()
+          pr.Out.Host = r.Host
+      },
+      Transport:     p.transport,
+      FlushInterval: -1,
+      ErrorHandler: func(w http.ResponseWriter, r *http.Request, err error) {
+          p.logger.Error("Proxy error", "host", r.Host, "backend", backendAddr)
+          p.serveErrorPage(w, http.StatusBadGateway, "Backend unavailable")
+      },
+  }
+  proxy.ServeHTTP(w, r)
+`} lang="go" />
+
+`Rewrite` replaces the older `Director` callback. `SetURL` points the request at the backend, `SetXForwarded` adds the standard forwarding headers, and preserving `r.Host` on the outbound request means backends see the original domain. `FlushInterval: -1` tells the proxy to flush immediately, which matters for server-sent events and streaming responses.
+
+### Host-Based Routing
+
+Routing is a map lookup. Each configured app gets a route keyed by its canonical domain, with optional aliases that resolve to the same backend:
+
+<Code code={`
+  func (p *Proxy) findRoute(config *Config, host string) *Route {
+      if route, ok := config.Routes[host]; ok {
+          return route
+      }
+
+      for _, route := range config.Routes {
+          for _, alias := range route.Aliases {
+              if strings.ToLower(alias) == host {
+                  return route
+              }
+          }
+      }
+      return nil
+  }
+`} lang="go" />
+
+Direct matches hit the fast path. Aliases fall through to a linear scan, which is fine when you're routing tens of domains, not thousands.
+
+### Zero-Downtime Config Updates
+
+When an app is deployed or its configuration changes, the proxy needs to pick up the new routes without dropping in-flight requests. `atomic.Pointer` makes this straightforward:
+
+<Code code={`
+  type Proxy struct {
+      config    atomic.Pointer[Config]
+      rrMu      sync.Mutex
+      rrIndexes map[string]uint32
+      // ...
+  }
+
+  func (p *Proxy) UpdateConfig(config *Config) {
+      p.config.Store(config)
+  }
+`} lang="go" />
+
+The entire config is swapped atomically. Requests in flight continue using the old config. New requests pick up the new one. No locks on the read path.
+
+### Round-Robin Load Balancing
+
+When an app has multiple containers, requests get distributed across them with a per-route counter:
+
+<Code code={`
+  func (p *Proxy) selectBackend(route *Route) Backend {
+      if len(route.Backends) == 1 {
+          return route.Backends[0]
+      }
+
+      p.rrMu.Lock()
+      index := p.rrIndexes[route.Canonical]
+      p.rrIndexes[route.Canonical] = index + 1
+      p.rrMu.Unlock()
+
+      return route.Backends[index%uint32(len(route.Backends))]
+  }
+`} lang="go" />
+
+Simple modulo arithmetic on an incrementing counter. The mutex is only held long enough to read and bump the index. For a single-backend route (the common case), it skips the lock entirely.
+
+## WebSocket Proxying
+
+This was the part I expected to need a library for. WebSocket connections start as an HTTP upgrade request, then switch to a raw TCP connection. `httputil.ReverseProxy` doesn't handle that transition, but `http.Hijacker` makes it manageable.
+
+The approach: detect the upgrade, dial the backend directly, hijack both sides, and pipe them together.
+
+<Code code={`
+  func (p *Proxy) handleWebSocket(w http.ResponseWriter, r *http.Request, route *Route, startTime time.Time) {
+      backendConn, err := net.DialTimeout("tcp", backendAddr, 10*time.Second)
+      if err != nil {
+          p.serveErrorPage(w, http.StatusBadGateway, "Backend unavailable")
+          return
+      }
+      defer backendConn.Close()
+
+      hijacker, ok := w.(http.Hijacker)
+      if !ok {
+          http.Error(w, "WebSocket not supported", http.StatusInternalServerError)
+          return
+      }
+
+      clientConn, clientBuf, err := hijacker.Hijack()
+      if err != nil {
+          return
+      }
+      defer clientConn.Close()
+
+      // Forward the original upgrade request to the backend
+      if err := r.Write(backendConn); err != nil {
+          return
+      }
+
+      // Bidirectional copy
+      var wg sync.WaitGroup
+      wg.Add(2)
+
+      go func() {
+          defer wg.Done()
+          if clientBuf.Reader.Buffered() > 0 {
+              io.CopyN(backendConn, clientBuf, int64(clientBuf.Reader.Buffered()))
+          }
+          io.Copy(backendConn, clientConn)
+          if tcpConn, ok := backendConn.(*net.TCPConn); ok {
+              tcpConn.CloseWrite()
+          }
+      }()
+
+      go func() {
+          defer wg.Done()
+          io.Copy(clientConn, backendConn)
+          if tcpConn, ok := clientConn.(*net.TCPConn); ok {
+              tcpConn.CloseWrite()
+          }
+      }()
+
+      wg.Wait()
+  }
+`} lang="go" />
+
+A few things worth noting:
+
+- `Hijack()` gives you the raw `net.Conn` and a `bufio.ReadWriter`. Any data already buffered by the HTTP server needs to be drained first, or it gets lost.
+- `CloseWrite()` sends a TCP FIN on the write side without closing the read side. This is how each goroutine signals "I'm done sending" without killing the other direction. Without it, one side closing would break the other.
+- Two goroutines, one `sync.WaitGroup`, and `io.Copy` doing the actual byte shuffling. That's the whole thing.
+
+The WebSocket detection itself is two header checks:
+
+<Code code={`
+  func isWebSocketUpgrade(r *http.Request) bool {
+      return strings.EqualFold(r.Header.Get("Upgrade"), "websocket") &&
+          strings.Contains(strings.ToLower(r.Header.Get("Connection")), "upgrade")
+  }
+`} lang="go" />
+
+## TLS Certificates
+
+### Dynamic Certificate Loading
+
+`tls.Config` has a `GetCertificate` callback that's invoked on every TLS handshake. The TLS client sends the server name it's trying to reach (SNI), and the callback returns the right certificate. This means you can serve different certificates for different domains without restarting the server.
+
+<Code code={`
+  tlsConfig := &tls.Config{
+      GetCertificate: certManager.GetCertificate,
+      NextProtos:     []string{"h2", "http/1.1"},
+      MinVersion:     tls.VersionTLS12,
+  }
+`} lang="go" />
+
+The certificate manager implements a multi-level lookup:
+
+<Code code={`
+  func (cm *CertManager) GetCertificate(hello *tls.ClientHelloInfo) (*tls.Certificate, error) {
+      serverName := strings.ToLower(hello.ServerName)
+
+      if serverName == "" {
+          return cm.defaultCert, nil
+      }
+
+      // Try exact match from cache
+      if cert, ok := cm.getCachedCertificate(serverName); ok {
+          return cert, nil
+      }
+
+      // Try loading from disk
+      if cert, err := cm.loadAndCacheCertificate(serverName); err == nil {
+          return cert, nil
+      }
+
+      // Resolve alias to canonical domain and try again
+      if canonical, ok := cm.resolveCanonical(serverName); ok && canonical != serverName {
+          if cert, ok := cm.getCachedCertificate(canonical); ok {
+              return cert, nil
+          }
+          if cert, err := cm.loadAndCacheCertificate(canonical); err == nil {
+              return cert, nil
+          }
+      }
+
+      // Try wildcard (*.example.com for app.example.com)
+      if wildcard := wildcardDomain(serverName); wildcard != "" {
+          if cert, ok := cm.getCachedCertificate(wildcard); ok {
+              return cert, nil
+          }
+      }
+
+      return cm.defaultCert, nil
+  }
+`} lang="go" />
+
+The fallback chain: exact match, disk load, alias resolution, wildcard, then a self-signed default. That last fallback exists because bots and scanners often connect without SNI. Without a default certificate, those connections would fail and fill your logs with TLS errors. A self-signed cert lets them connect (they'll get an untrusted cert warning, which they don't care about) without generating noise.
+
+### Self-Signed Fallback
+
+The default certificate is generated once at startup:
+
+<Code code={`
+  func generateSelfSignedCert() (*tls.Certificate, error) {
+      priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+      if err != nil {
+          return nil, err
+      }
+
+      template := x509.Certificate{
+          SerialNumber: serialNumber,
+          Subject:      pkix.Name{Organization: []string{"Haloy Default"}},
+          NotBefore:    time.Now(),
+          NotAfter:     time.Now().Add(10 * 365 * 24 * time.Hour),
+          KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+          ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+      }
+
+      certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &priv.PublicKey, priv)
+      if err != nil {
+          return nil, err
+      }
+
+      return &tls.Certificate{
+          Certificate: [][]byte{certDER},
+          PrivateKey:  priv,
+      }, nil
+  }
+`} lang="go" />
+
+All stdlib. `crypto/ecdsa` for the key, `crypto/x509` for the certificate, `crypto/rand` for the serial number.
+
+## Automatic ACME Certificates
+
+Certificate management uses `golang.org/x/crypto/acme` directly for Let's Encrypt HTTP-01 challenges. No wrapper libraries like `certmagic` or `lego`, just the ACME protocol.
+
+### The Challenge Server
+
+HTTP-01 validation requires Let's Encrypt to make an HTTP request to `http://yourdomain.com/.well-known/acme-challenge/{token}` and get back a specific response. The challenge server handles this:
+
+<Code code={`
+  type ChallengeServer struct {
+      mu         sync.RWMutex
+      challenges map[string]string // token -> keyAuth
+      server     *http.Server
+  }
+
+  func (cs *ChallengeServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+      prefix := "/.well-known/acme-challenge/"
+      if !strings.HasPrefix(r.URL.Path, prefix) {
+          http.NotFound(w, r)
+          return
+      }
+
+      token := strings.TrimPrefix(r.URL.Path, prefix)
+
+      cs.mu.RLock()
+      keyAuth, ok := cs.challenges[token]
+      cs.mu.RUnlock()
+
+      if !ok {
+          http.NotFound(w, r)
+          return
+      }
+
+      w.Header().Set("Content-Type", "text/plain")
+      w.Write([]byte(keyAuth))
+  }
+`} lang="go" />
+
+Tokens are added before the challenge starts and cleaned up after validation. The server runs on localhost and the main proxy forwards `/.well-known/acme-challenge/` requests to it.
+
+### The ACME Flow
+
+Obtaining a certificate follows the standard ACME order flow. Here's the condensed version:
+
+<Code code={`
+  func (m *ACMEClientManager) ObtainCertificate(
+      ctx context.Context,
+      domains []string,
+      challengeServer *ChallengeServer,
+  ) (certPEM, keyPEM []byte, err error) {
+      client, err := m.GetClient(ctx)
+      if err != nil {
+          return nil, nil, err
+      }
+
+      // Create order for all domains (canonical + aliases)
+      order, err := client.AuthorizeOrder(ctx, acme.DomainIDs(domains...))
+      if err != nil {
+          return nil, nil, err
+      }
+
+      // Authorize each domain via HTTP-01
+      for _, authURL := range order.AuthzURLs {
+          auth, err := client.GetAuthorization(ctx, authURL)
+          if err != nil {
+              return nil, nil, err
+          }
+
+          if auth.Status == acme.StatusValid {
+              continue
+          }
+
+          // Find the HTTP-01 challenge
+          var challenge *acme.Challenge
+          for _, c := range auth.Challenges {
+              if c.Type == "http-01" {
+                  challenge = c
+                  break
+              }
+          }
+
+          // Compute key authorization and serve it
+          keyAuth, err := client.HTTP01ChallengeResponse(challenge.Token)
+          if err != nil {
+              return nil, nil, err
+          }
+          challengeServer.SetChallenge(challenge.Token, keyAuth)
+          defer challengeServer.ClearChallenge(challenge.Token)
+
+          // Tell Let's Encrypt to validate
+          if _, err := client.Accept(ctx, challenge); err != nil {
+              return nil, nil, err
+          }
+          if _, err := client.WaitAuthorization(ctx, authURL); err != nil {
+              return nil, nil, err
+          }
+      }
+
+      // Generate a key for the certificate (separate from the account key)
+      certKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+      if err != nil {
+          return nil, nil, err
+      }
+
+      // Create CSR and finalize
+      csr, err := x509.CreateCertificateRequest(rand.Reader, &x509.CertificateRequest{
+          DNSNames: domains,
+      }, certKey)
+      if err != nil {
+          return nil, nil, err
+      }
+
+      order, err = client.WaitOrder(ctx, order.URI)
+      if err != nil {
+          return nil, nil, err
+      }
+
+      derCerts, _, err := client.CreateOrderCert(ctx, order.FinalizeURL, csr, true)
+      if err != nil {
+          return nil, nil, err
+      }
+
+      // Encode to PEM
+      var certBuf bytes.Buffer
+      for _, der := range derCerts {
+          pem.Encode(&certBuf, &pem.Block{Type: "CERTIFICATE", Bytes: der})
+      }
+
+      keyBytes, _ := x509.MarshalECPrivateKey(certKey)
+      keyPEM = pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: keyBytes})
+
+      return certBuf.Bytes(), keyPEM, nil
+  }
+`} lang="go" />
+
+The steps map directly to the ACME RFC: create an order, authorize each domain, respond to challenges, submit a CSR, and collect the certificate. Working with `golang.org/x/crypto/acme` directly means there's no magic. Each step is explicit, and error handling is straightforward.
+
+### Certificate Renewal
+
+Certificates are checked periodically and renewed if they expire within 30 days or if the domain configuration has changed (aliases added or removed):
+
+<Code code={`
+  func (cm *CertificatesManager) needsRenewalDueToExpiry(domain CertificatesDomain) (bool, error) {
+      certData, err := os.ReadFile(filepath.Join(cm.config.CertDir, domain.Canonical+".pem"))
+      if err != nil {
+          if os.IsNotExist(err) {
+              return true, nil
+          }
+          return false, err
+      }
+
+      parsedCert, err := parseCertificate(certData)
+      if err != nil {
+          return true, nil
+      }
+
+      return time.Until(parsedCert.NotAfter) < 30*24*time.Hour, nil
+  }
+`} lang="go" />
+
+Configuration changes trigger re-issuance too. If you add an alias domain to an app, the certificate needs to be re-issued with the new domain in the SAN list. The renewal manager compares the current alias list against the certificate's `DNSNames` field and re-issues if they don't match.
+
+Certificates are saved atomically using a write-to-temp-then-rename pattern, so a crash during a write won't leave a corrupted certificate on disk.
+
+## What You End Up With
+
+The whole proxy layer, including routing, WebSocket support, and TLS termination, is around 1,000 lines. The ACME integration with the full renewal lifecycle adds another 850. The only non-stdlib dependency in the networking layer is `golang.org/x/crypto/acme`.
+
+| Component | stdlib packages used |
+|-----------|---------------------|
+| Reverse proxy | `net/http/httputil`, `net/http` |
+| WebSocket proxying | `net/http` (`Hijacker`), `net`, `io` |
+| Config hot-reload | `sync/atomic` |
+| TLS termination | `crypto/tls` |
+| Certificate generation | `crypto/x509`, `crypto/ecdsa`, `crypto/elliptic` |
+| ACME challenges | `golang.org/x/crypto/acme` |
+
+I started this project expecting to lean on nginx for the proxy layer and a library like `lego` for certificate management. The stdlib alternative is easier to reason about, has fewer moving parts, and the whole thing compiles into a single binary with no runtime dependencies.
+
+---
+
+Haloy is still early (v0.1.0-beta). If you're interested in the full implementation, the source is on [GitHub](https://github.com/haloydev/haloy).
