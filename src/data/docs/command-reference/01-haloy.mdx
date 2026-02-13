@@ -248,6 +248,33 @@ Create a TCP tunnel to a running container, allowing local connections to be for
 - Requires exactly one target (use `--targets` flag for multi-target configs)
 - The target container must be running
 
+### targets
+
+List deployment targets defined in the haloy configuration file. This command reads only from the config file and does not require server communication or authentication.
+
+<Code code={`
+  # List all targets from config in current directory
+  haloy targets
+
+  # Specify a config file path
+  haloy targets --config path/to/config.yaml
+
+  # Filter to a specific target
+  haloy targets -t production
+`} lang="bash" />
+
+**Syntax:**
+<Code code="haloy targets [flags]" lang="bash" />
+
+**Options:**
+
+<div class="list-unstyled">
+- `--config, -c <path>` - Path to config file or directory (default: current directory)
+- `--targets, -t <name>` - Filter specific targets (comma-separated)
+</div>
+
+**Output:** A table with columns NAME, SERVER, DOMAINS, REPLICAS, and PROTECTED. Targets are sorted alphabetically. Domains shows comma-separated canonical domain names, or "-" if none are configured. Replicas defaults to "1" when not explicitly set. Protected shows "yes" or "no".
+
 ### rollback
 
 Rollback to a specific deployment.
