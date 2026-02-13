@@ -1,5 +1,5 @@
 ---
-title: 'Self-Hosted Deployment Tools Compared: Coolify, Dokploy, Kamal, Dokku, and Haloy'
+title: 'Self-Hosted Deployment Tools Compared: Coolify, Dokploy, Kamal, Dokku, Komodo, and Haloy'
 slug: 'self-hosted-deployment-tools-compared'
 description: 'A practical comparison of the most popular self-hosted deployment tools in 2026. What each one does well, where they fall short, and how to pick the right one for your project.'
 pubDate: 2026-02-08
@@ -10,7 +10,7 @@ draft: false
 
 The self-hosted deployment space has grown significantly over the past few years. Developers who want to deploy to their own servers without Kubernetes complexity or expensive PaaS bills now have real options to choose from. But the tools take very different approaches, and picking the wrong one means either fighting the tool or migrating later.
 
-This post compares five of the most popular self-hosted deployment tools: Coolify, Dokploy, Kamal, Dokku, and Haloy. I'll cover what each one does well, where each falls short, and who each is best suited for.
+This post compares six of the most popular self-hosted deployment tools: Coolify, Dokploy, Kamal, Dokku, Komodo, and Haloy. I'll cover what each one does well, where each falls short, and who each is best suited for.
 
 ## The Quick Summary
 
@@ -22,6 +22,7 @@ Before going deep, here's a high-level overview:
 | **Dokploy** | Self-hosted PaaS | TypeScript | Traefik | Web GUI | Yes (Docker Swarm) | No | Official MCP server | Docker-centric teams needing monitoring |
 | **Kamal** | CLI deployment tool | Ruby | kamal-proxy | CLI only | Yes (SSH-based) | Yes | None | Rails teams, zero-overhead deploys |
 | **Dokku** | Mini-Heroku | Go | Nginx, Caddy, Traefik | CLI only | No (single server) | No | Early-stage MCP | Solo devs wanting git-push simplicity |
+| **Komodo** | Server management platform | Rust | User-configured | Web GUI | Yes (agent-based) | Yes | None | Teams managing many servers and resources |
 | **Haloy** | CLI deployment tool | Go | Built-in | CLI only | Yes (REST API) | Optional | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
 
 ## Coolify
@@ -96,6 +97,28 @@ There's no multi-user support or role-based access control. The plugin ecosystem
 
 **Best for:** Solo developers running personal projects, side projects, or small production workloads that fit on a single server. If you love the Heroku workflow and want it on a $5/month VPS, Dokku is the obvious choice.
 
+## Komodo
+
+[Komodo](https://komo.do) is a server management platform built in Rust that takes a broader scope than most tools on this list. Rather than focusing narrowly on application deployment, Komodo treats servers, deployments, stacks, builds, and automation procedures as interconnected "resources" managed through a central web UI.
+
+**What it does well:**
+
+Komodo's resource abstraction is its defining feature. You connect servers by installing a lightweight "periphery" agent, then manage everything through a central dashboard. Deployments can be single Docker containers or full Docker Compose stacks. Builds pull from Git repos and produce Docker images pushed to registries. Procedures chain multiple actions across resources into automated workflows that can run in parallel stages or be triggered by webhooks.
+
+The platform scales without artificial limits. There's no cap on connected servers, and no "business edition" with gated features. Everything is available under the GPL-3.0 license. The Rust backend keeps resource usage low for the core API, and the TypeScript frontend provides a responsive dashboard. Komodo also supports declarative infrastructure through TOML-based resource sync files, letting you define your entire setup in version-controlled config and sync it across servers.
+
+For teams managing many servers and services, the centralized alerting system with configurable filtering, built-in token management for private registries and Git repos, and the ability to write custom automation scripts in TypeScript through the Komodo API add up to a capable operations platform.
+
+**Where it falls short:**
+
+Komodo's broader scope means more complexity. Where simpler tools let you deploy an app in a few minutes, Komodo requires setting up the core API, installing periphery agents on each server, and learning the resource model before you deploy anything. The agent-based architecture means every server needs a Komodo component running on it.
+
+The project has a smaller community than the other tools here (around 10,000 GitHub stars, 45 contributors). Documentation is improving but can be sparse in places. The reverse proxy setup is left to you, unlike tools that bundle one. There's no built-in HTTPS provisioning, so you'll need to configure certificates through your own reverse proxy or another tool.
+
+Komodo requires a Docker registry for builds. Images are built on dedicated builder servers (or AWS instances) and pushed to a registry before deployment. This is a natural fit if you already have a registry workflow, but adds setup if you don't.
+
+**Best for:** Teams managing multiple servers that want a centralized platform to orchestrate deployments, builds, and automation across their infrastructure. If you're running a fleet of servers with many services and want a single dashboard to manage it all, Komodo is worth evaluating. Less suited for deploying a single app to a single server, where simpler tools have less overhead.
+
 ## Haloy
 
 [Haloy](https://haloy.dev) takes a different approach from both the PaaS tools and the SSH-based tools. It's a CLI that communicates with a lightweight server daemon (`haloyd`) over HTTPS. You configure your application with a YAML file, run `haloy deploy`, and it builds a Docker image locally, uploads only the changed layers to the server, and does a zero-downtime swap.
@@ -124,6 +147,8 @@ As AI coding assistants become a regular part of development workflows, it's wor
 
 **Haloy** takes a different approach. Rather than exposing infrastructure management to AI, Haloy provides agent skills focused on project setup: detecting your framework, generating a Dockerfile, and creating your deployment config. The CLI-first design also means AI agents can invoke Haloy commands directly without needing to navigate a web dashboard or use a separate integration layer.
 
+**Komodo** has a comprehensive REST API and supports TypeScript-based automation scripts, but doesn't offer dedicated AI or MCP integrations yet.
+
 **Kamal** has no AI integration. **Dokku** has an early-stage community MCP server, but it's not widely adopted yet.
 
 The distinction matters depending on your workflow. Coolify and Dokploy's MCP servers are oriented toward infrastructure management, letting AI handle operational tasks like spinning up databases or configuring domains. Haloy's approach is oriented toward getting projects deployed quickly, with AI handling the setup boilerplate. If you're already using an AI coding assistant, all three approaches reduce friction, just at different stages of the workflow.
@@ -132,7 +157,7 @@ The distinction matters depending on your workflow. Coolify and Dokploy's MCP se
 
 The tools break down along two main axes: GUI vs. CLI, and platform vs. tool.
 
-**If you want a web dashboard**, choose between Coolify (most features, biggest community) and Dokploy (cleaner UI, better monitoring). Both give you a Vercel-like experience on your own hardware.
+**If you want a web dashboard**, choose between Coolify (most features, biggest community), Dokploy (cleaner UI, better monitoring), and Komodo (multi-server orchestration with resource management). Coolify and Dokploy give you a Vercel-like experience on your own hardware, while Komodo is geared more toward managing a fleet of servers with interconnected services.
 
 **If you want a CLI tool**, the choice depends on your workflow:
 
@@ -141,6 +166,8 @@ The tools break down along two main axes: GUI vs. CLI, and platform vs. tool.
 - **Want Docker deploys with or without a registry?** Haloy lets you upload images directly with layer caching, or pull from a Docker registry if you already have one. Either way, deploys are fast.
 
 **If you're a solo developer** running side projects on a single VPS, Dokku or Haloy give you the most straightforward path. Dokku if you prefer git-push, Haloy if you prefer explicit deploy commands with YAML config.
+
+**If you're managing many servers and services**, Komodo's resource model and centralized orchestration are designed for that scale. It gives you automated workflows, declarative infrastructure sync, and a single dashboard across your entire fleet.
 
 **If you're a small team** that needs multi-server deployments, Coolify, Kamal, or Haloy are the practical options. Coolify if you want a dashboard, Kamal or Haloy if you prefer CLI workflows.
 
@@ -156,6 +183,6 @@ The self-hosted tools in this post all share one advantage over managed platform
 
 ## Final Thoughts
 
-There's no single "best" deployment tool. Coolify and Dokploy are building toward a full PaaS experience on your own servers. Kamal and Haloy are building focused deployment tools that do one thing well. Dokku has been quietly reliable for over a decade.
+There's no single "best" deployment tool. Coolify and Dokploy are building toward a full PaaS experience on your own servers. Komodo is building a broader server management platform for teams running larger infrastructure. Kamal and Haloy are building focused deployment tools that do one thing well. Dokku has been quietly reliable for over a decade.
 
 The good news is that all of these tools are open source and free to use. Try a couple, see which workflow clicks, and go with that. The migration cost between them is low since they all run Docker containers at the end of the day.
