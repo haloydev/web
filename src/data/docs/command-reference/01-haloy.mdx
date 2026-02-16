@@ -406,31 +406,6 @@ Stream platform-level operational logs from the haloyd server daemon in real-tim
 - `--access-logs` - Include proxy HTTP access logs in output
 </div>
 
-### server upgrade
-
-Upgrade the haloyd daemon on a server to the latest version.
-
-<Code code={`
-  # Upgrade via API (recommended)
-  haloy server upgrade
-
-  # Upgrade specific target
-  haloy server upgrade --target production
-
-  # Show manual upgrade instructions
-  haloy server upgrade --manual
-`} lang="bash" />
-
-**Flags:**
-
-<div class="list-unstyled">
-- `--server, -s` - Server URL (overrides config file)
-- `--config, -c` - Path to config file or directory
-- `--target, -t <name>` - Apply to specific target(s) (comma-separated for multiple)
-- `--all, -a` - Upgrade all targets
-- `--manual` - Display manual SSH upgrade instructions instead of performing API upgrade
-</div>
-
 ### version
 
 Display the CLI version.
