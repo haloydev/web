@@ -1,0 +1,126 @@
+---
+title: 'Haloy vs Kubernetes: When You Need an Orchestrator and When You Don''t'
+slug: 'haloy-vs-kubernetes'
+description: 'Kubernetes is the industry standard for container orchestration, but most applications don''t need it. A practical look at what each tool does, where they overlap, and how to decide.'
+pubDate: 2026-02-16
+author: 'Andreas Meistad'
+tags: ['kubernetes', 'deployment', 'docker', 'devops', 'comparison']
+draft: false
+---
+
+The question comes up often enough that it deserves a direct answer: how does Haloy compare to Kubernetes?
+
+The short version is that they solve different problems at different scales. Kubernetes is a distributed container orchestration platform designed for large, complex systems. Haloy is a deployment tool designed to get Docker apps running on your own servers with minimal setup. Comparing them head-to-head is a bit like comparing a commercial kitchen to a home oven, both cook food, but they're built for entirely different situations.
+
+That said, both tools deploy Docker containers, so the question is fair. Here's a practical breakdown.
+
+## Quick Comparison
+
+| | Kubernetes | Haloy |
+|---|---|---|
+| **Architecture** | Distributed control plane (API server, etcd, scheduler, kubelet, kube-proxy) | Single binary CLI + lightweight server daemon |
+| **Configuration** | YAML manifests, Helm charts, Kustomize overlays | Single YAML file per app |
+| **Scaling model** | Auto-scaling across multi-node clusters | Manual replicas on individual servers |
+| **SSL/TLS** | Requires cert-manager or similar add-on | Built-in via Let's Encrypt |
+| **Registry requirement** | Yes, always | Optional (direct upload or registry) |
+| **Resource overhead** | Significant (control plane needs 2+ GB RAM minimum) | Minimal (single Go binary) |
+| **Learning curve** | Steep (weeks to months for proficiency) | Low (minutes to first deploy) |
+| **Best for** | Microservice architectures, large teams, auto-scaling, HA | Indie devs, small teams, single/few servers, simple Docker apps |
+
+## What Kubernetes Is
+
+Kubernetes is a container orchestration platform originally developed at Google and now maintained by the CNCF. It manages containers across a cluster of machines, handling scheduling, networking, storage, scaling, and self-healing.
+
+A typical Kubernetes setup includes an API server, etcd (a distributed key-value store for cluster state), a scheduler that decides where pods run, kubelets on each node that manage containers, and kube-proxy for networking. On top of that, most production clusters need an ingress controller for HTTP routing, cert-manager for TLS, a CNI plugin for pod networking, and monitoring via Prometheus and Grafana.
+
+Kubernetes is genuinely powerful. It can scale workloads automatically based on CPU, memory, or custom metrics. It handles rolling updates, canary deployments, and automatic rollbacks. Service discovery, load balancing, and secret management are built in. When you have dozens of services running across many machines and need them to coordinate reliably, Kubernetes is the industry standard for good reason.
+
+## What Haloy Is
+
+Haloy is a CLI deployment tool paired with a lightweight server daemon. You write a YAML config file in your project root, run `haloy deploy`, and it builds a Docker image locally, uploads the changed layers to your server, and does a zero-downtime swap. The server daemon handles reverse proxying, automatic HTTPS via Let's Encrypt, health checks, and container management.
+
+There's no cluster, no control plane, no distributed state. One binary on your laptop, one binary on your server.
+
+## Key Differences
+
+### Architecture and operational overhead
+
+Kubernetes requires a control plane that itself needs to be highly available in production. That means at least three control plane nodes plus worker nodes, or a managed service like EKS, GKE, or AKS (which shifts the operational burden but adds cost). Even a minimal single-node k3s setup consumes meaningful resources just for the cluster components.
+
+Haloy's server daemon is a single Go process that uses a fraction of the resources. On a $10/month VPS, the difference between "most of your RAM goes to your app" and "a chunk of your RAM goes to the platform" matters.
+
+### Configuration complexity
+
+Deploying an application to Kubernetes typically involves writing a Deployment manifest, a Service manifest, and an Ingress manifest at minimum. Add a ConfigMap or Secret for environment variables, a PersistentVolumeClaim if you need storage, and a HorizontalPodAutoscaler if you want scaling. For anything non-trivial, teams reach for Helm charts or Kustomize to manage the complexity, which adds another layer of tooling to learn.
+
+Haloy's configuration is a single YAML file:
+
+<Code lang="yaml" code={`
+  name: myapp
+  server: haloy.yourserver.com
+  domains:
+    - domain: myapp.example.com
+  env:
+    - name: DATABASE_URL
+      from:
+        env: DATABASE_URL
+`} />
+
+That's a complete deployment configuration, including HTTPS.
+
+### Deployment workflow
+
+In Kubernetes, the typical flow is: build image, push to registry, update the manifest (or Helm values) with the new image tag, apply the manifest with `kubectl apply` or let a GitOps tool like ArgoCD sync it. Each step is a separate concern with its own tooling.
+
+With Haloy, it's `haloy deploy`. The CLI builds the image, uploads changed layers to the server, and triggers the deployment. One command, one tool.
+
+### Scaling
+
+This is where Kubernetes genuinely shines. It can automatically scale pods across nodes based on resource utilization or custom metrics. If traffic spikes, the Horizontal Pod Autoscaler adds more replicas. If a node goes down, the scheduler moves workloads to healthy nodes. Multi-region deployments, rolling updates across hundreds of pods, and service mesh integration are all possible.
+
+Haloy scales vertically (bigger server) or by manually configuring replicas. It supports deploying to multiple servers, but there's no auto-scaling, no cross-node scheduling, and no automatic failover between machines. If your application needs to handle unpredictable traffic spikes or needs to run across many nodes for redundancy, Kubernetes handles that and Haloy doesn't.
+
+### Networking and SSL
+
+Kubernetes networking is powerful but complex. Pods get their own IP addresses within a virtual network. Services provide stable endpoints for groups of pods. Ingress controllers (Nginx, Traefik, or others) handle external HTTP traffic. TLS termination requires installing cert-manager and configuring Certificate resources. Each of these is a separate component to install, configure, and maintain.
+
+Haloy's server daemon includes a built-in reverse proxy with automatic Let's Encrypt certificate provisioning. Point your DNS at the server, set the `host` field in your config, and HTTPS works on the first deploy. No additional components needed.
+
+### Ecosystem and extensibility
+
+Kubernetes has an enormous ecosystem. Operators, custom resource definitions, service meshes (Istio, Linkerd), observability stacks (Prometheus, Jaeger, Loki), policy engines (OPA, Kyverno), and hundreds of CNCF projects that integrate with it. If you need a specific capability, there's likely a Kubernetes-native solution for it.
+
+Haloy is intentionally focused. It deploys Docker containers, manages HTTPS, handles secrets, and does health checks. It doesn't try to be a platform. If you need a service mesh or a policy engine, Haloy isn't the tool for that.
+
+## When Kubernetes Makes Sense
+
+Kubernetes is the right choice when your situation looks like this:
+
+- **Microservice architectures** with many services that need to discover and communicate with each other
+- **Large teams** where multiple groups deploy independently to shared infrastructure
+- **Auto-scaling requirements** where traffic patterns are unpredictable and you need elastic capacity
+- **High availability** across multiple nodes or regions, where the system must survive machine failures automatically
+- **Service mesh needs** for mTLS between services, traffic splitting, or observability at the network level
+- **Compliance requirements** that mandate specific orchestration, audit logging, or network policy capabilities
+
+If you're running 20+ microservices across a fleet of machines with multiple teams deploying multiple times per day, Kubernetes gives you the primitives to manage that reliably.
+
+## When Haloy Makes Sense
+
+Haloy fits when your situation looks like this:
+
+- **Indie developers and small teams** shipping web applications, APIs, or background workers
+- **Single server or a few servers** rather than a large cluster
+- **Docker-based applications** that just need to run somewhere with HTTPS
+- **You want production deploys without platform complexity**, where setting up and maintaining an orchestrator is more overhead than the application itself warrants
+- **Side projects and small SaaS products** where the infrastructure should take minutes to set up, not days
+
+Most web applications, even ones serving thousands of users, run perfectly fine on a single server or a small handful of servers. They don't need a scheduler, they don't need a service mesh, and they don't need auto-scaling. They need a reliable way to deploy a Docker container, point a domain at it, and get HTTPS.
+
+## The Honest Take
+
+Most developers don't need Kubernetes. That's not a controversial statement, it's the experience of anyone who has set up a Kubernetes cluster for a project that could have been deployed with a simpler tool. The operational overhead of maintaining a cluster, keeping it updated, managing RBAC, debugging networking issues, and learning the ecosystem is significant. For a small team or a single developer, that overhead often exceeds the complexity of the application itself.
+
+But when you do need Kubernetes, nothing else replaces it. The ability to orchestrate hundreds of containers across dozens of machines with automatic scaling, self-healing, and sophisticated networking is something no simpler tool can replicate. Haloy isn't trying to.
+
+Haloy covers the common case: you have a Docker app, you have a server, and you want to deploy it with HTTPS and zero downtime. If that's your situation, you don't need a container orchestrator. If your situation grows beyond that, Kubernetes will be there.
