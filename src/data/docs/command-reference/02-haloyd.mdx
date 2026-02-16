@@ -89,30 +89,6 @@ Get or set configuration values.
 - `api-token` - The API authentication token
 </div>
 
-### upgrade
-
-Self-update haloyd to the latest version.
-
-<Code code={`
-  # Upgrade to latest version
-  sudo haloyd upgrade
-
-  # Upgrade to specific version
-  sudo haloyd upgrade --version 1.2.0
-`} lang="bash" />
-
-**Options:**
-
-<div class="list-unstyled">
-- `--version <version>` - Upgrade to a specific version instead of latest
-</div>
-
-The upgrade command will:
-1. Download the new binary
-2. Verify the download
-3. Replace the current binary
-4. Signal the service to restart (if running under systemd)
-
 ### verify
 
 Verify the haloyd installation and check system health.
