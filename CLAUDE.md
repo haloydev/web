@@ -6,6 +6,8 @@ The files in `public/markdown/` are generated on build. Do not edit them directl
 
 ## Code Component Formatting
 
+Always use the `<Code>` component for code blocks in `.mdx` files. Never use markdown backtick fenced code blocks. Files using `<Code>` must import it: `import Code from '@/components/code.astro';`
+
 For single-line code, use the inline syntax:
 ```
 <Code code="npm install package" lang="bash" />
