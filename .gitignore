@@ -1,6 +1,7 @@
 # build output
 dist/
 public/markdown/
+src/data/version.json
 # generated types
 .astro/
 
