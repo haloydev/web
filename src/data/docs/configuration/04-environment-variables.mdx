@@ -166,6 +166,50 @@ Combine different methods in a single configuration:
         secret: "onepassword:api-keys.secret"
 `} lang="yaml" />
 
+## Env Var Interpolation
+
+Reference other env vars within `value:` strings using `${VAR_NAME}` syntax to compose values from multiple sources.
+
+<Code code={`
+  env:
+    - name: "DB_PASSWORD"
+      from:
+        secret: "onepassword:db-creds.password"
+    - name: "DATABASE_URL"
+      value: "postgres://admin:\${DB_PASSWORD}@db:5432/myapp"
+`} lang="yaml" />
+
+Variables are resolved after secrets are fetched, and declaration order does not matter.
+
+### Syntax
+
+- Only `${VAR_NAME}` is supported (bare `$VAR` is not recognized)
+- Variable names must match `[A-Za-z_][A-Za-z0-9_]*`
+- Only applies to `value:` strings, not `from:` sourced values
+
+### Multiple and Chained References
+
+You can reference multiple variables in a single value, and reference variables that themselves use interpolation:
+
+<Code code={`
+  env:
+    - name: "SERVICE_HOST"
+      value: "api.example.com"
+    - name: "SERVICE_PORT"
+      value: "443"
+    - name: "SERVICE_BASE"
+      value: "https://\${SERVICE_HOST}:\${SERVICE_PORT}"
+    - name: "SERVICE_ENDPOINT"
+      value: "\${SERVICE_BASE}/v2/data"
+`} lang="yaml" />
+
+### Undefined and Circular References
+
+- Undefined references are left as literal text. This is backwards compatible with `${...}` patterns meant for runtime resolution inside the container.
+- Circular dependencies produce an error during `haloy deploy` and `haloy validate-config`.
+
+Use `haloy validate-config --show-resolved-config` to verify interpolated values resolve correctly.
+
 ## Build Arguments from Environment Variables
 When building Docker images locally, you often need the same variable both as a runtime environment variable and as a build argument. Instead of duplicating the definition, use the `build_arg` option:
 

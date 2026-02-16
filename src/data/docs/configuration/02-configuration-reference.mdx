@@ -71,7 +71,7 @@ These options define a deployment unit.
 | `replicas`            | integer        | No          | Number of container instances (default: 1)                                                                  |
 | `port`                | string/integer | No          | Container port to expose (default: "8080"). The port your application listens on inside the container.      |
 | `health_check_path`   | string         | No          | Health check endpoint (default: "/")                                                                        |
-| `env`                 | array          | No          | Environment variables (see [Environment Variables](/docs/environment-variables))                            |
+| `env`                 | array          | No          | Environment variables. Supports `${VAR_NAME}` interpolation in `value:` strings (see [Environment Variables](/docs/environment-variables)) |
 | `volumes`             | array          | No          | Volume mounts (see [Volumes](/docs/volumes))                                                                |
 | `pre_deploy`          | array          | No          | Commands to run before deploy (per target)                                                                  |
 | `post_deploy`         | array          | No          | Commands to run after deploy (per target)                                                                   |
