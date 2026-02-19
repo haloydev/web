@@ -1,0 +1,360 @@
+---
+title: 'Self-Hosted Analytics: Umami vs Plausible vs Rybbit'
+slug: 'self-hosted-analytics-compared'
+description: 'Comparing Umami, Plausible, and Rybbit for self-hosted analytics. How to deploy each with Haloy, bypass ad blockers, and scale when traffic grows.'
+pubDate: 2026-02-16
+author: 'Andreas Meistad'
+tags: ['analytics', 'self-hosted', 'docker', 'privacy', 'comparison']
+draft: false
+---
+
+import Code from '@/components/code.astro';
+
+Third-party analytics services raise a few problems at once. They cost money that scales with traffic, they collect visitor data on servers you don't control, they require cookie consent banners for GDPR compliance, and browser ad blockers strip out their tracking scripts entirely. For developers already running their own servers, self-hosting analytics solves all of these.
+
+This post compares three open-source analytics tools, Umami, Plausible Community Edition, and Rybbit, with deployment configs for each using Haloy. I'll also cover how to use custom endpoints to avoid ad blockers and when to run analytics on a separate server.
+
+## Why Self-Host Your Analytics?
+
+**Data ownership and privacy.** Your analytics data stays on your server. No third party processes your visitors' information, which means GDPR compliance without cookie consent banners. Most self-hosted analytics tools are cookieless by design.
+
+**No recurring SaaS fees.** Plausible's hosted plan starts at $9/month for 10k pageviews. Umami Cloud starts at $9/month. These costs grow with traffic. Self-hosted runs on infrastructure you already pay for.
+
+**Ad blocker bypass.** Browser extensions block requests to known analytics domains (plausible.io, cloud.umami.is). When you self-host on your own domain, those blocklists don't apply. Combined with custom script names and endpoints, you can get accurate visitor counts without fighting ad blockers.
+
+**Co-location with your app.** Analytics running on the same server as your application means tracking requests never leave the machine. No external network calls, no added latency, no extra DNS lookups.
+
+## The Quick Summary
+
+Before going deep, here's a high-level overview:
+
+| | Umami | Plausible CE | Rybbit |
+|---|---|---|---|
+| **Built with** | Next.js, Prisma | Elixir/Phoenix | Node.js/Koa, React |
+| **Database** | PostgreSQL | PostgreSQL + ClickHouse | ClickHouse |
+| **Containers needed** | 2 (app + postgres) | 3 (app + postgres + clickhouse) | ~3 (app + clickhouse + caddy) |
+| **Memory** | ~200MB | ~2GB minimum | ~2GB minimum |
+| **License** | MIT | AGPL-3.0 | AGPL-3.0 |
+| **GitHub stars** | 35k+ | 24k+ | 11k+ |
+| **Session replay** | No | No (cloud only) | Yes |
+| **Funnels** | No | No (cloud only) | Yes |
+| **Ad blocker bypass** | Built-in env vars | Manual proxy config | Manual proxy config |
+| **Best for** | Lightweight simplicity | High-traffic, polished dashboard | Feature-rich product analytics |
+
+## Umami
+
+[Umami](https://umami.is) is the most popular open-source web analytics tool by GitHub stars. It's a lightweight, privacy-focused alternative to Google Analytics that runs on Next.js with a PostgreSQL database.
+
+**What it does well:**
+
+Umami is the lightest option here. The app container uses around 200MB of memory, and combined with PostgreSQL, the total footprint stays under 500MB. Setup is simple: two containers (app + postgres), a few environment variables, and you're collecting data.
+
+The standout feature for self-hosters is built-in ad blocker bypass. Umami lets you customize both the tracking script filename and the data collection endpoint via environment variables (`TRACKER_SCRIPT_NAME` and `COLLECT_API_ENDPOINT`). No proxy configuration or application-level rewrites needed.
+
+The dashboard is clean and focused: pageviews, visitors, bounce rate, referrers, browser/OS/device breakdowns, and UTM tracking. It covers what most developers need without overwhelming you with options. Umami is MIT licensed, releases frequently, and has a large community.
+
+**Where it falls short:**
+
+PostgreSQL works fine for analytics at small to medium scale, but it's a row-oriented database. At high traffic volumes (millions of pageviews per month), ClickHouse-based tools will query faster because columnar storage is better suited to analytics workloads. Umami doesn't offer funnels, session replay, retention analysis, or cohort breakdowns. The Next.js runtime adds some overhead compared to a compiled binary, though at ~200MB this is still lightweight.
+
+**Best for:** Solo developers and small teams wanting lightweight analytics with minimal setup and built-in ad blocker bypass.
+
+## Plausible Community Edition
+
+[Plausible](https://plausible.io) is a privacy-first analytics tool built in Elixir/Phoenix. The Community Edition is the self-hosted version of their popular cloud service.
+
+**What it does well:**
+
+Plausible uses ClickHouse for analytics data, which means fast query performance even at high traffic volumes. Columnar storage handles aggregation queries over millions of rows efficiently. The dashboard is polished and well-designed, with a clean single-page view that loads quickly. Google Search Console integration lets you see search queries alongside your analytics. The project has strong brand recognition and a large community.
+
+**Where it falls short:**
+
+The self-hosted footprint is heavier: three containers (app + PostgreSQL + ClickHouse) with a minimum of about 2GB RAM. ClickHouse alone wants 1GB+ to run comfortably.
+
+The bigger issue is feature parity. Plausible CE releases only happen roughly twice per year, lagging behind the cloud version. Features like funnels, custom properties filtering, and revenue tracking are available on Plausible Cloud but gated behind paid plans or unavailable in CE. There's no built-in mechanism to customize tracking script names or collection endpoints for ad blocker bypass, so you'll need to handle that at the proxy or application level.
+
+The AGPL-3.0 license means any modifications to the source code must be made available, which matters if you plan to customize the tool.
+
+**Best for:** Higher-traffic sites that need ClickHouse-level query performance and a polished, well-designed dashboard.
+
+## Rybbit
+
+[Rybbit](https://rybbit.io) is a newer open-source analytics tool that has gained traction quickly, reaching 11k+ GitHub stars since launching. It's built with Node.js/Koa on the backend and React on the frontend, with ClickHouse for data storage.
+
+**What it does well:**
+
+Rybbit's defining advantage is feature parity between self-hosted and cloud. Unlike Plausible CE, where advanced features are cloud-only, Rybbit ships everything in the open-source version: session replay, funnels, retention analysis, user journeys, and Core Web Vitals monitoring. If you want product analytics features without deploying something as heavy as PostHog, Rybbit fills that gap.
+
+The UI is modern and well-organized. ClickHouse handles analytics queries efficiently, just like Plausible. Development is active with frequent releases, and the project is growing fast.
+
+**Where it falls short:**
+
+As a newer project, Rybbit has a smaller community and less documentation than Umami or Plausible. The ClickHouse dependency means a ~2GB RAM minimum, same as Plausible. The AGPL-3.0 license applies here too. There's no built-in ad blocker bypass via environment variables like Umami offers, so you'll need proxy-level or application-level configuration for that.
+
+**Best for:** Teams wanting product analytics features (session replay, funnels, retention) in a self-hosted tool without PostHog's complexity.
+
+## Others Worth Knowing About
+
+**PostHog** is a full product analytics suite with event tracking, feature flags, A/B testing, session replay, and more. It's significantly heavier than the tools above and is closer to a platform than a simple analytics tool. Worth considering if you need the full product analytics stack.
+
+**Matomo** is the long-standing open-source Google Analytics alternative, built in PHP. It's feature-rich but heavyweight, and some features require paid premium plugins.
+
+**GoatCounter** is a minimalist analytics tool written in Go. Even lighter than Umami, it's a single binary with SQLite. No Docker required. Good for developers who want the absolute minimum.
+
+## Deploying Umami with Haloy
+
+Umami needs two containers: the application and a PostgreSQL database. Here's the full Haloy configuration:
+
+<Code code={`
+  server: your-server.haloy.dev
+  env:
+    - name: POSTGRES_USER
+      value: umami
+    - name: POSTGRES_PASSWORD
+      from:
+        env: POSTGRES_PASSWORD
+    - name: POSTGRES_DB
+      value: umami
+
+  targets:
+    umami-db:
+      preset: database
+      image:
+        repository: postgres:17
+      port: 5432
+      volumes:
+        - umami-postgres-data:/var/lib/postgresql/data
+
+    umami:
+      preset: service
+      image:
+        repository: ghcr.io/umami-software/umami:postgresql-latest
+      domains:
+        - domain: analytics.yourdomain.com
+      port: 3000
+      env:
+        - name: DATABASE_URL
+          value: postgresql://umami:\${POSTGRES_PASSWORD}@umami-db:5432/umami
+        - name: TRACKER_SCRIPT_NAME
+          value: custom.js
+        - name: COLLECT_API_ENDPOINT
+          value: /api/collect/event
+`} lang="yaml" />
+
+The `TRACKER_SCRIPT_NAME` and `COLLECT_API_ENDPOINT` variables configure ad blocker bypass. Instead of requesting the default `/script.js` and `/api/send`, your tracking script will be served from `/custom.js` and send data to `/api/collect/event`. Ad blockers that match on known Umami paths won't catch these.
+
+Deploy with:
+
+<Code code={`
+  haloy deploy -t umami-db
+  haloy deploy -t umami
+`} lang="bash" />
+
+Deploy umami-db first since umami depends on it. The default login credentials are admin/umami. Change the password immediately after first login.
+
+## Deploying Plausible CE with Haloy
+
+Plausible needs three containers: the application, PostgreSQL (for user accounts and site config), and ClickHouse (for analytics data).
+
+<Code code={`
+  server: your-server.haloy.dev
+  env:
+    - name: POSTGRES_USER
+      value: plausible
+    - name: POSTGRES_PASSWORD
+      from:
+        env: POSTGRES_PASSWORD
+
+  targets:
+    plausible-db:
+      preset: database
+      image:
+        repository: postgres:17
+      port: 5432
+      env:
+        - name: POSTGRES_DB
+          value: plausible
+      volumes:
+        - plausible-postgres-data:/var/lib/postgresql/data
+
+    plausible-events-db:
+      preset: database
+      image:
+        repository: clickhouse/clickhouse-server:24-alpine
+      port: 8123
+      volumes:
+        - plausible-clickhouse-data:/var/lib/clickhouse
+
+    plausible:
+      preset: service
+      image:
+        repository: ghcr.io/plausible/community-edition:v2
+      domains:
+        - domain: analytics.yourdomain.com
+      port: 8000
+      env:
+        - name: DATABASE_URL
+          value: postgresql://plausible:\${POSTGRES_PASSWORD}@plausible-db:5432/plausible
+        - name: CLICKHOUSE_DATABASE_URL
+          value: http://plausible-events-db:8123/plausible_events
+        - name: SECRET_KEY_BASE
+          from:
+            env: SECRET_KEY_BASE
+        - name: BASE_URL
+          value: https://analytics.yourdomain.com
+`} lang="yaml" />
+
+Deploy in order:
+
+<Code code={`
+  haloy deploy -t plausible-db
+  haloy deploy -t plausible-events-db
+  haloy deploy -t plausible
+`} lang="bash" />
+
+Note the higher memory requirements. ClickHouse alone needs about 1GB of RAM to run well. Plan for a server with at least 2GB of RAM available for analytics, on top of whatever your application uses.
+
+## Deploying Rybbit with Haloy
+
+Rybbit uses ClickHouse for data storage. It bundles its own Caddy reverse proxy by default, but with Haloy the built-in reverse proxy handles HTTPS, so we just expose the backend port directly.
+
+<Code code={`
+  server: your-server.haloy.dev
+
+  targets:
+    rybbit-clickhouse:
+      preset: database
+      image:
+        repository: clickhouse/clickhouse-server:24-alpine
+      port: 8123
+      volumes:
+        - rybbit-clickhouse-data:/var/lib/clickhouse
+
+    rybbit:
+      preset: service
+      image:
+        repository: ghcr.io/rybbit-io/rybbit:latest
+      domains:
+        - domain: analytics.yourdomain.com
+      port: 3001
+      env:
+        - name: CLICKHOUSE_HOST
+          value: http://rybbit-clickhouse:8123
+        - name: CLICKHOUSE_DB
+          value: rybbit
+        - name: SECRET_KEY
+          from:
+            env: SECRET_KEY
+        - name: BASE_URL
+          value: https://analytics.yourdomain.com
+`} lang="yaml" />
+
+Deploy in order:
+
+<Code code={`
+  haloy deploy -t rybbit-clickhouse
+  haloy deploy -t rybbit
+`} lang="bash" />
+
+Same memory note as Plausible: ClickHouse needs about 1GB, so plan for at least 2GB available for the analytics stack.
+
+## Avoiding Ad Blockers with Custom Endpoints
+
+Self-hosting already solves the biggest ad blocker problem: your analytics domain isn't on any blocklist. But there are a few more things to consider.
+
+**The subdomain matters.** Ad blockers maintain lists of common analytics subdomains. Using `analytics.yourdomain.com` or `stats.yourdomain.com` might get caught by aggressive filter lists. Something less obvious like `a.yourdomain.com` or `t.yourdomain.com` is less likely to match.
+
+**Umami's built-in approach** is the simplest. Set `TRACKER_SCRIPT_NAME` to rename the tracking script (default is `script.js`) and `COLLECT_API_ENDPOINT` to change the data collection path. No other configuration needed.
+
+**Plausible and Rybbit** don't have built-in env vars for this. You'll need to proxy the tracking requests through your application. Here's how that looks in Next.js and TanStack Start.
+
+In Next.js, use rewrites:
+
+<Code code={`
+  // next.config.js
+  module.exports = {
+    async rewrites() {
+      return [
+        {
+          source: "/t/js/script.js",
+          destination: "https://analytics.yourdomain.com/js/script.js",
+        },
+        {
+          source: "/t/api/event",
+          destination: "https://analytics.yourdomain.com/api/event",
+        },
+      ];
+    },
+  };
+`} lang="js" />
+
+In TanStack Start, use a server file route with `proxyRequest`:
+
+<Code code={`
+  // app/routes/t/$.ts
+  import {
+    createServerFileRoute,
+    proxyRequest,
+  } from "@tanstack/react-start/server";
+
+  const ANALYTICS_URL = "https://analytics.yourdomain.com";
+
+  export const ServerRoute = createServerFileRoute("/t/$").methods((api) =>
+    api.handler(async ({ request, params }) => {
+      const url = new URL(request.url);
+      const targetUrl =
+        ANALYTICS_URL + "/" + (params._splat ?? "") + url.search;
+      await proxyRequest(targetUrl);
+      return new Response();
+    })
+  );
+`} lang="ts" />
+
+Then reference the proxied script in your HTML instead of the direct analytics URL. The browser sees a request to your own domain and path, which no ad blocker will flag.
+
+## Same Server or Separate Server?
+
+Running analytics on the same server as your application has clear benefits: tracking requests stay local (no external network calls), you manage one server instead of two, and there's no extra hosting cost.
+
+This works well for most sites. Umami in particular is light enough (~200MB) that it barely registers on a server already running a web application. Plausible and Rybbit's ClickHouse requirement makes the footprint heavier, but on a 4GB+ VPS there's usually room.
+
+**When to separate:** If your analytics start consuming noticeable CPU or memory (typically at very high traffic volumes), or if you want isolation so an analytics query spike doesn't affect your application's response times, move analytics to their own server.
+
+With Haloy, this is a one-line change per target. Just update the `server` field:
+
+<Code code={`
+  targets:
+    rybbit-clickhouse:
+      preset: database
+      server: analytics-server.haloy.dev
+      image:
+        repository: clickhouse/clickhouse-server:24-alpine
+      port: 8123
+      volumes:
+        - rybbit-clickhouse-data:/var/lib/clickhouse
+
+    rybbit:
+      preset: service
+      server: analytics-server.haloy.dev
+      image:
+        repository: ghcr.io/rybbit-io/rybbit:latest
+      domains:
+        - domain: analytics.yourdomain.com
+      port: 3001
+`} lang="yaml" />
+
+Each target can have its own `server` field, so you can move analytics to a dedicated server without changing anything else in the config.
+
+## Final Thoughts
+
+The three tools cover distinct points on the spectrum:
+
+**Umami** is the simplest option. Two containers, ~200MB memory, built-in ad blocker bypass, MIT license. If you want analytics on your server with the least possible friction, start here.
+
+**Plausible CE** adds ClickHouse for better query performance at scale, with a polished dashboard and strong ecosystem. The trade-off is a heavier footprint and feature parity gaps with the cloud version.
+
+**Rybbit** gives you the most features in the self-hosted tier: session replay, funnels, retention analysis, and Core Web Vitals. If you want product analytics capabilities without PostHog's weight, Rybbit is the tool to evaluate.
+
+For most developers running a personal site, a SaaS product, or a small portfolio of applications, Umami on the same server as the app is the path of least resistance. It's light, it's simple, and it covers standard web analytics needs. If you outgrow it or need deeper product analytics, Plausible and Rybbit are there.
+
+All three are open source, respect visitor privacy, and can be deployed in minutes with the configs above.

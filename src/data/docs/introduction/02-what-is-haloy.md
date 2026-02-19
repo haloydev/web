@@ -2,6 +2,7 @@
 title: What is Haloy
 slug: what-is-haloy
 section: introduction
+description: 'Haloy is a lightweight, open-source deployment platform for Docker applications. Deploy to your own servers with simple YAML config and automatic HTTPS.'
 ---
 
 **Haloy** is a lightweight deployment and orchestration system designed for developers who want a simple, reliable way to deploy Docker‑based applications to their own servers. It removes the complexity of traditional DevOps stacks while providing the core features needed for modern deployments.

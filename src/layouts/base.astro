@@ -18,7 +18,8 @@ const defaultDescription =
 
 const { title, description = defaultDescription, class: className, ogType = 'website' } = Astro.props;
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site).href;
+const pathname = Astro.url.pathname.replace(/\.html$/, '');
+const canonicalURL = new URL(pathname, Astro.site).href;
 ---
 
 <script is:inline>
