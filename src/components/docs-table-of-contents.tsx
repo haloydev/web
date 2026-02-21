@@ -47,7 +47,7 @@ export function DocsTableOfContents({ headings, className }: DocsTableOfContents
     <div className={cn('sticky top-0 h-screen w-80 overflow-x-scroll pt-6', className)}>
       <div className="border-muted border-l px-4">
         <span className="text-muted-foreground/70 text-xs font-medium">On This Page</span>
-        <ul className="mt-3 space-y-2">
+        <ul className="mt-3 space-y-2 pb-32">
           {headings.map((heading) => (
             <li
               key={heading.slug}
