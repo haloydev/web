@@ -10,10 +10,8 @@ const steps = [
 <section class="relative px-6 py-20">
   <div class="mx-auto max-w-5xl">
     <div class="text-center">
-      <span
-        class="workflow-label text-muted-foreground mb-4 inline-block rounded-full border border-emerald-500/20 px-3.5 py-1.5 font-mono text-xs font-medium tracking-widest uppercase dark:border-emerald-500/30"
-      >
-        Agent Skills
+      <span class="text-muted-foreground mb-4 inline-block font-mono text-sm font-medium tracking-widest uppercase">
+        <span class="text-emerald-500">/</span> Agent Skills
       </span>
       <h2 class="font-figtree text-foreground mb-4 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl">
         From idea to deployed in 4 commands
@@ -78,11 +76,3 @@ const steps = [
   </div>
 </section>
 
-<style>
-  .workflow-label {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));
-  }
-  :global(.dark) .workflow-label {
-    background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.15));
-  }
-</style>

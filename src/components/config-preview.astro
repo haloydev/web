@@ -23,8 +23,8 @@ const features = [
     <div class="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
       <!-- Left: Text content -->
       <div class="order-2 lg:order-1">
-        <span class="config-label mb-4 inline-block rounded-full border border-amber-500/20 px-3.5 py-1.5 font-mono text-xs font-medium uppercase tracking-widest text-muted-foreground dark:border-amber-500/30">
-          Configuration
+        <span class="mb-4 inline-block font-mono text-sm font-medium uppercase tracking-widest text-muted-foreground">
+          <span class="text-emerald-500">/</span> Configuration
         </span>
         <h2 class="mb-4 font-figtree text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl">
           One file. That's it.
@@ -63,11 +63,3 @@ const features = [
   </div>
 </section>
 
-<style>
-  .config-label {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(234, 88, 12, 0.1));
-  }
-  :global(.dark) .config-label {
-    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(234, 88, 12, 0.15));
-  }
-</style>
