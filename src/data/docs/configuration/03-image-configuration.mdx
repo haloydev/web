@@ -13,7 +13,7 @@ Configure Docker images, registry authentication, local building, and rollback s
 
 | Key            | Type    | Required | Description                                                                            |
 | -------------- | ------- | -------- | -------------------------------------------------------------------------------------- |
-| `repository`   | string  | **Yes**  | Docker image name                                                                      |
+| `repository`   | string  | No       | Docker image name (defaults to the target/app name when omitted)                       |
 | `tag`          | string  | No       | Image tag (default: "latest"). Can also be included in repository (e.g., nginx:alpine) |
 | `build`        | boolean | No       | Whether to build the image locally                                                     |
 | `registry`     | object  | No       | Private registry authentication                                                        |
@@ -261,8 +261,6 @@ Build locally and upload directly to your server:
   name: "my-app"
   server: "haloy.yourserver.com"
   image:
-    repository: "my-app"
-    tag: "latest"
     build_config:
       context: "."
       dockerfile: "Dockerfile"
@@ -468,7 +466,6 @@ Use images already present on the server (don't pull from registry):
   name: "my-app"
   server: "haloy.yourserver.com"
   image:
-    repository: "my-app"
     tag: "latest"
     source: "local"  # Only look for images on the server
   domains:
