@@ -122,6 +122,8 @@ Use `preset: "database"` for stateful database services. This automatically appl
       - /data/postgres:/var/lib/postgresql/data
 `} lang="yaml" />
 
+For practical multi-database and backup examples, see [Databases](/docs/databases).
+
 ### Service Preset
 
 Use `preset: "service"` for stateful services that share similar requirements to databases (static naming, replace strategy) but do not need the strict safety of being `protected`. This automatically applies:

@@ -1,0 +1,298 @@
+---
+title: 'Databases'
+slug: 'databases'
+section: deployment
+description: 'Deploy popular databases with Haloy and implement practical backup workflows, including a PostgreSQL to Cloudflare R2 example.'
+---
+
+import Code from '@/components/code.astro';
+
+This page shows practical database deployment patterns with Haloy and one simple backup strategy you can adapt.
+
+
+## How Haloy Handles Databases
+
+For stateful services, start with `preset: database`. It applies safer defaults:
+
+- `deployment_strategy: "replace"`
+- `naming_strategy: "static"`
+- `protected: true`
+- `image.history.strategy: "none"`
+
+Use named volumes for persistent storage and deploy databases explicitly:
+
+<Code code={`
+  haloy deploy -t app-postgres
+`} lang="bash" />
+
+## Common Database Target Examples
+
+The examples below use generic names and can live in the same `haloy.yaml` file.
+
+### PostgreSQL
+
+<Code code={`
+  server: haloy.example.com
+  targets:
+    app-postgres:
+      preset: database
+      image:
+        repository: postgres:18
+      port: 5432
+      env:
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          from:
+            env: POSTGRES_PASSWORD
+        - name: POSTGRES_DB
+          value: app
+      volumes:
+        - postgres-data:/var/lib/postgresql
+`} lang="yaml" />
+
+### MySQL
+
+<Code code={`
+  server: haloy.example.com
+  targets:
+    app-mysql:
+      preset: database
+      image:
+        repository: mysql:8
+      port: 3306
+      env:
+        - name: MYSQL_DATABASE
+          value: app
+        - name: MYSQL_USER
+          value: app
+        - name: MYSQL_PASSWORD
+          from:
+            env: MYSQL_PASSWORD
+        - name: MYSQL_ROOT_PASSWORD
+          from:
+            env: MYSQL_ROOT_PASSWORD
+      volumes:
+        - mysql-data:/var/lib/mysql
+`} lang="yaml" />
+
+### MongoDB
+
+<Code code={`
+  targets:
+    app-mongodb:
+      preset: database
+      image:
+        repository: mongo:8
+      port: 27017
+      env:
+        - name: MONGO_INITDB_ROOT_USERNAME
+          value: root
+        - name: MONGO_INITDB_ROOT_PASSWORD
+          from:
+            env: MONGO_INITDB_ROOT_PASSWORD
+      volumes:
+        - mongodb-data:/data/db
+`} lang="yaml" />
+
+### Redis
+
+<Code code={`
+  targets:
+    app-redis:
+      preset: service
+      image:
+        repository: redis:7
+      port: 6379
+      volumes:
+        - redis-data:/data
+`} lang="yaml" />
+
+### Valkey
+
+<Code code={`
+  targets:
+    app-valkey:
+      preset: database
+      image:
+        repository: valkey/valkey:8
+      port: 6379
+      volumes:
+        - valkey-data:/data
+`} lang="yaml" />
+
+Image data paths differ by database image and version. Always confirm paths in each image's documentation.
+
+## Backup Your Database
+Haloy does not force a single backup workflow. It gives you the deployment primitives and stays out of the way so you can choose the right approach for your system.
+
+Backup strategy is workload-specific. Haloy does not prescribe one path. A simple pattern is:
+
+1. Run your database as one target.
+2. Run a second target that executes scheduled backups.
+3. Upload backup artifacts to object storage (for example Cloudflare R2).
+
+### Example: PostgreSQL Backups to Cloudflare R2
+
+This mirrors the same pattern used in production in this project:
+
+- a dedicated backup target
+- a backup container with `postgresql-client-18` and `rclone`
+- `supercronic` for scheduling
+- one immediate backup on container start, then daily scheduled backups
+
+Add a backup target that builds from your backup files:
+
+<Code code={`
+  env:
+    - name: POSTGRES_USER
+      value: postgres
+    - name: POSTGRES_PASSWORD
+      from:
+        env: POSTGRES_PASSWORD
+    - name: POSTGRES_DB
+      value: app
+  targets:
+    app-postgres:
+      preset: database
+      image:
+        repository: postgres:18
+      port: 5432
+      volumes:
+        - postgres-data:/var/lib/postgresql
+
+    app-postgres-backup:
+      preset: service
+      image:
+        build_config:
+          dockerfile: "./infrastructure/backup/Dockerfile"
+          context: "./infrastructure/backup/"
+      env:
+        - name: POSTGRES_URL
+          value: "postgresql://postgres:\${POSTGRES_PASSWORD}@app-postgres:5432/app"
+        - name: RCLONE_CONFIG_R2_BUCKET
+          value: "app-db-backups"
+        - name: RCLONE_CONFIG_R2_TYPE
+          value: "s3"
+        - name: RCLONE_CONFIG_R2_PROVIDER
+          value: "Cloudflare"
+        - name: RCLONE_CONFIG_R2_ACCESS_KEY_ID
+          from:
+            env: RCLONE_CONFIG_R2_ACCESS_KEY_ID
+        - name: RCLONE_CONFIG_R2_SECRET_ACCESS_KEY
+          from:
+            env: RCLONE_CONFIG_R2_SECRET_ACCESS_KEY
+        - name: RCLONE_CONFIG_R2_REGION
+          value: "auto"
+        - name: RCLONE_CONFIG_R2_NO_CHECK_BUCKET
+          value: "true"
+        - name: RCLONE_CONFIG_R2_ENDPOINT
+          from:
+            env: RCLONE_CONFIG_R2_ENDPOINT
+`} lang="yaml" />
+
+R2 details to get right:
+
+- Endpoint format: `https://<account-id>.r2.cloudflarestorage.com`
+- Do not append the bucket name to the endpoint
+- Set bucket separately with `RCLONE_CONFIG_R2_BUCKET`
+- Use `RCLONE_CONFIG_R2_NO_CHECK_BUCKET=true` for bucket-scoped credentials
+
+### Backup Container Dockerfile (`infrastructure/backup/Dockerfile`)
+
+<Code code={`
+  FROM debian:13-slim
+
+  ARG TARGETARCH
+  ARG SUPERCRONIC_VERSION=v0.2.43
+
+  RUN apt-get update && \
+      apt-get install -y --no-install-recommends \
+        ca-certificates \
+        curl \
+        gnupg \
+      && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+         | gpg --dearmor -o /usr/share/keyrings/pgdg.gpg \
+      && echo "deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt trixie-pgdg main" \
+         > /etc/apt/sources.list.d/pgdg.list \
+      && apt-get update \
+      && apt-get install -y --no-install-recommends \
+        postgresql-client-18 \
+        rclone \
+      && SUPERCRONIC_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "arm64" || echo "amd64") \
+      && curl -fsSL "https://github.com/aptible/supercronic/releases/download/\${SUPERCRONIC_VERSION}/supercronic-linux-\${SUPERCRONIC_ARCH}" \
+         -o /usr/local/bin/supercronic \
+      && chmod +x /usr/local/bin/supercronic \
+      && apt-get purge -y curl gnupg \
+      && apt-get autoremove -y \
+      && rm -rf /var/lib/apt/lists/*
+
+  COPY backup-db.sh /usr/local/bin/backup-db.sh
+  COPY crontab /etc/backup-crontab
+  RUN chmod +x /usr/local/bin/backup-db.sh
+
+  CMD ["/bin/sh", "-c", "/usr/local/bin/backup-db.sh && exec supercronic /etc/backup-crontab"]
+`} lang="bash" />
+
+### Cron Schedule (`infrastructure/backup/crontab`)
+
+<Code code={`
+  0 3 * * * /usr/local/bin/backup-db.sh
+`} lang="bash" />
+
+### Backup Script (`infrastructure/backup/backup-db.sh`)
+
+<Code code={`
+  #!/usr/bin/env bash
+  set -euo pipefail
+
+  POSTGRES_URL="\${POSTGRES_URL:?POSTGRES_URL is required}"
+  R2_BUCKET="\${RCLONE_CONFIG_R2_BUCKET:-\${R2_BUCKET:-}}"
+  : "\${R2_BUCKET:?RCLONE_CONFIG_R2_BUCKET is required}"
+  RETENTION_DAYS="\${RETENTION_DAYS:-30}"
+  BACKUP_DIR="\${BACKUP_DIR:-/tmp/db-backups}"
+
+  TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+  FILENAME="backup-\${TIMESTAMP}.dump"
+  FILEPATH="\${BACKUP_DIR}/\${FILENAME}"
+
+  mkdir -p "$BACKUP_DIR"
+
+  pg_dump "$POSTGRES_URL" -Fc -f "$FILEPATH"
+  rclone copyto --s3-no-check-bucket "$FILEPATH" "r2:\${R2_BUCKET}/\${FILENAME}"
+  rm "$FILEPATH"
+
+  CUTOFF=$(date -d "-\${RETENTION_DAYS} days" +%Y%m%d)
+  rclone lsf --s3-no-check-bucket "r2:\${R2_BUCKET}/" | while read -r file; do
+      if [[ "$file" =~ ^backup-([0-9]{8})-[0-9]{6}\.dump$ ]]; then
+          file_date="\${BASH_REMATCH[1]}"
+          if [[ "$file_date" < "$CUTOFF" ]]; then
+              rclone deletefile --s3-no-check-bucket "r2:\${R2_BUCKET}/\${file}"
+          fi
+      fi
+  done
+`} lang="bash" />
+
+### Restore Example
+
+<Code code={`
+  rclone copy "r2:app-db-backups/backup-20260101-030000.dump" ./
+
+  pg_restore --clean --if-exists \
+    -d "postgresql://postgres:\${POSTGRES_PASSWORD}@localhost:5432/app" \
+    backup-20260101-030000.dump
+`} lang="bash" />
+
+## Operational Checklist
+
+1. Confirm a new backup object is uploaded on schedule.
+2. Test restore regularly on a non-production database.
+3. Configure retention (script cleanup and/or bucket lifecycle rules).
+4. Add alerting for failed backup jobs.
+
+## Next Steps
+
+- [Configuration Reference](/docs/configuration-reference)
+- [Volume Configuration](/docs/volumes)
+- [TanStack Start with PostgreSQL Example](/docs/tanstack-start-postgres)
+- [Next.js with PostgreSQL Example](/docs/nextjs-postgres)
