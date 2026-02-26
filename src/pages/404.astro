@@ -3,7 +3,16 @@ import BaseLayout from '@/layouts/base.astro';
 import { Navbar } from '@/components/navbar';
 ---
 
-<BaseLayout title="Haloy - Page not found">
+<script is:inline>
+  (function () {
+    var path = window.location.pathname;
+    if (path !== '/' && path.endsWith('/')) {
+      window.location.replace(path.slice(0, -1) + window.location.search + window.location.hash);
+    }
+  })();
+</script>
+
+<BaseLayout title="Haloy - Page not found" noIndex>
   <div class="flex min-h-screen flex-col">
     <Navbar client:load />
     <div class="flex justify-center">

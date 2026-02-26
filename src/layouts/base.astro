@@ -11,12 +11,13 @@ interface Props {
   description?: string;
   class?: string;
   ogType?: string;
+  noIndex?: boolean;
 }
 
 const defaultDescription =
   'Haloy is a lightweight deployment platform that lets you deploy Docker-based applications to your own servers with simple YAML configuration, automatic HTTPS, and built-in secret management.';
 
-const { title, description = defaultDescription, class: className, ogType = 'website' } = Astro.props;
+const { title, description = defaultDescription, class: className, ogType = 'website', noIndex = false } = Astro.props;
 
 const pathname = Astro.url.pathname.replace(/\.html$/, '').replace(/\/$/, '') || '/';
 const canonicalURL = new URL(pathname, Astro.site).href.replace(/\/$/, '');
@@ -57,14 +58,15 @@ const canonicalURL = new URL(pathname, Astro.site).href.replace(/\/$/, '');
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalURL} />
+    {!noIndex && <link rel="canonical" href={canonicalURL} />}
+    {noIndex && <meta name="robots" content="noindex" />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="preload" as="font" type="font/woff2" href={interLatinWoff2} crossorigin="anonymous" />
     <link rel="preload" as="font" type="font/woff2" href={figtreeLatinWoff2} crossorigin="anonymous" />
 
     <!-- Open Graph -->
     <meta property="og:type" content={ogType} />
-    <meta property="og:url" content={canonicalURL} />
+    {!noIndex && <meta property="og:url" content={canonicalURL} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:site_name" content="Haloy" />
