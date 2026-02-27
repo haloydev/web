@@ -10,10 +10,10 @@ import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
 import InstallHaloy from '@/components/install-haloy.astro';
 import Code from '@/components/code.astro';
-import TerminalVideo from '@/components/terminal-video.astro';
 import FeaturesGrid from '@/components/features-grid.astro';
 import AiWorkflow from '@/components/ai-workflow.astro';
 import ConfigPreview from '@/components/config-preview.astro';
+import { DeployFlow } from '@/components/deploy-flow/deploy-flow';
 import Footer from '@/components/footer.astro';
 import versionData from '@/data/version.json';
 
@@ -64,7 +64,7 @@ const { version } = versionData;
         </div>
       </div>
     </div>
-    <div class="mt-20 flex justify-center">
+    <div class="mt-20 mb-20 flex justify-center">
       <div class="w-full max-w-3xl px-6">
         <div class="space-y-8">
           <div>
@@ -93,11 +93,8 @@ const { version } = versionData;
         </div>
       </div>
     </div>
-    <div class="mt-20 flex justify-center">
-      <div class="w-full max-w-3xl px-6">
-        <TerminalVideo src="/haloy-deploy-demo.webm" title="haloy deploy" />
-      </div>
-    </div>
+
+    <DeployFlow client:visible />
 
     <FeaturesGrid />
 
