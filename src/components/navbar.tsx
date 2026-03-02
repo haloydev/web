@@ -120,14 +120,18 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
       </div>
 
       <Dialog open={newsletterOpen} onOpenChange={setNewsletterOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Newsletter</DialogTitle>
-            <DialogDescription>
-              Practical notes on Docker deploys, ops trade-offs, and self-hosted infrastructure.
-            </DialogDescription>
-          </DialogHeader>
-          <NewsletterSignup variant="inline" />
+        <DialogContent className="gap-0 overflow-hidden rounded-2xl border-black/[0.06] p-0 sm:max-w-md dark:border-white/[0.06]">
+          <div className="bg-emerald-500/[0.04] px-8 pt-8 pb-6 dark:bg-emerald-500/[0.06]">
+            <DialogHeader>
+              <DialogTitle className="font-figtree text-xl font-bold">Stay in the loop</DialogTitle>
+              <DialogDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
+                Practical notes on Docker deploys, ops trade-offs, and self-hosted infrastructure.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+          <div className="px-8 pt-6 pb-8">
+            <NewsletterSignup variant="inline" />
+          </div>
         </DialogContent>
       </Dialog>
     </nav>
