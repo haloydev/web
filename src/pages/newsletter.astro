@@ -1,0 +1,23 @@
+---
+import BaseLayout from '@/layouts/base.astro';
+import { Navbar } from '@/components/navbar';
+import Footer from '@/components/footer.astro';
+import { NewsletterSignup } from '@/components/newsletter-signup';
+import versionData from '@/data/version.json';
+
+const { version } = versionData;
+---
+
+<BaseLayout
+  title="Haloy Newsletter - Practical deployment notes"
+  description="Join the Haloy newsletter for practical tips on self-hosted Docker deployments, server operations, and shipping with less platform overhead."
+  class="bg-background-sky"
+>
+  <div class="relative min-h-screen">
+    <Navbar client:load version={version} />
+    <main class="mx-auto max-w-4xl px-6 pt-16 pb-20 sm:pt-24">
+      <NewsletterSignup client:load />
+    </main>
+    <Footer />
+  </div>
+</BaseLayout>

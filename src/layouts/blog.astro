@@ -4,6 +4,7 @@ import { Navbar } from '@/components/navbar';
 import { DocsTableOfContents } from '@/components/docs-table-of-contents';
 import BaseLayout from '@/layouts/base.astro';
 import Prose from '@/components/prose.astro';
+import { NewsletterSignup } from '@/components/newsletter-signup';
 
 interface Props {
   title: string;
@@ -84,6 +85,13 @@ const jsonLd = {
         <Prose>
           <slot />
         </Prose>
+        <div class="mt-12">
+          <NewsletterSignup
+            client:load
+            title="Enjoyed this post? Get the next one by email"
+            description="New practical write-ups on self-hosted deployments and Docker operations, sent when there is something useful to share."
+          />
+        </div>
         <footer class="mt-12 pt-8 border-t border-border">
           <a href="/blog" class="text-sm text-muted-foreground hover:text-foreground transition-colors">
             &larr; Back to all posts
