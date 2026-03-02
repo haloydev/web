@@ -11,7 +11,7 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://haloy.dev',
-  adapter: cloudflare(),
+  adapter: cloudflare({ imageService: 'compile' }),
   trailingSlash: 'never',
   build: {
     format: 'file',
