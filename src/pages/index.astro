@@ -15,7 +15,6 @@ import AiWorkflow from '@/components/ai-workflow.astro';
 import ConfigPreview from '@/components/config-preview.astro';
 import { DeployFlow } from '@/components/deploy-flow/deploy-flow';
 import Footer from '@/components/footer.astro';
-import { NewsletterSignup } from '@/components/newsletter-signup';
 import versionData from '@/data/version.json';
 
 const { version } = versionData;
@@ -98,14 +97,6 @@ const { version } = versionData;
     <DeployFlow client:visible />
 
     <FeaturesGrid />
-
-    <div class="mx-auto mt-4 max-w-6xl px-6">
-      <NewsletterSignup
-        client:load
-        title="Get practical self-hosted deployment notes"
-        description="Join for concise posts on Docker deploy patterns, ops trade-offs, and new Haloy content."
-      />
-    </div>
 
     <AiWorkflow />
 

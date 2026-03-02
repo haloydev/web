@@ -2,8 +2,10 @@ import { IconBrandGithub, IconMenu2 } from '@tabler/icons-react';
 import { Moon, Monitor, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/use-theme';
 import { ModeToggle } from './mode-toggle';
+import { NewsletterSignup } from './newsletter-signup';
 import { Button } from './ui/button';
 import { ButtonLink } from './ui/button-link';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { VersionBadge } from './version-badge';
+import { useState } from 'react';
 
 type NavbarProps = {
   showLinks?: boolean;
@@ -20,6 +23,7 @@ type NavbarProps = {
 
 export function Navbar({ showLinks = true, version }: NavbarProps) {
   const { setTheme } = useTheme();
+  const [newsletterOpen, setNewsletterOpen] = useState(false);
 
   return (
     <nav className="flex justify-center py-4 pr-6 pl-2">
@@ -41,12 +45,12 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
               <a href="/blog" className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium">
                 Blog
               </a>
-              <a
-                href="/newsletter"
-                className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium"
+              <button
+                onClick={() => setNewsletterOpen(true)}
+                className="text-muted-foreground hover:text-foreground cursor-pointer px-3 text-sm font-medium"
               >
                 Newsletter
-              </a>
+              </button>
             </div>
           )}
 
@@ -79,8 +83,8 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
                   <DropdownMenuItem asChild>
                     <a href="/blog">Blog</a>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <a href="/newsletter">Newsletter</a>
+                  <DropdownMenuItem onSelect={() => setNewsletterOpen(true)}>
+                    Newsletter
                   </DropdownMenuItem>
                 </>
               )}
@@ -114,6 +118,18 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
           </DropdownMenu>
         </div>
       </div>
+
+      <Dialog open={newsletterOpen} onOpenChange={setNewsletterOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Newsletter</DialogTitle>
+            <DialogDescription>
+              Practical notes on Docker deploys, ops trade-offs, and self-hosted infrastructure.
+            </DialogDescription>
+          </DialogHeader>
+          <NewsletterSignup variant="inline" />
+        </DialogContent>
+      </Dialog>
     </nav>
   );
 }

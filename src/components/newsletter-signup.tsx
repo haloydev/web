@@ -9,9 +9,11 @@ type FormState = 'idle' | 'submitting' | 'success' | 'error';
 export function NewsletterSignup({
   title = 'Stay in the loop',
   description = 'Get concise posts on Docker deploy patterns, ops trade-offs, and new Haloy content.',
+  variant = 'card',
 }: {
   title?: string;
   description?: string;
+  variant?: 'card' | 'inline';
 }) {
   const [email, setEmail] = useState('');
   const [formState, setFormState] = useState<FormState>('idle');
@@ -109,41 +111,47 @@ export function NewsletterSignup({
     }
   };
 
+  const formContent =
+    formState === 'success' ? (
+      <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
+        Check your inbox to confirm your subscription.
+      </p>
+    ) : (
+      <form onSubmit={handleSubmit}>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Input
+            type="email"
+            name="email"
+            placeholder="you@example.com"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1"
+            disabled={formState === 'submitting'}
+          />
+          <div aria-hidden="true" className="absolute -left-[9999px]">
+            <input type="text" name="website" tabIndex={-1} autoComplete="off" />
+          </div>
+          <Button type="submit" disabled={formState === 'submitting'} className="shrink-0">
+            {formState === 'submitting' ? 'Subscribing...' : 'Subscribe'}
+          </Button>
+        </div>
+        <div ref={turnstileRef} className="mt-3" />
+        {formState === 'error' && (
+          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+        )}
+      </form>
+    );
+
+  if (variant === 'inline') {
+    return formContent;
+  }
+
   return (
     <div className="rounded-2xl border border-black/[0.06] bg-white/60 p-8 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
       <h2 className="text-xl font-semibold">{title}</h2>
       <p className="text-muted-foreground mt-2 text-sm">{description}</p>
-
-      {formState === 'success' ? (
-        <p className="mt-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">
-          Check your inbox to confirm your subscription.
-        </p>
-      ) : (
-        <form onSubmit={handleSubmit} className="mt-4">
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Input
-              type="email"
-              name="email"
-              placeholder="you@example.com"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="flex-1"
-              disabled={formState === 'submitting'}
-            />
-            <div aria-hidden="true" className="absolute -left-[9999px]">
-              <input type="text" name="website" tabIndex={-1} autoComplete="off" />
-            </div>
-            <Button type="submit" disabled={formState === 'submitting'} className="shrink-0">
-              {formState === 'submitting' ? 'Subscribing...' : 'Subscribe'}
-            </Button>
-          </div>
-          <div ref={turnstileRef} className="mt-3" />
-          {formState === 'error' && (
-            <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
-          )}
-        </form>
-      )}
+      <div className="mt-4">{formContent}</div>
     </div>
   );
 }

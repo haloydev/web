@@ -1,5 +1,6 @@
 ---
 import { CurlewLogo } from './curlew-logo';
+import { NewsletterSignup } from './newsletter-signup';
 
 const currentYear = new Date().getFullYear();
 
@@ -7,7 +8,7 @@ const links = {
   product: [
     { label: 'Documentation', href: '/docs/quickstart' },
     { label: 'Blog', href: '/blog' },
-    { label: 'Newsletter', href: '/newsletter' },
+    { label: 'Newsletter', href: '#newsletter' },
     { label: 'Examples', href: 'https://github.com/haloydev/examples' },
   ],
   resources: [
@@ -21,19 +22,22 @@ const links = {
 <footer class="relative border-t border-black/[0.06] bg-white/50 dark:border-white/[0.06] dark:bg-white/[0.02]">
   <div class="mx-auto max-w-7xl px-6 py-12 lg:py-16">
     <div class="grid gap-8 lg:grid-cols-12 lg:gap-12">
-      <!-- Brand column -->
-      <div class="lg:col-span-4">
+      <!-- Brand + Newsletter column -->
+      <div class="lg:col-span-5">
         <a href="/" class="inline-flex items-center gap-2">
           <CurlewLogo className="size-8" />
           <span class="font-figtree text-xl font-semibold text-foreground">Haloy</span>
         </a>
-        <p class="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-          Deploy your apps to your own servers. No platforms, no lock-in, no surprises.
+        <p class="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
+          Practical notes on Docker deploys, ops trade-offs, and self-hosted infrastructure.
         </p>
+        <div id="newsletter" class="mt-4 scroll-mt-24">
+          <NewsletterSignup client:load variant="inline" />
+        </div>
       </div>
 
       <!-- Links columns -->
-      <div class="grid grid-cols-2 gap-8 sm:grid-cols-2 lg:col-span-4 lg:col-start-7">
+      <div class="grid grid-cols-2 gap-8 sm:grid-cols-2 lg:col-span-4 lg:col-start-9">
         <div>
           <h3 class="text-sm font-semibold text-foreground">Product</h3>
           <ul class="mt-4 space-y-3">
