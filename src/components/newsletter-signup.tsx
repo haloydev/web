@@ -128,13 +128,13 @@ export function NewsletterSignup({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="sm:max-w-64"
+              className="flex-1"
               disabled={formState === 'submitting'}
             />
             <div aria-hidden="true" className="absolute -left-[9999px]">
               <input type="text" name="website" tabIndex={-1} autoComplete="off" />
             </div>
-            <Button type="submit" disabled={formState === 'submitting'}>
+            <Button type="submit" disabled={formState === 'submitting'} className="shrink-0">
               {formState === 'submitting' ? 'Subscribing...' : 'Subscribe'}
             </Button>
           </div>

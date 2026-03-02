@@ -6,6 +6,7 @@ import { DocsTableOfContents } from '@/components/docs-table-of-contents';
 import { CopyPageButton } from '@/components/copy-page-button';
 import BaseLayout from '@/layouts/base.astro';
 import Prose from '@/components/prose.astro';
+import { NewsletterSignup } from '@/components/newsletter-signup';
 import { getCollection } from 'astro:content';
 
 const sections = await getCollection('docSections');
@@ -47,6 +48,13 @@ const { title, description, activeSlug, headings } = Astro.props;
         <Prose>
           <slot />
         </Prose>
+        <div class="mt-12">
+          <NewsletterSignup
+            client:load
+            title="Stay updated on Haloy"
+            description="Get notified about new docs, deployment patterns, and Haloy updates."
+          />
+        </div>
       </div>
       <aside class="hidden lg:block xl:ml-24">
         <DocsTableOfContents client:load headings={headings} />
