@@ -41,6 +41,12 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
               <a href="/blog" className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium">
                 Blog
               </a>
+              <a
+                href="/newsletter"
+                className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium"
+              >
+                Newsletter
+              </a>
             </div>
           )}
 
@@ -72,6 +78,9 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <a href="/blog">Blog</a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href="/newsletter">Newsletter</a>
                   </DropdownMenuItem>
                 </>
               )}
