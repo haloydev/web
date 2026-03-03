@@ -131,7 +131,7 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
             <DialogHeader>
               <DialogTitle className="font-figtree text-xl font-bold">Stay in the loop</DialogTitle>
               <DialogDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                Practical notes on Docker deploys, ops trade-offs, and self-hosted infrastructure.
+                Get Haloy updates, deployment tips, and a light roast of cloud complexity.
               </DialogDescription>
             </DialogHeader>
           </div>
