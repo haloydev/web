@@ -5,6 +5,7 @@ interface TurnstileRenderOptions {
   'error-callback'?: () => void;
   theme?: 'light' | 'dark' | 'auto';
   size?: 'normal' | 'compact';
+  appearance?: 'always' | 'execute' | 'interaction-only';
 }
 
 interface Turnstile {

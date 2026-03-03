@@ -9,6 +9,12 @@ interface NewsletterRequest {
   timestamp: number;
 }
 
+interface TurnstileVerificationResponse {
+  success: boolean;
+  hostname?: string;
+  'error-codes'?: string[];
+}
+
 export const POST: APIRoute = async ({ request }) => {
   let body: NewsletterRequest;
   try {
@@ -23,6 +29,10 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ error: 'Missing required fields' }, { status: 400 });
   }
 
+  if (typeof timestamp !== 'number') {
+    return Response.json({ error: 'Invalid timestamp' }, { status: 400 });
+  }
+
   if (honeypot) {
     return Response.json({ error: 'Bot detected' }, { status: 422 });
   }
@@ -32,17 +42,36 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
-  const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      secret: turnstileSecret,
-      response: turnstile_token,
-    }),
-  });
+  if (!turnstileSecret) {
+    return Response.json({ error: 'Newsletter service misconfigured' }, { status: 500 });
+  }
 
-  const turnstileData = await turnstileRes.json();
-  if (!turnstileData.success) {
+  const ipHeader = request.headers.get('cf-connecting-ip') || request.headers.get('x-forwarded-for') || '';
+  const remoteIp = ipHeader.split(',')[0]?.trim();
+
+  let turnstileData: TurnstileVerificationResponse;
+  try {
+    const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        secret: turnstileSecret,
+        response: turnstile_token,
+        ...(remoteIp ? { remoteip: remoteIp } : {}),
+      }),
+    });
+
+    if (!turnstileRes.ok) {
+      return Response.json({ error: 'Turnstile verification unavailable' }, { status: 503 });
+    }
+
+    turnstileData = await turnstileRes.json();
+  } catch {
+    return Response.json({ error: 'Turnstile verification unavailable' }, { status: 503 });
+  }
+
+  const expectedHostname = new URL(request.url).hostname;
+  if (!turnstileData.success || (turnstileData.hostname && turnstileData.hostname !== expectedHostname)) {
     return Response.json({ error: 'Turnstile verification failed' }, { status: 422 });
   }
 

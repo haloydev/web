@@ -3,6 +3,54 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+let turnstileScriptPromise: Promise<void> | null = null;
+
+function loadTurnstileScript(): Promise<void> {
+  if (typeof window === 'undefined') return Promise.resolve();
+  if (window.turnstile) return Promise.resolve();
+  if (turnstileScriptPromise) return turnstileScriptPromise;
+
+  turnstileScriptPromise = new Promise<void>((resolve, reject) => {
+    const existingScript = document.querySelector(`script[src^="${TURNSTILE_SCRIPT_SRC}"]`) as HTMLScriptElement | null;
+    const script = existingScript ?? document.createElement('script');
+
+    const cleanupListeners = () => {
+      script.removeEventListener('load', onLoad);
+      script.removeEventListener('error', onError);
+    };
+
+    const onLoad = () => {
+      cleanupListeners();
+      if (window.turnstile) {
+        resolve();
+      } else {
+        turnstileScriptPromise = null;
+        reject(new Error('Turnstile loaded but window.turnstile is unavailable'));
+      }
+    };
+
+    const onError = () => {
+      cleanupListeners();
+      turnstileScriptPromise = null;
+      reject(new Error('Failed to load Turnstile script'));
+    };
+
+    script.addEventListener('load', onLoad);
+    script.addEventListener('error', onError);
+
+    if (!existingScript) {
+      script.src = TURNSTILE_SCRIPT_SRC;
+      script.async = true;
+      document.head.appendChild(script);
+    } else if (window.turnstile) {
+      cleanupListeners();
+      resolve();
+    }
+  });
+
+  return turnstileScriptPromise;
+}
 
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
 
@@ -22,51 +70,58 @@ export function NewsletterSignup({
   const turnstileRef = useRef<HTMLDivElement>(null);
   const turnstileWidgetId = useRef<string | null>(null);
   const turnstileToken = useRef('');
-  const scriptLoaded = useRef(false);
 
   const renderWidget = useCallback(() => {
     if (!turnstileRef.current || turnstileWidgetId.current !== null) return;
     if (!window.turnstile) return;
+    if (!TURNSTILE_SITE_KEY) {
+      setErrorMessage('Verification is not configured. Please try again later.');
+      setFormState('error');
+      return;
+    }
 
     turnstileWidgetId.current = window.turnstile.render(turnstileRef.current, {
       sitekey: TURNSTILE_SITE_KEY,
+      appearance: 'interaction-only',
       callback: (token: string) => {
         turnstileToken.current = token;
       },
       'expired-callback': () => {
         turnstileToken.current = '';
       },
+      'error-callback': () => {
+        turnstileToken.current = '';
+      },
     });
   }, []);
 
+  const resetWidget = useCallback(() => {
+    if (turnstileWidgetId.current && window.turnstile) {
+      window.turnstile.reset(turnstileWidgetId.current);
+    }
+    turnstileToken.current = '';
+  }, []);
+
   useEffect(() => {
-    if (scriptLoaded.current) {
-      renderWidget();
-      return;
-    }
-
-    if (document.querySelector('script[src*="turnstile"]')) {
-      scriptLoaded.current = true;
-      if (window.turnstile) {
+    let isMounted = true;
+    loadTurnstileScript()
+      .then(() => {
+        if (!isMounted) return;
         renderWidget();
-      } else {
-        (window as any).__turnstileOnLoad = renderWidget;
-      }
-      return;
-    }
-
-    (window as any).__turnstileOnLoad = renderWidget;
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=__turnstileOnLoad';
-    script.async = true;
-    document.head.appendChild(script);
-    scriptLoaded.current = true;
+      })
+      .catch(() => {
+        if (!isMounted) return;
+        setErrorMessage('Verification failed to load. Please refresh and try again.');
+        setFormState('error');
+      });
 
     return () => {
+      isMounted = false;
       if (turnstileWidgetId.current !== null && window.turnstile) {
         window.turnstile.remove(turnstileWidgetId.current);
         turnstileWidgetId.current = null;
       }
+      turnstileToken.current = '';
     };
   }, [renderWidget]);
 
@@ -101,6 +156,7 @@ export function NewsletterSignup({
       if (!res.ok) {
         setErrorMessage(data.error || 'Something went wrong. Please try again.');
         setFormState('error');
+        resetWidget();
         return;
       }
 
@@ -108,6 +164,7 @@ export function NewsletterSignup({
     } catch {
       setErrorMessage('Network error. Please try again.');
       setFormState('error');
+      resetWidget();
     }
   };
 
