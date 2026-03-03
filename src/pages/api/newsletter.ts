@@ -70,8 +70,7 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ error: 'Turnstile verification unavailable' }, { status: 503 });
   }
 
-  const expectedHostname = new URL(request.url).hostname;
-  if (!turnstileData.success || (turnstileData.hostname && turnstileData.hostname !== expectedHostname)) {
+  if (!turnstileData.success) {
     return Response.json({ error: 'Turnstile verification failed' }, { status: 422 });
   }
 
