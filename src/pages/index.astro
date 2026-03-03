@@ -4,7 +4,7 @@ import { IconBrandGithub } from '@tabler/icons-react';
 import BaseLayout from '@/layouts/base.astro';
 import pinkBurst from '../assets/pink-burst.svg';
 import blueBurst from '../assets/blue-burst.svg';
-import { CurlewLogo } from '@/components/curlew-logo';
+import { TextLogo } from '@/components/text-logo';
 import { ButtonLink } from '@/components/ui/button-link';
 import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
@@ -38,8 +38,7 @@ const { version } = versionData;
     <Navbar client:load version={version} />
     <div class="flex justify-center">
       <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
-        <h1 class="relative inline-block max-w-5xl text-center">
-          <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
+        <h1 class="max-w-5xl text-center">
           <div
             class="font-figtree text-4xl leading-tight font-black tracking-tight text-balance sm:text-5xl md:text-6xl"
           >

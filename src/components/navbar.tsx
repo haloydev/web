@@ -13,6 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import { TextLogo } from './text-logo';
 import { VersionBadge } from './version-badge';
 import { useState } from 'react';
 
@@ -29,8 +30,7 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
     <nav className="flex justify-center py-4 pr-6 pl-2">
       <div className="flex w-full justify-between">
         <a href="/" className="inline-flex items-center px-4" aria-label="Haloy home">
-          <img src="/haloy-logo-text-light.svg" alt="Haloy" className="h-6 w-auto dark:hidden" />
-          <img src="/haloy-logo-text-dark.svg" alt="Haloy" className="hidden h-6 w-auto dark:block" />
+          <TextLogo />
         </a>
 
         {/* Desktop */}

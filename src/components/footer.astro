@@ -1,5 +1,5 @@
 ---
-import { CurlewLogo } from './curlew-logo';
+import { TextLogo } from './text-logo';
 import { NewsletterSignup } from './newsletter-signup';
 
 const currentYear = new Date().getFullYear();
@@ -24,9 +24,8 @@ const links = {
     <div class="grid gap-8 lg:grid-cols-12 lg:gap-12">
       <!-- Brand + Newsletter column -->
       <div class="lg:col-span-5">
-        <a href="/" class="inline-flex items-center gap-2">
-          <CurlewLogo className="size-8" />
-          <span class="font-figtree text-xl font-semibold text-foreground">Haloy</span>
+        <a href="/" class="inline-flex items-center">
+          <TextLogo className="h-6 w-auto" />
         </a>
         <p class="mt-4 max-w-sm text-sm leading-relaxed text-muted-foreground">
           Get Haloy updates, deployment tips, and a light roast of cloud complexity.
