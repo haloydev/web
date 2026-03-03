@@ -21,8 +21,8 @@ const { version } = versionData;
 ---
 
 <BaseLayout
-  title="Haloy - Deploy to your own servers, minus the platform overhead"
-  description="Deploy Docker apps to your own servers with simple YAML config, automatic HTTPS, and built-in secret management. No dashboards, no vendor lock-in."
+  title="Haloy - Turn Any VPS into a Production-Ready App Platform"
+  description="Turn any VPS into a production-ready app platform in minutes. Zero-downtime deploys, automatic HTTPS, and instant rollbacks, without complex setup or vendor lock-in."
   class="bg-background-sky"
 >
   <div class="absolute inset-0 mx-auto max-w-7xl overflow-hidden dark:hidden">
@@ -38,14 +38,17 @@ const { version } = versionData;
     <Navbar client:load version={version} />
     <div class="flex justify-center">
       <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
-        <h1 class="relative inline-block">
+        <h1 class="relative inline-block max-w-5xl text-center">
           <CurlewLogo className="absolute -top-12 right-3 w-10 sm:-right-8 sm:w-12" />
-          <div class="font-figtree text-center text-5xl font-black text-balance sm:text-6xl">
-            Deploy on your servers
+          <div
+            class="font-figtree text-4xl leading-tight font-black tracking-tight text-balance sm:text-5xl md:text-6xl"
+          >
+            Turn any VPS into a
+            <span class="block">production-ready app platform in minutes.</span>
           </div>
         </h1>
         <p class="mt-2 max-w-2xl text-center text-xl text-balance sm:leading-10 md:text-2xl">
-          No dashboards. No vendor lock-in. LLM-friendly. Deploy your app in minutes with a simple config.
+          Zero-downtime deploys, automatic HTTPS, and instant rollbacks, without complex setup or vendor lock-in.
         </p>
         <div class="mt-6 flex items-center space-x-4 sm:mt-8">
           <ButtonLink href="/docs/quickstart" size="default" className="h-10 shadow-xl sm:has-[>svg]:px-4">
