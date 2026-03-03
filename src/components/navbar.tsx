@@ -2,10 +2,9 @@ import { IconBrandGithub, IconMenu2 } from '@tabler/icons-react';
 import { Moon, Monitor, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/use-theme';
 import { ModeToggle } from './mode-toggle';
-import { NewsletterSignup } from './newsletter-signup';
+import { NewsletterDialog } from './newsletter-dialog';
 import { Button } from './ui/button';
 import { ButtonLink } from './ui/button-link';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -120,27 +119,7 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
         </div>
       </div>
 
-      <Dialog open={newsletterOpen} onOpenChange={setNewsletterOpen}>
-        <DialogContent
-          className="w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-2xl border-black/[0.06] p-0 sm:w-full sm:max-w-md dark:border-white/[0.06]"
-          onInteractOutside={(event) => {
-            // Keep dialog open when extension UI (like password managers) is clicked.
-            event.preventDefault();
-          }}
-        >
-          <div className="bg-emerald-500/[0.04] px-8 pt-8 pb-6 dark:bg-emerald-500/[0.06]">
-            <DialogHeader>
-              <DialogTitle className="font-figtree text-xl font-bold">Stay in the loop</DialogTitle>
-              <DialogDescription className="text-muted-foreground mt-1 text-sm leading-relaxed">
-                Get Haloy updates, deployment tips, and a light roast of cloud complexity.
-              </DialogDescription>
-            </DialogHeader>
-          </div>
-          <div className="bg-emerald-500/[0.04] px-8 pt-6 pb-8 dark:bg-emerald-500/[0.06]">
-            <NewsletterSignup variant="inline" />
-          </div>
-        </DialogContent>
-      </Dialog>
+      <NewsletterDialog open={newsletterOpen} onOpenChange={setNewsletterOpen} />
     </nav>
   );
 }
