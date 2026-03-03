@@ -28,8 +28,9 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
   return (
     <nav className="flex justify-center py-4 pr-6 pl-2">
       <div className="flex w-full justify-between">
-        <a href="/" className="font-figtree px-4 text-2xl font-semibold">
-          Haloy
+        <a href="/" className="inline-flex items-center px-4" aria-label="Haloy home">
+          <img src="/haloy-logo-text-light.svg" alt="Haloy" className="h-6 w-auto dark:hidden" />
+          <img src="/haloy-logo-text-dark.svg" alt="Haloy" className="hidden h-6 w-auto dark:block" />
         </a>
 
         {/* Desktop */}

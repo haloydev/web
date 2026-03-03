@@ -33,3 +33,7 @@ When writing `haloy.yaml` examples in blog posts or docs, always cross-reference
 - There is no top-level `build` field. Image building is configured via the `image` object with `build_config`. A Dockerfile in the project root is auto-detected.
 - `env` is an array of objects with `name` and `value`/`from` fields, not a key-value map.
 - `server` is required and specifies the Haloy server API URL.
+
+## Commit Messages
+
+Use lowercase commit messages. Keep them one line and simple.
