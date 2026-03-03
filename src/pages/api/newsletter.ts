@@ -15,7 +15,8 @@ interface TurnstileVerificationResponse {
   'error-codes'?: string[];
 }
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
+  const runtime = locals.runtime as { env: Record<string, string> };
   let body: NewsletterRequest;
   try {
     body = await request.json();
@@ -41,7 +42,7 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ error: 'Submitted too quickly' }, { status: 422 });
   }
 
-  const turnstileSecret = import.meta.env.TURNSTILE_SECRET_KEY;
+  const turnstileSecret = runtime.env.TURNSTILE_SECRET_KEY;
   if (!turnstileSecret) {
     return Response.json({ error: 'Newsletter service misconfigured' }, { status: 500 });
   }
@@ -74,8 +75,8 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ error: 'Turnstile verification failed' }, { status: 422 });
   }
 
-  const apiKey = import.meta.env.EMAILOCTOPUS_API_KEY;
-  const listId = import.meta.env.EMAILOCTOPUS_LIST_ID;
+  const apiKey = runtime.env.EMAILOCTOPUS_API_KEY;
+  const listId = runtime.env.EMAILOCTOPUS_LIST_ID;
 
   const eoRes = await fetch(`https://emailoctopus.com/api/1.6/lists/${listId}/contacts`, {
     method: 'POST',
