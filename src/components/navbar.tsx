@@ -136,7 +136,7 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
               </DialogDescription>
             </DialogHeader>
           </div>
-          <div className="px-8 pt-6 pb-8">
+          <div className="bg-emerald-500/[0.04] px-8 pt-6 pb-8 dark:bg-emerald-500/[0.06]">
             <NewsletterSignup variant="inline" />
           </div>
         </DialogContent>
