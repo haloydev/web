@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
-import { Input } from '@/components/ui/input';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
 const TURNSTILE_SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
@@ -55,8 +55,8 @@ function loadTurnstileScript(): Promise<void> {
 type FormState = 'idle' | 'submitting' | 'success' | 'error';
 
 export function NewsletterSignup({
-  title = 'Stay in the loop',
-  description = 'Get concise posts on Docker deploy patterns, ops trade-offs, and new Haloy content.',
+  title = 'Stay updated',
+  description = 'Get updates on new Haloy content.',
   variant = 'card',
 }: {
   title?: string;
@@ -183,20 +183,18 @@ export function NewsletterSignup({
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="flex-1"
+            className="min-h-10 flex-1"
             disabled={formState === 'submitting'}
           />
           <div aria-hidden="true" className="absolute -left-[9999px]">
             <input type="text" name="website" tabIndex={-1} autoComplete="off" />
           </div>
-          <Button type="submit" disabled={formState === 'submitting'} className="shrink-0">
+          <Button type="submit" disabled={formState === 'submitting'} className="min-h-10 shrink-0">
             {formState === 'submitting' ? 'Subscribing...' : 'Subscribe'}
           </Button>
         </div>
         <div ref={turnstileRef} className="mt-3" />
-        {formState === 'error' && (
-          <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
-        )}
+        {formState === 'error' && <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errorMessage}</p>}
       </form>
     );
 

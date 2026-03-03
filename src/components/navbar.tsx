@@ -121,7 +121,7 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
 
       <Dialog open={newsletterOpen} onOpenChange={setNewsletterOpen}>
         <DialogContent
-          className="gap-0 overflow-hidden rounded-2xl border-black/[0.06] p-0 sm:max-w-md dark:border-white/[0.06]"
+          className="w-[calc(100%-2rem)] gap-0 overflow-hidden rounded-2xl border-black/[0.06] p-0 sm:w-full sm:max-w-md dark:border-white/[0.06]"
           onInteractOutside={(event) => {
             // Keep dialog open when extension UI (like password managers) is clicked.
             event.preventDefault();

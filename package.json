@@ -6,7 +6,7 @@
     "dev": "astro dev",
     "build": "node scripts/get-version.mjs && astro build",
     "preview": "astro preview",
-    "astro": "astro",
+    "astro": "NODE_OPTIONS=--disable-warning=DEP0040 astro",
     "clean": "rm -fr .astro node_modules"
   },
   "dependencies": {
