@@ -10,7 +10,7 @@ draft: false
 
 import Code from '@/components/code.astro';
 
-Haloy's reverse proxy and certificate manager weren't always built on Go's standard library. The project went through two earlier architectures before landing here, and the progression is worth sharing because each step made the case for stdlib stronger.
+Haloy's reverse proxy and certificate manager were not always stdlib-based. I tried two earlier architectures first, and walking through that progression explains why the current approach stuck.
 
 ## How We Got Here
 
@@ -18,9 +18,9 @@ The first version used [Traefik](https://traefik.io/) as the reverse proxy, runn
 
 The second version swapped Traefik for [HAProxy](https://www.haproxy.org/) and used [Lego](https://github.com/go-acme/lego) for certificate management. HAProxy is fast and battle-tested, but it came with its own friction. Configuration reloads required generating HAProxy config files and sending SIGHUP signals over sockets. Certificate updates meant coordinating between Lego, the filesystem, and HAProxy's reload cycle. Another Docker container to manage, another set of esoteric config syntax to maintain.
 
-Both approaches felt like hacks. The core of Haloy is a single Go binary that runs as a systemd service (or rc service on Alpine). Having the proxy layer depend on external containers and tool-specific configuration didn't fit.
+Both approaches felt bolted on. Haloy is supposed to be one Go binary running as a systemd service (or rc service on Alpine), so depending on extra containers and tool-specific config did not fit the design.
 
-So I tried building it on Go's stdlib, and was genuinely surprised how smoothly everything came together. `httputil.ReverseProxy` handles the proxying. `tls.Config.GetCertificate` handles dynamic certificate loading. `golang.org/x/crypto/acme` handles Let's Encrypt directly. Certificate fetching is faster now than it was with either previous setup, and the whole thing runs as part of `haloyd` with no external dependencies, no extra containers, no config file generation, no reload signals.
+Then I rebuilt it on Go's stdlib and it came together faster than expected. `httputil.ReverseProxy` handles proxying, `tls.Config.GetCertificate` handles dynamic cert loading, and `golang.org/x/crypto/acme` talks to Let's Encrypt directly. Certificate issuance is faster than in the previous setups, and everything now runs inside `haloyd` with no extra containers, generated config files, or reload hooks.
 
 The only non-stdlib networking dependency is `golang.org/x/crypto/acme`, which feels close enough to stdlib that I'm comfortable calling it one.
 

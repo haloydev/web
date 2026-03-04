@@ -10,7 +10,7 @@ draft: false
 
 import Code from '@/components/code.astro';
 
-The goal with Haloy was to create a simple tool that could do zero downtime deployments to my own server without needing a complicated build system and unnecessary services. Just a server and my local development machine. My first approach was simple, maybe a little naive:
+My goal with Haloy was simple: zero-downtime deploys to my own server without dragging in a full build pipeline and extra services. Just a server and my local machine. The first version worked, but in hindsight it was pretty naive:
 
 <Code code={`
   # Build the image
@@ -26,9 +26,9 @@ The goal with Haloy was to create a simple tool that could do zero downtime depl
   ssh server "docker load -i /tmp/myapp.tar"
 `} lang="bash" />
 
-This worked, but it's wasteful. A typical dockerized Node.js app is 200-400MB. A Next.js production build? Easily 400-600MB. And you're uploading all of it, every single deploy. Most of that is base layers that haven't changed. The `node:22-alpine` base image. The `npm install` layer with your dependencies. The only thing that actually changed is your application code, maybe 5MB.
+This works, but it's wasteful. A typical Dockerized Node.js app is 200-400MB. A Next.js production build can be 400-600MB. Uploading that whole tar on every deploy is mostly redundant because the heavy layers rarely change. Usually only your app code changed, maybe 5MB.
 
-The "obvious" solution is to use a Docker registry. Push once, pull everywhere. I considered running a private registry container directly on the production server, but that meant managing authentication, volume mounts, and exposing ports (or tunneling). In other words, complexity I wanted to avoid in the first place. I wanted a single binary with zero external dependencies.
+The obvious fix is a Docker registry: push once, pull anywhere. I considered running a private registry on the same server, but that reintroduced complexity I was trying to avoid (auth, storage, ports, and more moving pieces). I wanted to keep Haloy as a single binary with minimal dependencies.
 
 After some thinking (and prompting), I realized the answer was simpler: extract just the layer caching mechanism from a registry and build it into the server itself.
 

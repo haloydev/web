@@ -10,9 +10,9 @@ draft: false
 
 import Code from '@/components/code.astro';
 
-Third-party analytics services raise a few problems at once. They cost money that scales with traffic, they collect visitor data on servers you don't control, they require cookie consent banners for GDPR compliance, and browser ad blockers strip out their tracking scripts entirely. For developers already running their own servers, self-hosting analytics solves all of these.
+Third-party analytics creates a pile of trade-offs at once: rising monthly cost, data on infrastructure you don't control, extra compliance overhead, and tracking scripts that get blocked by default in many browsers. If you already run your own servers, self-hosting can remove most of that friction.
 
-This post compares three open-source analytics tools, Umami, Plausible Community Edition, and Rybbit, with deployment configs for each using Haloy. I'll also cover how to use custom endpoints to avoid ad blockers and when to run analytics on a separate server.
+This post compares three open-source options, Umami, Plausible Community Edition, and Rybbit, with Haloy deployment configs for each. I'll also cover practical ad-blocker workarounds and when it makes sense to move analytics to a separate server.
 
 ## Why Self-Host Your Analytics?
 
@@ -26,7 +26,7 @@ This post compares three open-source analytics tools, Umami, Plausible Community
 
 ## The Quick Summary
 
-Before going deep, here's a high-level overview:
+If you just want the quick comparison:
 
 | | Umami | Plausible CE | Rybbit |
 |---|---|---|---|
@@ -310,7 +310,7 @@ In TanStack Start, use a server file route with `proxyRequest`:
   );
 `} lang="ts" />
 
-Then reference the proxied script in your HTML instead of the direct analytics URL. The browser sees a request to your own domain and path, which no ad blocker will flag.
+Then reference the proxied script in your HTML instead of the direct analytics URL. The browser sees a request to your own domain and path, which usually avoids common analytics blocklists.
 
 ## Same Server or Separate Server?
 
@@ -347,7 +347,7 @@ Each target can have its own `server` field, so you can move analytics to a dedi
 
 ## Final Thoughts
 
-The three tools cover distinct points on the spectrum:
+These three tools land at different points on the spectrum:
 
 **Umami** is the simplest option. Two containers, ~200MB memory, built-in ad blocker bypass, MIT license. If you want analytics on your server with the least possible friction, start here.
 
@@ -355,6 +355,6 @@ The three tools cover distinct points on the spectrum:
 
 **Rybbit** gives you the most features in the self-hosted tier: session replay, funnels, retention analysis, and Core Web Vitals. If you want product analytics capabilities without PostHog's weight, Rybbit is the tool to evaluate.
 
-For most developers running a personal site, a SaaS product, or a small portfolio of applications, Umami on the same server as the app is the path of least resistance. It's light, it's simple, and it covers standard web analytics needs. If you outgrow it or need deeper product analytics, Plausible and Rybbit are there.
+For most people running a personal site or small SaaS, Umami on the same server is the easiest place to start. It's light and covers core web analytics. If you later need deeper product analytics, Plausible and Rybbit are solid next steps.
 
 All three are open source, respect visitor privacy, and can be deployed in minutes with the configs above.

@@ -10,11 +10,11 @@ draft: false
 
 import Code from '@/components/code.astro';
 
-The question comes up often enough that it deserves a direct answer: how does Haloy compare to Kubernetes?
+This comes up a lot, so here's the direct answer: how does Haloy compare to Kubernetes?
 
-The short version is that they solve different problems at different scales. Kubernetes is a distributed container orchestration platform designed for large, complex systems. Haloy is a deployment tool designed to get Docker apps running on your own servers with minimal setup. Comparing them head-to-head is a bit like comparing a commercial kitchen to a home oven, both cook food, but they're built for entirely different situations.
+Short version: they solve different problems at different scales. Kubernetes is a distributed orchestrator for complex systems. Haloy is a deployment tool for running Docker apps on your own servers with minimal setup. Comparing them directly is like comparing a commercial kitchen and a home oven. Both cook food, but they are built for different jobs.
 
-That said, both tools deploy Docker containers, so the question is fair. Here's a practical breakdown.
+Still, both tools run containers, so the comparison is fair. Here's a practical breakdown.
 
 ## Quick Comparison
 
@@ -86,7 +86,7 @@ Haloy scales vertically (bigger server) or by manually configuring replicas. It 
 
 Kubernetes networking is powerful but complex. Pods get their own IP addresses within a virtual network. Services provide stable endpoints for groups of pods. Ingress controllers (Nginx, Traefik, or others) handle external HTTP traffic. TLS termination requires installing cert-manager and configuring Certificate resources. Each of these is a separate component to install, configure, and maintain.
 
-Haloy's server daemon includes a built-in reverse proxy with automatic Let's Encrypt certificate provisioning. Point your DNS at the server, set the `host` field in your config, and HTTPS works on the first deploy. No additional components needed.
+Haloy's server daemon includes a built-in reverse proxy with automatic Let's Encrypt certificate provisioning. Point your DNS at the server, set your `domains` in config, and HTTPS works on the first deploy. No extra components needed.
 
 ### Ecosystem and extensibility
 
@@ -121,8 +121,8 @@ Most web applications, even ones serving thousands of users, run perfectly fine 
 
 ## The Honest Take
 
-Most developers don't need Kubernetes. That's not a controversial statement, it's the experience of anyone who has set up a Kubernetes cluster for a project that could have been deployed with a simpler tool. The operational overhead of maintaining a cluster, keeping it updated, managing RBAC, debugging networking issues, and learning the ecosystem is significant. For a small team or a single developer, that overhead often exceeds the complexity of the application itself.
+Most developers don't need Kubernetes on day one. If you've ever set up a cluster for a project that could have lived on one or two servers, you already know the overhead is real. Keeping a cluster healthy, managing RBAC, debugging networking, and learning the ecosystem takes time that small teams often need elsewhere.
 
 But when you do need Kubernetes, nothing else replaces it. The ability to orchestrate hundreds of containers across dozens of machines with automatic scaling, self-healing, and sophisticated networking is something no simpler tool can replicate. Haloy isn't trying to.
 
-Haloy covers the common case: you have a Docker app, you have a server, and you want to deploy it with HTTPS and zero downtime. If that's your situation, you don't need a container orchestrator. If your situation grows beyond that, Kubernetes will be there.
+Haloy covers the common case: you have a Docker app, a server, and you want reliable deploys with HTTPS and zero downtime. If your needs outgrow that, Kubernetes is still there when you need it.
