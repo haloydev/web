@@ -64,15 +64,9 @@ Haloy is intentionally simple. You probably don’t want it if you need:
 
 ## Why Haloy Exists
 
-Infrastructure has become complicated. Many developers don’t need Kubernetes, cloud vendor services, or complex CI/CD pipelines for everyday apps. Haloy gives you a deploy system that is:
+Infrastructure has become complicated. Many developers do not need Kubernetes, cloud vendor services, or complex CI/CD pipelines for everyday apps.
 
-- Understandable
-- Self‑contained
-- Reliable
-- Easy to operate
-- Easy to reason about
-
-All while still being powerful enough for production workloads.
+For the full positioning and tradeoffs, see [Why Haloy](/docs/why-haloy).
 
 ## Next Steps
 - [Install Haloy](/docs/quickstart)

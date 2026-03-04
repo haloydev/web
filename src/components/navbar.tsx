@@ -45,6 +45,12 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
               <a href="/blog" className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium">
                 Blog
               </a>
+              <a
+                href="/docs/why-haloy"
+                className="text-muted-foreground hover:text-foreground px-3 text-sm font-medium"
+              >
+                Why Haloy
+              </a>
               <button
                 onClick={() => setNewsletterOpen(true)}
                 className="text-muted-foreground hover:text-foreground cursor-pointer px-3 text-sm font-medium"
@@ -82,6 +88,9 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <a href="/blog">Blog</a>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <a href="/docs/why-haloy">Why Haloy</a>
                   </DropdownMenuItem>
                   <DropdownMenuItem onSelect={() => setNewsletterOpen(true)}>
                     Newsletter
