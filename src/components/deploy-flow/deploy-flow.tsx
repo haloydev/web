@@ -1,15 +1,15 @@
-import { useState, useEffect, type ComponentType } from 'react';
-import { NextjsLogo } from './nextjs-logo';
-import { TanstackStartLogo } from './tantstack-start';
+import { type ComponentType, useEffect, useState } from 'react';
 import { DjangoLogo } from './django-logo';
+import { GolangLogo } from './golang-logo';
+import { HtmxLogo } from './htmx-logo';
 import { LaravelLogo } from './laravel-logo';
-import { RubyOnRailsLogo } from './ruby-on-rails-logo';
+import { NextjsLogo } from './nextjs-logo';
 import { NuxtjsLogo } from './nuxtjs-logo';
 import { PhoenixLogo } from './phoenix-logo';
-import { GolangLogo } from './golang-logo';
-import { SvelteKitLogo } from './svelte-kit-logo';
+import { RubyOnRailsLogo } from './ruby-on-rails-logo';
 import { SolidStartLogo } from './solid-start-logo';
-import { HtmxLogo } from './htmx-logo';
+import { SvelteKitLogo } from './svelte-kit-logo';
+import { TanstackStartLogo } from './tantstack-start';
 import { WebIcon } from './web-icon';
 
 interface FrameworkIconProps {
@@ -121,13 +121,7 @@ const ITEM_HEIGHT = 40;
 
 function ArrowRight() {
   return (
-    <svg
-      width="40"
-      height="24"
-      viewBox="0 0 40 24"
-      fill="none"
-      className="text-muted-foreground/40 shrink-0"
-    >
+    <svg width="40" height="24" viewBox="0 0 40 24" fill="none" className="text-muted-foreground/40 shrink-0">
       <path
         d="M0 12h36m0 0l-6-6m6 6l-6 6"
         stroke="currentColor"
@@ -141,13 +135,7 @@ function ArrowRight() {
 
 function ArrowDown() {
   return (
-    <svg
-      width="24"
-      height="32"
-      viewBox="0 0 24 32"
-      fill="none"
-      className="text-muted-foreground/40 shrink-0"
-    >
+    <svg width="24" height="32" viewBox="0 0 24 32" fill="none" className="text-muted-foreground/40 shrink-0">
       <path
         d="M12 0v28m0 0l-6-6m6 6l6-6"
         stroke="currentColor"
@@ -214,11 +202,11 @@ export function DeployFlow() {
         <div className="mx-auto max-w-6xl">
           {/* Header */}
           <div className="mb-16 text-center">
-            <h2 className="mb-4 font-figtree text-3xl font-extrabold leading-tight tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-              Any framework. One workflow.
+            <h2 className="font-figtree text-foreground mb-4 text-3xl leading-tight font-extrabold tracking-tight lg:text-4xl">
+              Same workflow for every framework
             </h2>
-            <p className="mx-auto max-w-xl text-lg leading-relaxed text-muted-foreground">
-              The deploy process is the same regardless of your stack. Write a config, run deploy, go live.
+            <p className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed">
+              The deploy process is the same regardless of your stack. Dockerize, write a config, run deploy, go live.
             </p>
           </div>
 
@@ -257,7 +245,7 @@ export function DeployFlow() {
           <div className="mt-10 text-center">
             <a
               href="https://github.com/haloydev/examples"
-              className="text-sm text-muted-foreground underline decoration-muted-foreground/30 underline-offset-4 transition-colors hover:text-foreground hover:decoration-foreground/30"
+              className="text-muted-foreground decoration-muted-foreground/30 hover:text-foreground hover:decoration-foreground/30 text-sm underline underline-offset-4 transition-colors"
             >
               See example projects
             </a>
@@ -280,10 +268,7 @@ function FrameworkSelector({
   return (
     <div className="w-full max-w-[280px] shrink-0 lg:basis-[280px]">
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
-        <div
-          className="relative overflow-hidden"
-          style={{ height: ITEM_HEIGHT }}
-        >
+        <div className="relative overflow-hidden" style={{ height: ITEM_HEIGHT }}>
           <div
             className="transition-transform duration-500"
             style={{
@@ -296,7 +281,7 @@ function FrameworkSelector({
               return (
                 <div
                   key={fw.name}
-                  className="flex items-center gap-3 px-5 font-figtree text-sm font-bold text-foreground"
+                  className="font-figtree text-foreground flex items-center gap-3 px-5 text-sm font-bold"
                   style={{ height: ITEM_HEIGHT }}
                 >
                   <Icon className="size-5 shrink-0" />
@@ -350,8 +335,7 @@ function ConfigCard({ fw }: { fw: Framework }) {
                 height: 12,
                 borderRadius: '50%',
                 background: 'linear-gradient(180deg, #ff6058 0%, #e5453e 100%)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
               }}
             />
             <span
@@ -360,8 +344,7 @@ function ConfigCard({ fw }: { fw: Framework }) {
                 height: 12,
                 borderRadius: '50%',
                 background: 'linear-gradient(180deg, #ffbd2e 0%, #dea123 100%)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
               }}
             />
             <span
@@ -370,8 +353,7 @@ function ConfigCard({ fw }: { fw: Framework }) {
                 height: 12,
                 borderRadius: '50%',
                 background: 'linear-gradient(180deg, #28c940 0%, #1aab2f 100%)',
-                boxShadow:
-                  'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
               }}
             />
           </div>
@@ -430,7 +412,7 @@ function ConfigCard({ fw }: { fw: Framework }) {
             <Key>domains</Key>
             <Punct>:</Punct>
             {'\n'}
-            <Punct>  - </Punct>
+            <Punct> - </Punct>
             <Key>domain</Key>
             <Punct>: </Punct>
             <ConfigValue key={`domain-${fw.domain}`}>"{fw.domain}"</ConfigValue>
@@ -467,10 +449,7 @@ function LiveUrl({ fw }: { fw: Framework }) {
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
         <div className="flex items-center gap-2.5 px-4 py-3">
           <WebIcon className="size-3.5 shrink-0 text-emerald-500" />
-          <span
-            key={fw.domain}
-            className="deploy-flow-fade-in truncate font-mono text-sm text-foreground"
-          >
+          <span key={fw.domain} className="deploy-flow-fade-in text-foreground truncate font-mono text-sm">
             https://{fw.domain}
           </span>
         </div>
