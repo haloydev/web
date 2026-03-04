@@ -1,0 +1,309 @@
+---
+title: 'HTMX with Go'
+slug: 'htmx-go'
+section: examples
+description: 'Deploy an HTMX + Go app to your own server using Haloy.'
+---
+
+import Code from '@/components/code.astro';
+
+This guide shows how to deploy a small HTMX + Go app with Haloy on your own server.
+
+The complete source code for this guide is available at:
+[haloydev/examples/htmx](https://github.com/haloydev/examples/tree/main/htmx)
+
+## What You'll Build
+
+You will deploy a server-rendered todo app built with:
+
+- **Go** - Backend server and routing
+- **HTMX** - In-page updates without building a separate SPA
+- **HTML templates** - Full-page rendering plus fragment responses
+- **Haloy** - Deployment to your own server
+
+## Prerequisites
+
+- Go 1.25+ installed
+- Haloy installed ([Quickstart](/docs/quickstart))
+- A Linux server (VPS or dedicated server)
+- A domain or a subdomain
+- Basic familiarity with Go and HTML
+
+## Project Setup
+
+### 1. Create the Project
+
+<Code code={`
+  mkdir my-htmx-app
+  cd my-htmx-app
+  go mod init htmx-example
+`} lang="bash" />
+
+### 2. Create Project Files
+
+Create this file structure:
+
+<Code code={`
+  .
+  ├── Dockerfile
+  ├── go.mod
+  ├── haloy.yaml
+  ├── main.go
+  └── templates
+      └── index.html
+`} lang="text" />
+
+## Application Code
+
+### 1. Create the Go Server
+
+Create `main.go`:
+
+<Code code={`
+  package main
+
+  import (
+    "embed"
+    "html/template"
+    "log"
+    "net/http"
+    "strconv"
+    "sync"
+  )
+
+  //go:embed templates
+  var templateFS embed.FS
+
+  var tmpl = template.Must(template.ParseFS(templateFS, "templates/*.html"))
+
+  type Todo struct {
+    ID   int
+    Text string
+    Done bool
+  }
+
+  type App struct {
+    mu     sync.Mutex
+    todos  []Todo
+    nextID int
+  }
+
+  func main() {
+    app := &App{
+      todos: []Todo{
+        {ID: 1, Text: "Learn HTMX", Done: false},
+        {ID: 2, Text: "Build something with Go", Done: true},
+      },
+      nextID: 3,
+    }
+
+    mux := http.NewServeMux()
+    mux.HandleFunc("GET /health", func(w http.ResponseWriter, r *http.Request) {
+      w.Header().Set("Content-Type", "application/json")
+      w.Write([]byte(\`{"status":"ok"}\`))
+    })
+    mux.HandleFunc("GET /", app.handleIndex)
+    mux.HandleFunc("POST /todos", app.handleAddTodo)
+    mux.HandleFunc("PUT /todos/{id}/toggle", app.handleToggleTodo)
+    mux.HandleFunc("DELETE /todos/{id}", app.handleDeleteTodo)
+
+    log.Println("Server starting on :8080")
+    log.Fatal(http.ListenAndServe(":8080", mux))
+  }
+
+  func (a *App) handleIndex(w http.ResponseWriter, r *http.Request) {
+    a.mu.Lock()
+    defer a.mu.Unlock()
+    tmpl.ExecuteTemplate(w, "index.html", a.todos)
+  }
+
+  func (a *App) handleAddTodo(w http.ResponseWriter, r *http.Request) {
+    text := r.FormValue("text")
+    if text == "" {
+      http.Error(w, "text is required", http.StatusBadRequest)
+      return
+    }
+
+    a.mu.Lock()
+    defer a.mu.Unlock()
+
+    todo := Todo{ID: a.nextID, Text: text, Done: false}
+    a.nextID++
+    a.todos = append(a.todos, todo)
+
+    tmpl.ExecuteTemplate(w, "todo-item", todo)
+  }
+
+  func (a *App) handleToggleTodo(w http.ResponseWriter, r *http.Request) {
+    id, err := strconv.Atoi(r.PathValue("id"))
+    if err != nil {
+      http.Error(w, "invalid id", http.StatusBadRequest)
+      return
+    }
+
+    a.mu.Lock()
+    defer a.mu.Unlock()
+
+    for i := range a.todos {
+      if a.todos[i].ID == id {
+        a.todos[i].Done = !a.todos[i].Done
+        tmpl.ExecuteTemplate(w, "todo-item", a.todos[i])
+        return
+      }
+    }
+
+    http.Error(w, "not found", http.StatusNotFound)
+  }
+
+  func (a *App) handleDeleteTodo(w http.ResponseWriter, r *http.Request) {
+    id, err := strconv.Atoi(r.PathValue("id"))
+    if err != nil {
+      http.Error(w, "invalid id", http.StatusBadRequest)
+      return
+    }
+
+    a.mu.Lock()
+    defer a.mu.Unlock()
+
+    for i := range a.todos {
+      if a.todos[i].ID == id {
+        a.todos = append(a.todos[:i], a.todos[i+1:]...)
+        w.WriteHeader(http.StatusOK)
+        return
+      }
+    }
+
+    http.Error(w, "not found", http.StatusNotFound)
+  }
+`} lang="go" />
+
+### 2. Create the HTMX Template
+
+Create `templates/index.html`:
+
+<Code code={`
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>HTMX + Go Todo App</title>
+      <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+      <style>
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 0 20px; background: #f5f5f5; color: #333; }
+          h1 { margin-bottom: 24px; }
+          form { display: flex; gap: 8px; margin-bottom: 24px; }
+          input[type="text"] { flex: 1; padding: 10px 14px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+          button { padding: 10px 18px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; }
+          button[type="submit"] { background: #2563eb; color: white; }
+          button[type="submit"]:hover { background: #1d4ed8; }
+          .todo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+          .todo-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+          .todo-item.done .todo-text { text-decoration: line-through; color: #999; }
+          .todo-text { flex: 1; font-size: 16px; }
+          .btn-toggle { background: #e5e7eb; font-size: 18px; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; padding: 0; }
+          .btn-delete { background: #fee2e2; color: #dc2626; font-size: 14px; }
+          .btn-delete:hover { background: #fecaca; }
+      </style>
+  </head>
+  <body>
+      <h1>Todo App</h1>
+      <form hx-post="/todos" hx-target="#todo-list" hx-swap="beforeend" hx-on::after-request="if(event.detail.successful) this.reset()">
+          <input type="text" name="text" placeholder="What needs to be done?" required>
+          <button type="submit">Add</button>
+      </form>
+      <ul id="todo-list" class="todo-list">
+          {{range .}}
+          {{template "todo-item" .}}
+          {{end}}
+      </ul>
+  </body>
+  </html>
+
+  {{define "todo-item"}}
+  <li id="todo-{{.ID}}" class="todo-item{{if .Done}} done{{end}}">
+      <button class="btn-toggle" hx-put="/todos/{{.ID}}/toggle" hx-target="#todo-{{.ID}}" hx-swap="outerHTML">
+          {{if .Done}}&#10003;{{else}}&nbsp;{{end}}
+      </button>
+      <span class="todo-text">{{.Text}}</span>
+      <button class="btn-delete" hx-delete="/todos/{{.ID}}" hx-target="#todo-{{.ID}}" hx-swap="outerHTML">Delete</button>
+  </li>
+  {{end}}
+`} lang="html" />
+
+Why this setup works well:
+
+- The server renders both full pages and small HTML fragments
+- HTMX swaps only the changed todo row
+- You do not need a separate frontend build step
+
+## Docker Configuration
+
+Create `Dockerfile`:
+
+<Code code={`
+  FROM golang:1.25-alpine AS builder
+
+  WORKDIR /app
+
+  COPY go.mod ./
+  RUN go mod download
+
+  COPY . .
+
+  RUN CGO_ENABLED=0 go build -o server .
+
+  FROM alpine:3.21
+
+  COPY --from=builder /app/server /server
+
+  EXPOSE 8080
+
+  HEALTHCHECK --interval=10s --timeout=3s --start-period=5s --retries=3 \\
+      CMD wget -qO- http://localhost:8080/health || exit 1
+
+  USER nobody
+
+  CMD ["/server"]
+`} lang="dockerfile" />
+
+## Haloy Configuration
+
+Create `haloy.yaml`:
+
+<Code code={`
+  name: htmx
+  server: haloy.example.com
+  domains:
+    - domain: my-app.example.com
+  port: 8080
+`} lang="yaml" />
+
+Before deploying, replace:
+
+- `server` - Your Haloy server domain
+- `domains[0].domain` - The domain (or subdomain) for your app
+
+## Deploy
+
+Run deployment from the project root:
+
+<Code code="haloy deploy" lang="bash" />
+
+Haloy builds the Docker image, uploads it to your server, starts the container, and configures routing for your domain.
+
+## Verify the Deployment
+
+After deployment:
+
+1. Open your configured domain in a browser
+2. Add a todo item and verify it appears without a full page refresh
+3. Toggle and delete todos to confirm HTMX interactions are working
+4. Check the health endpoint:
+
+<Code code="curl https://my-app.example.com/health" lang="bash" />
+
+You should get:
+
+<Code code='{"status":"ok"}' lang="json" />
