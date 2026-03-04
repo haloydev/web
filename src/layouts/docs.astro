@@ -48,13 +48,13 @@ const { title, description, activeSlug, headings } = Astro.props;
         <Prose>
           <slot />
         </Prose>
-        <div class="mt-12">
+        <section class="mt-20 pt-4">
           <NewsletterSignup
             client:load
             title="Stay updated on Haloy"
             description="Get notified about new docs, deployment patterns, and Haloy updates."
           />
-        </div>
+        </section>
       </div>
       <aside class="hidden lg:block xl:ml-24">
         <DocsTableOfContents client:load headings={headings} />

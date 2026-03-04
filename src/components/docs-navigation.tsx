@@ -20,7 +20,7 @@ function NavigationContent({
   sectionsWithPages: SectionWithPages[];
 }) {
   return (
-    <nav className="space-y-6 px-4">
+    <nav className="space-y-6 px-4 pb-24">
       {sectionsWithPages.map((section) => (
         <div key={section.id}>
           <h3 className="text-muted-foreground/70 mb-1 px-3 text-xs font-semibold tracking-tight">
