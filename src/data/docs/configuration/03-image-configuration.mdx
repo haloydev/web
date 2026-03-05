@@ -20,6 +20,37 @@ Configure Docker images, registry authentication, local building, and rollback s
 | `history`      | object  | No       | Image history and rollback strategy                                                    |
 | `build_config` | object  | No       | Build configuration for local building                                                 |
 
+## Multi-Target Image Selection (Quick Start)
+
+For multi-target setups, define reusable images at the root with `images`, then pick one per target using `image_key`.
+
+<Code code={`
+  name: "my-app"
+  server: "haloy.yourserver.com"
+
+  images:
+    web: "ghcr.io/your-org/my-app-web:v1.2.3"
+    worker: "ghcr.io/your-org/my-app-worker:v1.2.3"
+
+  targets:
+    production:
+      image_key: "web"
+      domains:
+        - domain: "my-app.com"
+    jobs:
+      image_key: "worker"
+`} lang="yaml" />
+
+When to use:
+
+- Use root `image` when every target should share one default image
+- Use root `images` + target `image_key` when targets need different images (for example web vs worker)
+
+Rules:
+
+- A target can set either `image` or `image_key` (not both)
+- Resolution priority is: target `image` -> target `image_key` -> root `image`
+
 ## String Shorthand
 
 Anywhere an image is expected, you can use a plain string instead of the object form. The string is treated as the `repository` field.
