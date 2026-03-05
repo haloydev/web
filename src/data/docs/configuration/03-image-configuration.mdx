@@ -17,7 +17,6 @@ Configure Docker images, registry authentication, local building, and rollback s
 | `tag`          | string  | No       | Image tag (default: "latest"). Can also be included in repository (e.g., nginx:alpine) |
 | `build`        | boolean | No       | Whether to build the image locally                                                     |
 | `registry`     | object  | No       | Private registry authentication                                                        |
-| `source`       | string  | No       | Where to get the image: "registry" (default) or "local"                                |
 | `history`      | object  | No       | Image history and rollback strategy                                                    |
 | `build_config` | object  | No       | Build configuration for local building                                                 |
 
@@ -173,7 +172,7 @@ The `server` field is optional. Haloy auto-detects it from your repository:
 
 - `ghcr.io/your-org/app` → `ghcr.io`
 - `myregistry.example.com/my-app` → `myregistry.example.com`
-- `your-username/app` → `index.docker.io` (Docker Hub)
+- `your-username/app` → `docker.io` (Docker Hub)
 
 ### Registry Examples
 
@@ -361,8 +360,8 @@ Build once, deploy to multiple targets:
           password:
             from:
               env: "GITHUB_TOKEN"
-          build_config:
-            push: "registry" # Push to registry for staging
+        build_config:
+          push: "registry" # Push to registry for staging
       domains:
         - domain: "staging.my-app.com"
 `} lang="yaml" />
@@ -458,25 +457,33 @@ Disable rollback capability:
 **Pros:** Minimal resource usage
 **Cons:** No rollback capability
 
-## Local Images Only
+## Named Images for Multi-Target Configs
 
-Use images already present on the server (don't pull from registry):
+You can define shared images once at the root and let targets choose with `image_key`.
 
 <Code code={`
   name: "my-app"
   server: "haloy.yourserver.com"
-  image:
-    tag: "latest"
-    source: "local"  # Only look for images on the server
-  domains:
-    - domain: "my-app.com"
+
+  images:
+    web:
+      repository: "ghcr.io/your-org/my-app-web"
+      tag: "v1.2.3"
+    worker: "ghcr.io/your-org/my-app-worker:v1.2.3"
+
+  targets:
+    production:
+      image_key: "web"
+      domains:
+        - domain: "my-app.com"
+    jobs:
+      image_key: "worker"
 `} lang="yaml" />
 
-Useful when:
+Notes:
 
-- Images are built directly on the server
-- Using custom build processes
-- Testing local development images
+- For a target, use either `image` or `image_key` (not both)
+- Resolution priority is: target `image` -> target `image_key` -> root `image`
 
 ## Complete Example
 

@@ -38,7 +38,6 @@ Build and upload to a single server:
 server: "haloy.yourserver.com"
 image:
   repository: "my-app"
-  source: "local"  # Tell Haloy not to pull from registry
   tag: "latest"
 domains:
   - domain: "my-app.com"
@@ -67,7 +66,6 @@ Build once, deploy to multiple servers:
 <Code code={`name: "my-app"
 image:
   repository: "my-app"
-  source: "local"
   tag: "latest"
 
 # Build once before all deployments
@@ -109,7 +107,6 @@ Complex build with testing and multi-stage process:
 <Code code={`name: "complex-app"
 image:
   repository: "complex-app"
-  source: "local"
   tag: "latest"
 
 global_pre_deploy:
@@ -237,7 +234,6 @@ Access environment variables in deployment hooks:
 <Code code={`name: "my-app"
 image:
   repository: "my-app"
-  source: "local"
 
 pre_deploy:
 
@@ -349,7 +345,7 @@ Hooks stop execution on first error. Use `|| true` to continue on errors:
 1. **Use built-in builder when possible**: Simpler and more maintainable
 2. **Test hooks locally**: Run commands manually before adding to config
 3. **Use SSH keys**: Avoid password prompts in automated deployments
-4. **Set source to local**: Prevents registry pulls when using local images
+4. **Use a fixed image tag**: Ensure hooks build/load the exact image tag Haloy deploys
 5. **Clean up artifacts**: Remove temporary files in post-deploy
 6. **Use global hooks**: Build once for multi-target deployments
 7. **Handle errors gracefully**: Use `|| true` for non-critical commands
