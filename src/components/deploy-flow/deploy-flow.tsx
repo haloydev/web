@@ -1,5 +1,6 @@
 import { type ComponentType, useEffect, useState } from 'react';
 import { DjangoLogo } from './django-logo';
+import { DockerLogo } from './docker-logo';
 import { GolangLogo } from './golang-logo';
 import { HtmxLogo } from './htmx-logo';
 import { LaravelLogo } from './laravel-logo';
@@ -23,6 +24,7 @@ interface Framework {
   port: number;
   healthCheck: string;
   domain: string;
+  baseImage: string;
 }
 
 const frameworks: Framework[] = [
@@ -33,6 +35,7 @@ const frameworks: Framework[] = [
     port: 3000,
     healthCheck: '/api/health',
     domain: 'mynextjsapp.com',
+    baseImage: 'node:22-alpine',
   },
   {
     name: 'Nuxt',
@@ -41,6 +44,7 @@ const frameworks: Framework[] = [
     port: 3000,
     healthCheck: '/',
     domain: 'mynuxtapp.com',
+    baseImage: 'node:22-alpine',
   },
   {
     name: 'TanStack Start',
@@ -49,6 +53,7 @@ const frameworks: Framework[] = [
     port: 3000,
     healthCheck: '/',
     domain: 'mytanstackapp.com',
+    baseImage: 'node:22-alpine',
   },
   {
     name: 'SvelteKit',
@@ -57,6 +62,7 @@ const frameworks: Framework[] = [
     port: 3000,
     healthCheck: '/',
     domain: 'mysveltekitapp.com',
+    baseImage: 'node:22-alpine',
   },
   {
     name: 'SolidStart',
@@ -65,6 +71,7 @@ const frameworks: Framework[] = [
     port: 3000,
     healthCheck: '/',
     domain: 'mysolidstartapp.com',
+    baseImage: 'node:22-alpine',
   },
   {
     name: 'Django',
@@ -73,6 +80,7 @@ const frameworks: Framework[] = [
     port: 8000,
     healthCheck: '/health',
     domain: 'mydjangoapp.com',
+    baseImage: 'python:3.13-slim',
   },
   {
     name: 'Laravel',
@@ -81,6 +89,7 @@ const frameworks: Framework[] = [
     port: 8000,
     healthCheck: '/up',
     domain: 'mylaravelapp.com',
+    baseImage: 'php:8.4-fpm',
   },
   {
     name: 'Rails',
@@ -89,6 +98,7 @@ const frameworks: Framework[] = [
     port: 3000,
     healthCheck: '/up',
     domain: 'myrailsapp.com',
+    baseImage: 'ruby:3.3-slim',
   },
   {
     name: 'htmx',
@@ -97,6 +107,7 @@ const frameworks: Framework[] = [
     port: 8080,
     healthCheck: '/',
     domain: 'myhtmxapp.com',
+    baseImage: 'golang:1.24-alpine',
   },
   {
     name: 'Go',
@@ -105,6 +116,7 @@ const frameworks: Framework[] = [
     port: 8080,
     healthCheck: '/health',
     domain: 'mygoapp.com',
+    baseImage: 'golang:1.24-alpine',
   },
   {
     name: 'Phoenix',
@@ -113,11 +125,12 @@ const frameworks: Framework[] = [
     port: 4000,
     healthCheck: '/',
     domain: 'myphoenixapp.com',
+    baseImage: 'elixir:1.18-alpine',
   },
 ];
 
 const INTERVAL_MS = 3000;
-const ITEM_HEIGHT = 40;
+const ITEM_HEIGHT = 48;
 
 function ArrowRight() {
   return (
@@ -212,7 +225,7 @@ export function DeployFlow() {
 
           {/* Desktop layout */}
           <div
-            className="hidden items-center justify-center gap-6 lg:flex"
+            className="hidden items-center justify-center gap-6 xl:flex"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => {
               setPaused(false);
@@ -221,14 +234,17 @@ export function DeployFlow() {
           >
             <FrameworkSelector activeIndex={activeIndex} progressKey={progressKey} paused={paused} />
             <ArrowRight />
-            <ConfigCard fw={fw} />
+            <div className="flex flex-col gap-3">
+              <DockerCard fw={fw} />
+              <ConfigCard fw={fw} />
+            </div>
             <ArrowRight />
             <LiveUrl fw={fw} />
           </div>
 
           {/* Mobile layout */}
           <div
-            className="flex flex-col items-center gap-4 lg:hidden"
+            className="flex flex-col items-center gap-4 xl:hidden"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => {
               setPaused(false);
@@ -237,7 +253,10 @@ export function DeployFlow() {
           >
             <FrameworkSelector activeIndex={activeIndex} progressKey={progressKey} paused={paused} />
             <ArrowDown />
-            <ConfigCard fw={fw} />
+            <div className="flex flex-col gap-3">
+              <DockerCard fw={fw} />
+              <ConfigCard fw={fw} />
+            </div>
             <ArrowDown />
             <LiveUrl fw={fw} />
           </div>
@@ -266,7 +285,7 @@ function FrameworkSelector({
   paused: boolean;
 }) {
   return (
-    <div className="w-full max-w-[280px] shrink-0 lg:basis-[280px]">
+    <div className="w-[340px] xl:w-[280px] shrink-0">
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
         <div className="relative overflow-hidden" style={{ height: ITEM_HEIGHT }}>
           <div
@@ -305,7 +324,7 @@ function FrameworkSelector({
 
 function ConfigCard({ fw }: { fw: Framework }) {
   return (
-    <div className="w-full max-w-[340px] shrink-0">
+    <div className="w-[340px] shrink-0">
       <div
         style={{
           borderRadius: 12,
@@ -443,11 +462,112 @@ function Static({ children }: { children: React.ReactNode }) {
   return <span style={{ color: '#c9d1d9' }}>{children}</span>;
 }
 
+function DockerCard({ fw }: { fw: Framework }) {
+  return (
+    <div className="w-[340px] shrink-0">
+      <div
+        style={{
+          borderRadius: 12,
+          overflow: 'hidden',
+          background: '#0d0d0d',
+          boxShadow:
+            '0 0 0 1px rgba(255,255,255,0.05), 0 25px 50px -12px rgba(0,0,0,0.6), 0 12px 24px -8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.03)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: 38,
+            padding: '0 14px',
+            background: 'linear-gradient(180deg, #2a2a2a 0%, #1f1f1f 100%)',
+            borderBottom: '1px solid rgba(0,0,0,0.5)',
+            userSelect: 'none',
+          }}
+        >
+          <div style={{ display: 'flex', gap: 8, width: 54 }}>
+            <span
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                background: 'linear-gradient(180deg, #ff6058 0%, #e5453e 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
+              }}
+            />
+            <span
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                background: 'linear-gradient(180deg, #ffbd2e 0%, #dea123 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
+              }}
+            />
+            <span
+              style={{
+                width: 12,
+                height: 12,
+                borderRadius: '50%',
+                background: 'linear-gradient(180deg, #28c940 0%, #1aab2f 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.25), 0 1px 2px rgba(0,0,0,0.2)',
+              }}
+            />
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              color: 'rgba(255,255,255,0.5)',
+              fontFamily: "'SF Mono','Menlo','Monaco','Consolas',monospace",
+              fontSize: 12,
+              fontWeight: 500,
+              letterSpacing: '0.01em',
+            }}
+          >
+            <DockerLogo className="size-3.5" />
+            <span>Dockerfile</span>
+          </div>
+          <div style={{ width: 54 }} />
+        </div>
+
+        <pre
+          style={{
+            margin: 0,
+            padding: '12px 20px',
+            fontFamily: "'SF Mono','Menlo','Monaco','Consolas',monospace",
+            fontSize: 13,
+            lineHeight: 1.7,
+            background: '#0d0d0d',
+            overflow: 'hidden',
+          }}
+        >
+          <code>
+            <span style={{ color: '#7ee787' }}>FROM</span>
+            <span style={{ color: '#c9d1d9' }}> </span>
+            <span
+              key={`docker-from-${fw.baseImage}`}
+              className="deploy-flow-fade-in inline-block"
+              style={{ color: '#a5d6ff' }}
+            >
+              {fw.baseImage}
+            </span>
+            {'\n'}
+            <span style={{ color: '#c9d1d9', opacity: 0.35 }}>...</span>
+          </code>
+        </pre>
+      </div>
+    </div>
+  );
+}
+
 function LiveUrl({ fw }: { fw: Framework }) {
   return (
-    <div className="w-full max-w-[280px] shrink-0 lg:basis-[280px]">
+    <div className="w-[340px] xl:w-[280px] shrink-0">
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
-        <div className="flex items-center gap-2.5 px-4 py-3">
+        <div className="flex items-center gap-2.5 px-5 py-3.5">
           <WebIcon className="size-3.5 shrink-0 text-emerald-500" />
           <span key={fw.domain} className="deploy-flow-fade-in text-foreground truncate font-mono text-sm">
             https://{fw.domain}
