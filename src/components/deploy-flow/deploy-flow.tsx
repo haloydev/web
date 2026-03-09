@@ -216,7 +216,7 @@ export function DeployFlow() {
           {/* Header */}
           <div className="mb-16 text-center">
             <h2 className="font-figtree text-foreground mb-4 text-3xl leading-tight font-extrabold tracking-tight lg:text-4xl">
-              Same workflow for every framework
+              All you need is a Dockerfile and a config
             </h2>
             <p className="text-muted-foreground mx-auto max-w-xl text-lg leading-relaxed">
               The deploy process is the same regardless of your stack. Dockerize, write a config, run deploy, go live.
@@ -285,7 +285,7 @@ function FrameworkSelector({
   paused: boolean;
 }) {
   return (
-    <div className="w-[340px] xl:w-[280px] shrink-0">
+    <div className="w-[340px] shrink-0 xl:w-[280px]">
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
         <div className="relative overflow-hidden" style={{ height: ITEM_HEIGHT }}>
           <div
@@ -565,7 +565,7 @@ function DockerCard({ fw }: { fw: Framework }) {
 
 function LiveUrl({ fw }: { fw: Framework }) {
   return (
-    <div className="w-[340px] xl:w-[280px] shrink-0">
+    <div className="w-[340px] shrink-0 xl:w-[280px]">
       <div className="overflow-hidden rounded-2xl border border-black/[0.06] bg-white/60 backdrop-blur-sm dark:border-white/[0.06] dark:bg-white/[0.03]">
         <div className="flex items-center gap-2.5 px-5 py-3.5">
           <WebIcon className="size-3.5 shrink-0 text-emerald-500" />
