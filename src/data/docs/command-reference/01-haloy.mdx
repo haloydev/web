@@ -56,6 +56,42 @@ Deploy your application to configured servers.
 - `--server, -s <url>` - Override server URL from config
 </div>
 
+### prune-images
+
+Show or apply a prune plan for old deployment image tags on the server.
+
+This command is target-aware and uses the target's resolved app name and server from your haloy config. By default it performs a dry run. Use `--yes` to actually remove tags.
+
+<Code code={`
+  # Dry run using the target's configured history keep count
+  haloy prune-images --targets staging
+
+  # Dry run with an explicit keep count
+  haloy prune-images --targets staging --keep 2
+
+  # Apply the prune plan
+  haloy prune-images --targets staging --yes
+
+  # Apply a more aggressive prune for all targets
+  haloy prune-images --all --keep 1 --yes
+`} lang="bash" />
+
+**Options:**
+
+<div class="list-unstyled">
+- `--config, -c <path>` - Path to config file or directory (default: current directory)
+- `--targets, -t <name>` - Prune images for specific target(s) (comma-separated for multiple)
+- `--all, -a` - Prune images for all targets
+- `--keep <n>` - Number of deployment images to keep locally (defaults to the target's `image.history` policy)
+- `--yes` - Apply the prune plan instead of running a dry run
+</div>
+
+**Behavior:**
+
+- Dry runs show the running deployment IDs and the image tags that would be removed.
+- Applied runs remove only old deployment tags for the app, while avoiding the currently running image.
+- This is useful when a deploy cannot proceed because the server is low on disk space before normal post-deploy cleanup runs.
+
 ### status
 
 Check the status of your deployed applications.
