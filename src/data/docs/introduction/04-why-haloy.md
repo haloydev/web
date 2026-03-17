@@ -72,3 +72,5 @@ It is a focused deployment engine for teams that want reliable, automation-frien
 I'm Andreas Meistad, the person building Haloy.
 
 I care a lot about self-hosting, owning the infrastructure you depend on, and building software people actually use. Most of my interest in deployment tooling comes from wanting something practical: fewer moving parts, less platform overhead, and a setup that stays understandable after the first deploy.
+
+If you want to say hello you can reach me at [hi@haloy.dev](mailto:hi@haloy.dev)
