@@ -66,3 +66,9 @@ Haloy is probably not the right choice if you want:
 Haloy is not trying to replace every PaaS pattern.
 
 It is a focused deployment engine for teams that want reliable, automation-friendly Docker deploys on infrastructure they control.
+
+## About Me
+
+I'm Andreas Meistad, the person building Haloy.
+
+I care a lot about self-hosting, owning the infrastructure you depend on, and building software people actually use. Most of my interest in deployment tooling comes from wanting something practical: fewer moving parts, less platform overhead, and a setup that stays understandable after the first deploy.
