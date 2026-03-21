@@ -1,0 +1,161 @@
+---
+title: "Overlay Networks: When You Need Them and When You Don't"
+slug: 'overlay-networks-when-you-need-them'
+description: "Overlay networks solve a real problem: private cross-machine communication. But many apps don't need that layer. A practical look through Kamal, Haloy, Uncloud, and Kubernetes."
+pubDate: 2026-03-21
+author: 'Andreas Meistad'
+tags: ['networking', 'deployment', 'kubernetes', 'docker', 'devops']
+draft: false
+---
+
+Overlay networks make an appealing promise. Stretch a private network across multiple machines, give services stable names, and stop caring so much about which box a container landed on.
+
+That can be genuinely useful. It can also be one more layer between you and a simple deploy.
+
+The real question is whether your app actually needs private service-to-service networking across machines.
+
+If it does, tools like [Uncloud](https://uncloud.run/) and, more broadly, [Kubernetes](https://kubernetes.io/docs/concepts/cluster-administration/networking/) are built around that idea. If it does not, tools like [Kamal](https://kamal-deploy.org/docs/installation/) and Haloy are often a better fit because they do not add that layer in the first place.
+
+## What an overlay network is really buying you
+
+[Docker's overlay network docs](https://docs.docker.com/engine/network/drivers/overlay/) describe it pretty plainly: an overlay network sits on top of the host networks and lets containers on different machines talk as if they were on the same private network.
+
+That buys you a few important things:
+
+- Private east-west traffic across machines without exposing every service on public ports
+- Service discovery that survives rescheduling, because clients talk to a service name or virtual address rather than a specific host
+- A cleaner multi-host app model, where your app behaves more like one system and less like a pile of host-specific exceptions
+- More scheduling freedom, because containers can move between machines without every downstream consumer needing to be reconfigured
+
+Those are real benefits. If your app genuinely behaves like a distributed system, an overlay can simplify the application model a lot.
+
+## The tooling split is really a networking philosophy split
+
+Part of why deployment tools feel so different is that they are not just making different UX choices. They are making different networking choices.
+
+| Tool           | Networking model                                                                     | Overlay network             | Best fit                                                                          |
+| -------------- | ------------------------------------------------------------------------------------ | --------------------------- | --------------------------------------------------------------------------------- |
+| **Kamal**      | Host-centric deploys with `kamal-proxy` on each server                               | No                          | Explicit servers, external load balancer, simple web apps                         |
+| **Haloy**      | Per-server Docker networking with built-in reverse proxy and target-based deploys    | No cross-machine overlay    | Simple Docker deploys to one or more servers without cluster networking           |
+| **Uncloud**    | Cluster-style networking with WireGuard, service discovery, and cluster-wide ingress | Yes                         | Multi-host Docker/Compose apps that need private service-to-service communication |
+| **Kubernetes** | Cluster networking model via CNI, Services, and Ingress                              | Sometimes, depending on CNI | Larger distributed systems that need a full orchestration platform                |
+
+That is the decision in a nutshell.
+
+With Kamal or Haloy, you are mostly saying: I want to deploy containers to known servers and route traffic at the edge.
+
+With Uncloud or Kubernetes, you are saying: I want multiple machines to behave more like one application environment.
+
+It is also worth being precise about the term itself. "Overlay network" is a category, not one specific implementation. [Docker's own overlay driver](https://docs.docker.com/engine/network/drivers/overlay/) is VXLAN-based, [Uncloud](https://uncloud.run/) builds its cluster network on WireGuard, and Kubernetes does not prescribe one implementation because that depends on the CNI. A lot of blanket opinions about overlays skip over that part.
+
+## Why Kamal and Haloy don't need overlays
+
+Kamal keeps the model very straightforward. Its [installation docs](https://kamal-deploy.org/docs/installation/) show the flow clearly: connect to servers over SSH, build and push an image to a registry, pull it on the servers, and let `kamal-proxy` switch traffic to the new container. If you run multiple servers, the Kamal docs explicitly tell you to put a load balancer in front of them.
+
+That is the design, not a missing feature.
+
+Kamal does not try to make three servers feel like one private cluster. It treats them as three servers. That keeps the mental model simple. You know where workloads run, how traffic gets in, and what is doing the routing.
+
+Haloy lands in a similar place, even though the implementation is different. It uses a [built-in daemon and reverse proxy](/docs/architecture), and its docs describe application containers as being attached to a Docker network on each server. It supports [multi-server deployments through explicit targets](/docs/multi-server-deployments), but it is not trying to flatten those machines into one shared service network.
+
+For a lot of apps, that is enough. A web app, API, worker, cron process, and a couple of backing services usually do not need a virtual private fabric spanning multiple boxes. Traffic comes in through a domain, the reverse proxy forwards it locally, and anything stateful is often a managed service anyway. In that setup, an overlay solves very little.
+
+## Why Uncloud is interesting
+
+Uncloud is interesting because it is unusually clear about the problem it is trying to solve.
+
+It is not just "Docker deploys, but a bit nicer." The whole point is to give Docker workloads a real multi-machine network model without dragging you all the way into Kubernetes.
+
+From the [official overview](https://uncloud.run/docs/) and docs, a few things stand out:
+
+- It builds a WireGuard mesh between machines. The [machine add CLI docs](https://uncloud.run/docs/cli-reference/uc_machine_add/) expose WireGuard endpoint configuration, and the [overview](https://uncloud.run/) describes a secure cross-machine private network.
+- It gives you built-in service discovery. The [publishing services docs](https://uncloud.run/docs/concepts/ingress/publishing-services/) say services can talk to each other using DNS names like `service-name` or `service-name.internal` without publishing ports.
+- It uses Compose as the deployment interface. The [deploy app guide](https://uncloud.run/docs/guides/deployments/deploy-app/) is centered on deploying from a Compose file instead of switching into Kubernetes manifests.
+- It spreads replicas across machines by default. The [deploy to specific machines guide](https://uncloud.run/docs/guides/deployments/deploy-specific-machines/) says Uncloud evenly spreads replicated services across machines unless you pin them with `x-machines`.
+- It treats ingress as part of the cluster. The [Caddy docs](https://uncloud.run/docs/concepts/ingress/managing-caddy/) describe Caddy as a global service that typically runs on every machine.
+- It keeps the image workflow Docker-native. The [`uc image push` docs](https://uncloud.run/docs/cli-reference/uc_image_push/) describe uploading local images while transferring only missing layers.
+
+That is a strong package if your real problem is private communication across multiple Docker hosts.
+
+If what you want is "keep Compose, but let services on different machines talk to each other by name without me hand-rolling VPNs, routing, and placement," Uncloud is very clearly aimed at that.
+
+It also helps explain why Uncloud feels different from Kubernetes. On its homepage and docs, Uncloud emphasizes that it does not have a traditional control plane or quorum to manage. The bet is that you can get a lot of what people actually want from cluster networking without taking on the whole Kubernetes operating model.
+
+## Kubernetes is the bigger version of this idea
+
+Kubernetes is the larger, more general version of the same idea.
+
+The Kubernetes networking docs define a cluster networking model for pods, services, and external traffic, and they hand the actual implementation to the network plugin layer through CNI. That part matters, because it means **Kubernetes does not always imply an overlay network**. Some CNIs use overlays, some use routed or cloud-native network models, and some do a mix depending on the environment.
+
+From an operator's point of view, Kubernetes still gives you a cluster-wide network abstraction. Pods get cluster IPs. Services provide stable virtual endpoints. Ingress or Gateway resources sit on top. Network policy plugs into that same model. Even when the CNI is not technically an overlay, you are still operating inside a more abstract cluster network.
+
+That abstraction is powerful, and it is also where a meaningful share of Kubernetes complexity lives.
+
+## When you probably do need an overlay network
+
+You likely benefit from an overlay, or at least from a cluster-style private network, if your setup looks like this:
+
+- Multiple internal services talk across machines all the time, and you do not want to expose each one through host ports and manual firewall rules
+- Containers need to move between hosts without clients caring where they landed
+- You are building a real multi-host application platform, not just deploying a couple of apps to a couple of servers
+- Your machines live across awkward network boundaries, such as different clouds, offices, home labs, or NAT-heavy environments, and you want one private fabric across them
+- You want service discovery by name to be a first-class primitive
+- You expect to keep adding services, and a hand-managed host networking model is starting to get brittle
+
+This is where Uncloud starts to make a lot of sense. The shared private network is the point.
+
+It is also where Kubernetes earns its keep, especially once you also need autoscaling, richer scheduling, network policies, or the broader cloud-native ecosystem.
+
+## When you probably don't
+
+Most smaller apps are nowhere near that line.
+
+You probably do not need an overlay network if your situation looks more like this:
+
+- A single server, or a primary server plus a worker box
+- A monolith or near-monolith, even if it has a web process, worker process, and database
+- A small SaaS app behind a reverse proxy, where nearly all traffic enters from the edge and only a small amount of internal traffic exists
+- Managed infrastructure for the stateful pieces, such as hosted Postgres, Redis, object storage, or a queue
+- Multiple regions or environments that are logically separate, where "multi-server" really means separate deploy targets, not one shared cluster
+- A team that values explicitness and debuggability over mobility and indirection
+
+In those cases, an overlay often solves a problem you do not really have. What you actually need is:
+
+- reliable deploys
+- HTTPS
+- health checks
+- rollbacks
+- maybe a load balancer in front of a few app servers
+
+That is why Kamal and Haloy make sense for a lot of projects.
+
+## The cost is not just performance. It is also cognitive load.
+
+When people argue about overlays, the conversation usually goes straight to performance. That matters, but for many teams the bigger cost is operational complexity.
+
+An overlay network is another layer to debug when traffic breaks. Maybe it is MTU. Maybe it is peer connectivity. Maybe it is service discovery. Maybe it is the tunnel itself. Maybe it is the interaction between the tunnel and the host firewall. In Kubernetes, that same story expands into CNI behavior, kube-proxy or eBPF replacements, service routing, policies, and ingress layers.
+
+None of that is inherently bad. It is just additional machinery.
+
+Part of Uncloud's appeal is that it packages that machinery into something much smaller and more Docker-native than Kubernetes. But the machinery is still there, because the problem is still there.
+
+Kamal and Haloy avoid a lot of that because they sidestep the problem entirely.
+
+## My take
+
+My bias is still that most teams should start without overlay networks, and many never need them at all.
+
+Most teams need boring deploys, a clear mental model, and infrastructure that does not become its own product. In that world, the fact that Kamal and Haloy do **not** build a cross-machine private network is a strength.
+
+But there is a limit to that argument.
+
+If your application really does want containers on different machines to behave like they are on one private network, avoiding overlays can turn into fake simplicity. You are not removing the problem. You are just rebuilding pieces of it yourself with ad hoc VPNs, manually exposed ports, host-based routing exceptions, and fragile service discovery.
+
+That is the point where a tool like Uncloud becomes very interesting, and the point where Kubernetes starts to make sense for larger systems.
+
+So the practical answer is pretty simple:
+
+- If you mostly need to **deploy apps to servers**, start without an overlay.
+- If you need to **run a distributed application across machines as one private system**, use a tool that embraces that model on purpose.
+
+That sounds obvious, but it rules out a surprising amount of unnecessary infrastructure.

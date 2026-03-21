@@ -1,0 +1,213 @@
+---
+title: 'GitHub Actions'
+slug: 'github-actions'
+section: guides
+description: 'Deploy automatically on every push using GitHub Actions. Set up push-to-deploy with the official Haloy deploy action.'
+---
+
+import Code from '@/components/code.astro';
+
+Deploy your application automatically on every push using the official `haloy/deploy-action` GitHub Action. The action installs the Haloy CLI, authenticates with your server, and runs `haloy deploy` in your CI pipeline.
+
+## Quick Start
+
+Add this workflow file to your repository:
+
+<Code code={`
+  # .github/workflows/deploy.yml
+  name: Deploy
+  on:
+    push:
+      branches: [main]
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: haloy/deploy-action@v1
+          with:
+            api-token: \${{ secrets.HALOY_API_TOKEN }}
+`} lang="yaml" />
+
+That's it. Every push to `main` will build and deploy your application.
+
+## Setup
+
+### 1. Get Your API Token
+
+On your server, run:
+
+<Code code={`sudo haloyd config get api-token`} lang="bash" />
+
+### 2. Add the Token to GitHub
+
+1. Go to your repository on GitHub
+2. Navigate to **Settings > Secrets and variables > Actions**
+3. Click **New repository secret**
+4. Name: `HALOY_API_TOKEN`
+5. Value: paste your API token
+
+### 3. Add the Workflow File
+
+Create `.github/workflows/deploy.yml` in your repository with the workflow shown above, then push to `main`.
+
+## Action Inputs
+
+| Input | Required | Default | Description |
+|-------|----------|---------|-------------|
+| `api-token` | Yes | | Haloy API token for server authentication |
+| `target` | No | | Deployment target name (for multi-target configs) |
+| `config` | No | `./haloy.yaml` | Path to config file |
+| `version` | No | `latest` | Haloy CLI version to install |
+
+## Examples
+
+### Deploy a Specific Target
+
+<Code code={`
+  - uses: haloy/deploy-action@v1
+    with:
+      api-token: \${{ secrets.HALOY_API_TOKEN }}
+      target: production
+`} lang="yaml" />
+
+### Custom Config Path
+
+<Code code={`
+  - uses: haloy/deploy-action@v1
+    with:
+      api-token: \${{ secrets.HALOY_API_TOKEN }}
+      config: ./deploy/haloy.yaml
+`} lang="yaml" />
+
+### Pin CLI Version
+
+<Code code={`
+  - uses: haloy/deploy-action@v1
+    with:
+      api-token: \${{ secrets.HALOY_API_TOKEN }}
+      version: v0.1.0
+`} lang="yaml" />
+
+### Deploy Staging and Production
+
+<Code code={`
+  name: Deploy
+  on:
+    push:
+      branches: [main, staging]
+
+  jobs:
+    deploy-staging:
+      if: github.ref == 'refs/heads/staging'
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: haloy/deploy-action@v1
+          with:
+            api-token: \${{ secrets.HALOY_API_TOKEN }}
+            target: staging
+
+    deploy-production:
+      if: github.ref == 'refs/heads/main'
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: haloy/deploy-action@v1
+          with:
+            api-token: \${{ secrets.HALOY_API_TOKEN }}
+            target: production
+`} lang="yaml" />
+
+### Deploy with Manual Approval
+
+<Code code={`
+  name: Deploy Production
+  on:
+    push:
+      branches: [main]
+
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      environment: production
+      steps:
+        - uses: actions/checkout@v4
+        - uses: haloy/deploy-action@v1
+          with:
+            api-token: \${{ secrets.HALOY_API_TOKEN }}
+`} lang="yaml" />
+
+To require approval, configure a [deployment protection rule](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-protection-rules) on the `production` environment in your repository settings.
+
+### Run Tests Before Deploying
+
+<Code code={`
+  name: Test and Deploy
+  on:
+    push:
+      branches: [main]
+
+  jobs:
+    test:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - run: npm ci
+        - run: npm test
+
+    deploy:
+      needs: test
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+        - uses: haloy/deploy-action@v1
+          with:
+            api-token: \${{ secrets.HALOY_API_TOKEN }}
+`} lang="yaml" />
+
+## How It Works
+
+The GitHub Action:
+
+1. Detects the runner OS and architecture
+2. Downloads the Haloy CLI binary from GitHub releases
+3. Sets the `HALOY_API_TOKEN` environment variable
+4. Runs `haloy deploy --no-logs` with any additional flags you specify
+
+The Docker image is built on the GitHub Actions runner and uploaded to your server via the Haloy API, using the same mechanism as `haloy deploy` from your local machine.
+
+## Security
+
+- The API token is stored as a GitHub Actions secret and never exposed in logs
+- Authentication uses the existing bearer token mechanism on the server
+- No additional server-side configuration is required
+
+## Without the Action
+
+You can also use the Haloy CLI directly in any CI environment:
+
+<Code code={`
+  jobs:
+    deploy:
+      runs-on: ubuntu-latest
+      env:
+        HALOY_API_TOKEN: \${{ secrets.HALOY_API_TOKEN }}
+      steps:
+        - uses: actions/checkout@v4
+        - name: Install Haloy
+          run: |
+            curl -fsSL -o /usr/local/bin/haloy \\
+              https://github.com/haloydev/haloy/releases/latest/download/haloy-linux-amd64
+            chmod +x /usr/local/bin/haloy
+        - run: haloy deploy --no-logs
+`} lang="yaml" />
+
+This approach works with any CI provider, not just GitHub Actions.
+
+## Next Steps
+
+- [Server Authentication](/docs/server-authentication) for token management details
+- [Multi-Server Deployments](/docs/multi-server-deployments) for deploying to multiple servers
+- [Deployment Strategies](/docs/deployment-strategies) for zero-downtime deployments

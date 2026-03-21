@@ -15,6 +15,7 @@ Haloy checks for API tokens in this order:
 
 1. **App config**: `api_token` field in your `haloy.yaml`
 2. **Client config**: Tokens stored via `haloy server add`
+3. **Environment variable**: `HALOY_API_TOKEN` environment variable (useful for [CI/CD](/docs/github-actions))
 
 ## Managing Multiple Servers
 
