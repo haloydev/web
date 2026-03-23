@@ -7,7 +7,7 @@ description: 'Deploy automatically on every push using GitHub Actions. Set up pu
 
 import Code from '@/components/code.astro';
 
-Deploy your application automatically on every push using the official `haloy/deploy-action` GitHub Action. The action installs the Haloy CLI, authenticates with your server, and runs `haloy deploy` in your CI pipeline.
+The official [`haloydev/deploy-action`](https://github.com/haloydev/deploy-action) GitHub Action handles installing the Haloy CLI and running `haloy deploy` in your CI pipeline. Push to `main`, and your app deploys.
 
 ## Quick Start
 
@@ -25,7 +25,7 @@ Add this workflow file to your repository:
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        - uses: haloy/deploy-action@v1
+        - uses: haloydev/deploy-action@v1
           with:
             api-token: \${{ secrets.HALOY_API_TOKEN }}
 `} lang="yaml" />
@@ -66,7 +66,7 @@ Create `.github/workflows/deploy.yml` in your repository with the workflow shown
 ### Deploy a Specific Target
 
 <Code code={`
-  - uses: haloy/deploy-action@v1
+  - uses: haloydev/deploy-action@v1
     with:
       api-token: \${{ secrets.HALOY_API_TOKEN }}
       target: production
@@ -75,7 +75,7 @@ Create `.github/workflows/deploy.yml` in your repository with the workflow shown
 ### Custom Config Path
 
 <Code code={`
-  - uses: haloy/deploy-action@v1
+  - uses: haloydev/deploy-action@v1
     with:
       api-token: \${{ secrets.HALOY_API_TOKEN }}
       config: ./deploy/haloy.yaml
@@ -84,7 +84,7 @@ Create `.github/workflows/deploy.yml` in your repository with the workflow shown
 ### Pin CLI Version
 
 <Code code={`
-  - uses: haloy/deploy-action@v1
+  - uses: haloydev/deploy-action@v1
     with:
       api-token: \${{ secrets.HALOY_API_TOKEN }}
       version: v0.1.0
@@ -104,7 +104,7 @@ Create `.github/workflows/deploy.yml` in your repository with the workflow shown
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        - uses: haloy/deploy-action@v1
+        - uses: haloydev/deploy-action@v1
           with:
             api-token: \${{ secrets.HALOY_API_TOKEN }}
             target: staging
@@ -114,7 +114,7 @@ Create `.github/workflows/deploy.yml` in your repository with the workflow shown
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        - uses: haloy/deploy-action@v1
+        - uses: haloydev/deploy-action@v1
           with:
             api-token: \${{ secrets.HALOY_API_TOKEN }}
             target: production
@@ -134,7 +134,7 @@ Create `.github/workflows/deploy.yml` in your repository with the workflow shown
       environment: production
       steps:
         - uses: actions/checkout@v4
-        - uses: haloy/deploy-action@v1
+        - uses: haloydev/deploy-action@v1
           with:
             api-token: \${{ secrets.HALOY_API_TOKEN }}
 `} lang="yaml" />
@@ -162,31 +162,22 @@ To require approval, configure a [deployment protection rule](https://docs.githu
       runs-on: ubuntu-latest
       steps:
         - uses: actions/checkout@v4
-        - uses: haloy/deploy-action@v1
+        - uses: haloydev/deploy-action@v1
           with:
             api-token: \${{ secrets.HALOY_API_TOKEN }}
 `} lang="yaml" />
 
 ## How It Works
 
-The GitHub Action:
-
-1. Detects the runner OS and architecture
-2. Downloads the Haloy CLI binary from GitHub releases
-3. Sets the `HALOY_API_TOKEN` environment variable
-4. Runs `haloy deploy --no-logs` with any additional flags you specify
-
-The Docker image is built on the GitHub Actions runner and uploaded to your server via the Haloy API, using the same mechanism as `haloy deploy` from your local machine.
+The action downloads the Haloy CLI for the runner's platform, sets `HALOY_API_TOKEN`, and runs `haloy deploy --no-logs` with any flags you specify. The Docker image is built on the GitHub Actions runner and uploaded to your server via the Haloy API, the same way `haloy deploy` works from your local machine.
 
 ## Security
 
-- The API token is stored as a GitHub Actions secret and never exposed in logs
-- Authentication uses the existing bearer token mechanism on the server
-- No additional server-side configuration is required
+Your API token is stored as a GitHub Actions secret and never exposed in logs. It authenticates using the same bearer token mechanism as the CLI, so no additional server-side configuration is needed.
 
 ## Without the Action
 
-You can also use the Haloy CLI directly in any CI environment:
+If you'd rather skip the action, you can install the CLI directly:
 
 <Code code={`
   jobs:
@@ -204,7 +195,7 @@ You can also use the Haloy CLI directly in any CI environment:
         - run: haloy deploy --no-logs
 `} lang="yaml" />
 
-This approach works with any CI provider, not just GitHub Actions.
+This works with any CI provider, not just GitHub Actions.
 
 ## Next Steps
 
