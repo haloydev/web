@@ -90,7 +90,8 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
 
 ## Architecture Diagram
 
-<Code code={`
+<Code
+  code={`
 ┌─────────────────────┐
 │  Developer Machine  │
 │                     │
@@ -131,7 +132,8 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
 
 ### Incoming Requests
 
-<Code code={`
+<Code
+  code={`
    Internet
    │
    ├─ HTTP (port 80)
@@ -158,13 +160,13 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
        │
        └─► Upload to server or push to registry
            │
-           └─► API call to haloyd
-               │
-               ├─► haloyd pulls/loads image
-               ├─► haloyd starts new containers
-               ├─► haloyd waits for health checks
-               ├─► haloyd updates proxy routes
-               └─► haloyd stops old containers`}
+               └─► API call to haloyd
+                   │
+                   ├─► haloyd pulls/loads image
+                   ├─► haloyd starts new containers
+                   ├─► haloyd waits for health checks/readiness window
+                   ├─► haloyd updates proxy routes
+                   └─► haloyd stops old containers`}
   lang="text"
 />
 
@@ -183,7 +185,8 @@ The standard approach is to use `haloy deploy` which handles labeling automatica
 
 You can start containers manually (using `docker run`, Docker Compose, or other orchestration tools) and `haloyd` will automatically discover and route traffic to them:
 
-<Code code={`
+<Code
+  code={`
   # Start a container with Haloy labels
   docker run -d \\
     --name my-app \\
@@ -196,10 +199,12 @@ You can start containers manually (using `docker run`, Docker Compose, or other 
     --label dev.haloy.port=8080 \\
     --label dev.haloy.health-check-path=/health \\
     my-image:latest
-`} lang="bash"
+`}
+  lang="bash"
 />
 
-<Code code={`
+<Code
+  code={`
   # Docker Compose example
   services:
     my-app:
@@ -217,7 +222,8 @@ You can start containers manually (using `docker run`, Docker Compose, or other 
   networks:
     haloy:
       external: true
-`} lang="yaml"
+`}
+  lang="yaml"
 />
 
 **Required labels**:
@@ -258,12 +264,12 @@ Haloy creates and uses Docker networks:
     - 80:80   (HTTP)
     - 443:443 (HTTPS)
 
-  Application Containers:
+Application Containers:
 
-  - No direct port exposure
-  - Internal network only
-  - haloyd routes traffic
-`} lang="text" />
+- No direct port exposure
+- Internal network only
+- haloyd routes traffic
+  `} lang="text" />
 
 ## Data Storage
 
@@ -272,9 +278,9 @@ Haloy creates and uses Docker networks:
   ├── haloyd.yaml          # Daemon configuration
   └── .env                 # API tokens
 
-  /var/lib/haloy/
-  ├── certs/               # SSL certificates
-  └── db/                  # Deployment database
+/var/lib/haloy/
+├── certs/ # SSL certificates
+└── db/ # Deployment database
 `} lang="text" />
 
 ## SSL/TLS Certificates
@@ -302,26 +308,30 @@ Haloy includes a unified health checking system with configurable monitoring:
 
 **Flow**:
 
-<Code code={`
+<Code
+  code={`
   haloyd → Health Check → App Container (/health endpoint)
      │                              │
      │                              ├─ 200 OK → Healthy
      │                              └─ Other → Unhealthy
      │
      └─ Routes traffic only to healthy containers
-`} lang="text"
+`}
+  lang="text"
 />
 
 **Configuration** (in `haloyd.yaml`):
 
-<Code code={`
+<Code
+  code={`
 health_monitor:
   enabled: true
   interval: "15s"  # Check every 15 seconds
   fall: 3          # Mark unhealthy after 3 consecutive failures
   rise: 2          # Mark healthy after 2 consecutive successes
   timeout: "5s"    # Per-check timeout
-`} lang="yaml"
+`}
+  lang="yaml"
 />
 
 **Key Features**:
@@ -329,6 +339,8 @@ health_monitor:
 - **Fall/Rise thresholds**: Prevents flapping by requiring consecutive failures/successes
 - **Concurrent checks**: Health checks run in parallel with configurable concurrency
 - **Automatic route updates**: Unhealthy backends are excluded from routing while routes remain active
+
+During deployments, `min_ready_seconds` can add an extra stabilization window after a container first becomes healthy before Haloy considers it ready for cutover.
 
 **Actions on Failure**:
 
@@ -351,31 +363,35 @@ Haloy achieves HA through:
 
 ### Rolling Deployment
 
-<Code code={`
+<Code
+  code={`
   Old containers: [1] [2] [3]
                    │   │   │
   Step 1:          │   │   │  New [1] starts
-  Step 2:          │   │   │  New [1] healthy → Old [1] stops
+  Step 2:          │   │   │  New [1] healthy + ready → Old [1] stops
   Step 3:          │   │   │  New [2] starts
-  Step 4:          │   │   │  New [2] healthy → Old [2] stops
+  Step 4:          │   │   │  New [2] healthy + ready → Old [2] stops
   Step 5:          │   │   │  New [3] starts
-  Step 6:          │   │   │  New [3] healthy → Old [3] stops
+  Step 6:          │   │   │  New [3] healthy + ready → Old [3] stops
                    ▼   ▼   ▼
   New containers: [1] [2] [3]
-`} lang="text"
+`}
+  lang="text"
 />
 
 ### Replace Deployment
 
-<Code code={`
+<Code
+  code={`
   Old containers: [1] [2] [3]
                    │   │   │
   Step 1:          Stop all old containers
   Step 2:          Start all new containers
-  Step 3:          Wait for health checks
+  Step 3:          Wait for health checks/readiness
                    ▼   ▼   ▼
   New containers: [1] [2] [3]
-`} lang="text"
+`}
+  lang="text"
 />
 
 ## Security
@@ -446,6 +462,7 @@ Haloy achieves HA through:
 5. **Linux only**: Server must be Linux-based
 
 ## Next Steps
+
 - [Install Haloy](/docs/quickstart)
 - [Haloy CLI Commands Reference](/docs/haloy)
 - [Understand Authentication](/docs/server-authentication)

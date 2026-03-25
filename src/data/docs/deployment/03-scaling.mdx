@@ -27,6 +27,7 @@ Haloy automatically:
 - Starts the specified number of containers
 - Configures load balancing in the built-in reverse proxy
 - Distributes traffic across all healthy instances
+- Waits for any configured readiness stabilization window before routing to new replicas
 - Monitors health checks
 
 ## Load Balancing
@@ -143,14 +144,35 @@ replicas: 5
 
 Health checks are critical for scaling:
 
-<Code code={`name: "my-app"
-replicas: 5
-health_check_path: "/health"
-port: "8080"
+<Code code={`
+  name: "my-app"
+  replicas: 5
+  health_check_path: "/health"
+  min_ready_seconds: 10
+  port: "8080"
 
 # haloyd only routes to healthy containers
 
-# Unhealthy containers are automatically excluded`} lang="yaml" />
+# Unhealthy containers are automatically excluded
+
+`} lang="yaml" />
+
+### Stabilizing New Replicas
+
+If new replicas sometimes pass health checks and then crash shortly afterward, add `min_ready_seconds`:
+
+<Code
+  code={`
+  name: "my-app"
+  replicas: 5
+  deployment_strategy: "rolling"
+  health_check_path: "/health"
+  min_ready_seconds: 10
+`}
+  lang="yaml"
+/>
+
+Haloy only adds a new replica to rotation after it is healthy and has remained up for the configured stabilization window. This is useful for catching late database failures, startup race conditions, or short crash loops during rolling deploys.
 
 ### Health Check Best Practices
 
@@ -205,6 +227,7 @@ Check status of all replicas:
 haloy status
 
 # View logs from all replicas
+
 haloy logs --all-containers`} lang="bash" />
 
 ## Geographic Scaling
@@ -295,9 +318,10 @@ haloy stop --remove-containers`} lang="bash" />
 3. **Use odd numbers**: 3, 5, 7 for better consensus/distribution
 4. **Design for stateless**: Enables unlimited horizontal scaling
 5. **Implement health checks**: Critical for load balancing
-6. **Monitor all replicas**: Ensure even load distribution
-7. **Plan resources**: Ensure server can handle all replicas
-8. **Use rolling deployments**: Maintain availability during updates
+6. **Use `min_ready_seconds` for unstable startups**: Prevents a replica from entering rotation too early
+7. **Monitor all replicas**: Ensure even load distribution
+8. **Plan resources**: Ensure server can handle all replicas
+9. **Use rolling deployments**: Maintain availability during updates
 
 ## Troubleshooting
 

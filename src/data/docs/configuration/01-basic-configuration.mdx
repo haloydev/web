@@ -13,14 +13,17 @@ Learn how to create a basic Haloy configuration file to deploy your application.
 
 The simplest `haloy.yaml` configuration:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   domains:
     - domain: "my-app.com"
       aliases:
         - "www.my-app.com"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 This configuration:
 
@@ -35,7 +38,9 @@ This configuration:
 Haloy supports YAML, JSON, and TOML for configuration files.
 
 ### YAML (`*.yml` or `*.yaml`)
-<Code code={`
+
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   domains:
@@ -43,10 +48,15 @@ Haloy supports YAML, JSON, and TOML for configuration files.
       aliases:
         - "www.my-app.com"
   health_check_path: "/health"
-`} lang="yaml" />
+  min_ready_seconds: 10
+`}
+  lang="yaml"
+/>
 
 ### JSON (`*.json`)
-<Code code={`
+
+<Code
+  code={`
   {
     "name": "my-app",
     "server": "haloy.yourserver.com",
@@ -56,9 +66,12 @@ Haloy supports YAML, JSON, and TOML for configuration files.
         "aliases": ["www.my-app.com"]
       }
     ],
-    "health_check_path": "/health"
+    "healthCheckPath": "/health",
+    "minReadySeconds": 10
   }
-`} lang="json" />
+`}
+  lang="json"
+/>
 
 ### TOML (`*.toml`)
 
@@ -66,31 +79,36 @@ Haloy supports YAML, JSON, and TOML for configuration files.
   name = "my-app"
   server = "haloy.yourserver.com"
   health_check_path = "/health"
+  min_ready_seconds = 10
 
-  [[domains]]
-  domain = "my-app.com"
-  aliases = ["www.my-app.com"]
+[[domains]]
+domain = "my-app.com"
+aliases = ["www.my-app.com"]
 `} lang="toml" />
 
 **Naming Convention:**
 
 - YAML/TOML: Use `snake_case` (e.g., `health_check_path`)
-- JSON: Use `camelCase` (e.g., `healthCheckPath`)
+- JSON: Use `camelCase` (e.g., `healthCheckPath`, `minReadySeconds`)
 
 ## Adding a Domain
 
 To make your app accessible via a domain:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   domains:
     - domain: "my-app.com"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 ## Multiple Domains and Aliases
 
-<Code code={`
+<Code
+  code={`
   domains:
     - domain: "my-app.com"
       aliases:
@@ -105,7 +123,8 @@ To make your app accessible via a domain:
 
 If your application listens on a port other than 8080:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   port: "3000"  # Your app's internal port
@@ -119,13 +138,36 @@ The proxy will route traffic from ports 80/443 to this container port.
 
 Configure a custom health check endpoint:
 
-<Code code={`
+<Code
+  code={`
   name: "my-app"
   server: haloy.yourserver.com
   health_check_path: "/api/health"
-`} lang="yaml" />
+`}
+  lang="yaml"
+/>
 
 Default: `"/"`
+
+## Readiness Stabilization
+
+If your app can pass its initial health checks and then fail a few seconds later, add `min_ready_seconds` to require a short stabilization window before Haloy marks the container ready:
+
+<Code
+  code={`
+  name: "my-app"
+  server: haloy.yourserver.com
+  health_check_path: "/api/health"
+  min_ready_seconds: 10
+`}
+  lang="yaml"
+/>
+
+Haloy waits until the container is healthy and has been running for at least the configured number of seconds.
+
+- Default: `0` (disabled)
+- Valid range: `0` to `600`
+- JSON field name: `minReadySeconds`
 
 ## Configuration File Location
 
