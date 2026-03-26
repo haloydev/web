@@ -25,6 +25,8 @@ For multi-line code, start on the second line and indent each line with two spac
 
 Without the two-space indentation, multi-line code blocks will not render correctly.
 
+Do not run Prettier on `.mdx` files in this repo unless the user explicitly asks for it. Prettier can rewrite `<Code>` component blocks and break rendering by changing the required indentation and formatting. Edit `.mdx` files manually instead.
+
 ## Haloy Config Examples
 
 When writing `haloy.yaml` examples in blog posts or docs, always cross-reference `/src/data/docs/configuration/02-configuration-reference.mdx` to verify field names and structure. Key points:

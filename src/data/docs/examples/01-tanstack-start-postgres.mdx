@@ -66,7 +66,7 @@ Install TanStack Start and React:
 
 Install dev dependencies:
 
-<Code code="pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node vite-tsconfig-paths" lang="bash" />
+<Code code="pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node" lang="bash" />
 
 Install Drizzle and PostgreSQL:
 
@@ -100,18 +100,19 @@ Update your `package.json` with the required configuration and scripts:
 Create `vite.config.ts`:
 
 <Code code={`
-  import { defineConfig } from "vite";
-  import { nitro } from "nitro/vite";
-  import tsConfigPaths from "vite-tsconfig-paths";
   import { tanstackStart } from "@tanstack/react-start/plugin/vite";
   import viteReact from "@vitejs/plugin-react";
+  import { nitro } from "nitro/vite";
+  import { defineConfig } from "vite";
 
   export default defineConfig({
     server: {
       port: 3000,
     },
+    resolve: {
+      tsconfigPaths: true,
+    },
     plugins: [
-      tsConfigPaths(),
       tanstackStart(),
       nitro(),
       // react's vite plugin must come after start's vite plugin
@@ -134,11 +135,13 @@ Create `drizzle.config.ts`:
 <Code code={`
   import { config } from "dotenv";
   import { defineConfig } from "drizzle-kit";
-  import { getDatabaseUrl } from "./src/db/database-url";
 
   config();
 
-  const databaseUrl = getDatabaseUrl();
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not set");
+  }
 
   export default defineConfig({
     out: "./drizzle",
@@ -157,9 +160,11 @@ Create `src/db/index.ts`:
 <Code code={`
   import "dotenv/config";
   import { drizzle } from "drizzle-orm/node-postgres";
-  import { getDatabaseUrl } from "./database-url";
 
-  const databaseUrl = getDatabaseUrl();
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error("DATABASE_URL is not set");
+  }
 
   const db = drizzle(databaseUrl);
   export { db };
@@ -179,53 +184,18 @@ Create `src/db/schema.ts`:
   });
 `} lang="typescript" />
 
-### 4. Database Connection Helper
+### 4. Create Environment File
 
-Create `src/db/database-url.ts` to handle connection string construction:
-
-<Code code={`
-  export function getDatabaseUrl() {
-    const postgresUser = process.env.POSTGRES_USER;
-    if (!postgresUser) {
-      throw new Error("POSTGRES_USER environment variable not found");
-    }
-
-    const postgresPassword = process.env.POSTGRES_PASSWORD;
-    if (!postgresPassword) {
-      throw new Error("POSTGRES_PASSWORD environment variable not found");
-    }
-
-    const postgresDb = process.env.POSTGRES_DB;
-    if (!postgresDb) {
-      throw new Error("POSTGRES_DB environment variable not found");
-    }
-
-    // In production, we use the service name 'postgres' as the host
-    // In development, we connect to localhost
-    const host = process.env.NODE_ENV === "production" ? "postgres" : "localhost";
-
-    return \`postgres://\${postgresUser}:\${postgresPassword}@\${host}:5432/\${postgresDb}\`;
-}
-`} lang="typescript" />
-
-This helper constructs the database connection string from environment variables and automatically switches between `localhost` (development) and `postgres` (production hostname) based on `NODE_ENV`.
-
-
-
-### 5. Create Environment File
-
-Create `.env` for local development. Make sure you have a local PostgreSQL instance running or use Docker Compose.
+Create `.env` for local development. This guide expects PostgreSQL to be available on `localhost:5432`. If you use different credentials, a different port, or a different host, adjust the connection string accordingly.
 
 <Code
   code={`
-  POSTGRES_USER=postgres
-  POSTGRES_PASSWORD=postgres
-  POSTGRES_DB=todo_app
+  DATABASE_URL=postgres://postgres:postgres@localhost:5432/todo_app
 `}
   lang="bash"
 />
 
-### 6. Set Up Local Database (Optional)
+### 5. Set Up Local Database (Optional)
 
 For local testing, you can use Docker to run PostgreSQL without installing it:
 
@@ -242,7 +212,7 @@ For local testing, you can use Docker to run PostgreSQL without installing it:
 This command:
 
 - Creates a PostgreSQL container named `postgres-dev`
-- Sets up credentials matching your `.env` file
+- Sets up credentials and a database matching your `DATABASE_URL`
 - Exposes port 5432 to your local machine
 - Runs in the background
 
@@ -513,8 +483,8 @@ For PostgreSQL, we need to deploy two services: the database and the application
         - domain: my-app.example.com
       port: 3000
       env:
-        - name: NODE_ENV
-          value: production
+        - name: DATABASE_URL
+          value: "postgres://\${POSTGRES_USER}:\${POSTGRES_PASSWORD}@postgres:5432/\${POSTGRES_DB}"
 `} lang="yaml" />
 
 **Important:** Replace `your-server.haloy.dev` with the actual server domain you configured during the [Quickstart setup](/docs/quickstart). This should match the server where you installed the Haloy daemon.
@@ -526,6 +496,8 @@ Also update:
 
 ### Configuration Explained
 
+The top-level `POSTGRES_*` variables are shared across both targets so the database container configuration and the application's connection string stay in sync.
+
 We define two **targets**:
 
 1.  `postgres`:
@@ -536,8 +508,8 @@ We define two **targets**:
 
 2.  `tanstack-start-postgres`:
     - Your application code.
-    - Connects to the database using the environment variables.
-    - `NODE_ENV=production` ensures `src/db/database-url.ts` uses the `postgres` hostname.
+    - Connects to the database using `DATABASE_URL`.
+    - `DATABASE_URL` is composed with Haloy env interpolation and uses `postgres` as the internal hostname for the database target.
 
 ### Persistent Storage
 

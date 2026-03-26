@@ -66,7 +66,7 @@ Install TanStack Start and React:
 
 Install dev dependencies
 <Code code={`
-  pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node vite-tsconfig-paths
+  pnpm add -D vite @vitejs/plugin-react typescript @types/react @types/react-dom @types/node
 `} lang="bash" />
 
 
@@ -101,7 +101,6 @@ Create `vite.config.ts`:
 <Code code={`
   import { defineConfig } from "vite";
   import { nitro } from "nitro/vite";
-  import tsConfigPaths from "vite-tsconfig-paths";
   import { tanstackStart } from "@tanstack/react-start/plugin/vite";
   import viteReact from "@vitejs/plugin-react";
 
@@ -109,8 +108,10 @@ Create `vite.config.ts`:
     server: {
       port: 3000,
     },
+    resolve: {
+      tsconfigPaths: true,
+    },
     plugins: [
-      tsConfigPaths(),
       tanstackStart(),
       nitro(),
       // react's vite plugin must come after start's vite plugin
