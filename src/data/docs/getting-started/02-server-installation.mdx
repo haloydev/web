@@ -382,6 +382,43 @@ After changing settings, you may need to:
 - Flush your local DNS cache: `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder` (macOS)
 - Wait a few minutes for DNS changes to propagate
 
+### Certificate Issuance Fails (Domain Resolves to Loopback)
+
+If haloyd can't obtain a TLS certificate and logs show your API domain resolving to `127.0.1.1` or another loopback address, your `/etc/hosts` file is likely the culprit.
+
+**Cause:** Debian and Ubuntu cloud-init images often add a line like this to `/etc/hosts`:
+
+<Code code="127.0.1.1 myserver.example.com myserver" lang="text" />
+
+When `myserver.example.com` is also your Haloy API domain, haloyd resolves it to `127.0.1.1` instead of the server's public IP. haloyd uses the system resolver, which reads `/etc/hosts` before querying DNS.
+
+Note that `dig` won't show this, since it queries DNS servers directly and skips `/etc/hosts`. Use `getent` instead to see what the system resolver returns:
+
+<Code code="getent ahostsv4 myserver.example.com" lang="bash" />
+
+If the output shows `127.0.1.1` instead of your server's public IP, `/etc/hosts` is overriding DNS.
+
+**Fix:** Edit `/etc/hosts` so only the short hostname maps to `127.0.1.1`, not the FQDN:
+
+<Code lang="bash" code={`
+  # Before (problematic)
+  127.0.1.1 myserver.example.com myserver
+
+  # After (fixed)
+  127.0.1.1 myserver
+`} />
+
+To prevent cloud-init from restoring the old entry on reboot, make the same change in the template:
+
+<Code lang="bash" code={`
+  sudo nano /etc/cloud/templates/hosts.debian.tmpl
+  # Remove the FQDN from the 127.0.1.1 line
+`} />
+
+Then restart haloyd:
+
+<Code code="sudo systemctl restart haloyd" lang="bash" />
+
 ## Uninstalling
 
 To completely remove Haloy from your server:
