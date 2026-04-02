@@ -18,28 +18,24 @@ The configuration file supports **two modes** of operation:
 
 ### Single Deployment Example
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   server: "haloy.yourserver.com"
   image: "my-app:latest"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ### Multi-Target Example
 
 <Code code={`
   # Base settings inherited by all targets
   image: "my-app:latest"
-
-targets:
-prod:
-server: "prod.server.com"
-replicas: 2
-staging:
-server: "staging.server.com"
-replicas: 1
+  targets:
+    prod:
+      server: "prod.server.com"
+      replicas: 2
+    staging:
+      server: "staging.server.com"
+      replicas: 1
 `} lang="yaml" />
 
 ## Global Configuration
@@ -87,14 +83,11 @@ These options define a deployment unit.
 
 Use `min_ready_seconds` to require a container to stay healthy for a minimum period after it first passes health checks. This helps catch containers that start successfully and then crash a few seconds later.
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   health_check_path: "/health"
   min_ready_seconds: 10
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 - Default: `0` (disabled)
 - Valid range: `0` to `600`
@@ -109,17 +102,18 @@ Like other target settings, `min_ready_seconds` can be defined at the root and o
 
 <Code code={`
   min_ready_seconds: 5
-
-targets:
-web:
-server: "prod.haloy.com"
-image: "nginx:latest"
-domains: - domain: "app.example.com"
-api:
-server: "api.haloy.com"
-image: "node:20"
-min_ready_seconds: 15
-domains: - domain: "api.example.com"
+  targets:
+    web:
+      server: "prod.haloy.com"
+      image: "nginx:latest"
+      domains:
+        - domain: "app.example.com"
+    api:
+      server: "api.haloy.com"
+      image: "node:20"
+      min_ready_seconds: 15
+      domains:
+        - domain: "api.example.com"
 `} lang="yaml" />
 
 ## Configuration File Discovery
@@ -136,10 +130,8 @@ Haloy automatically searches for configuration files in the current directory in
 <Code code={`
   # Specific file
   haloy deploy --config /path/to/config.yaml
-
-# Directory (will search for config files inside)
-
-haloy deploy --config /path/to/directory
+  # Directory (will search for config files inside)
+  haloy deploy --config /path/to/directory
 `} lang="bash" />
 
 Most Haloy commands require a configuration file. See [Basic Configuration](/docs/basic-configuration) to get started.
@@ -157,16 +149,13 @@ Use `preset: "database"` for stateful database services. This automatically appl
 - `protected: true` (prevents accidental deployment)
 - `image.history.strategy: "none"` (no rollback history)
 
-<Code
-  code={`
+<Code code={`
   postgres:
     preset: database
     image: "postgres:18"
     volumes:
       - /data/postgres:/var/lib/postgresql/data
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 For practical multi-database and backup examples, see [Databases](/docs/databases).
 
@@ -178,27 +167,21 @@ Use `preset: "service"` for stateful services that share similar requirements to
 - `naming_strategy: "static"`
 - `image.history.strategy: "none"`
 
-<Code
-  code={`
+<Code code={`
   redis:
     preset: service
     image: "henrygd/beszel:latest"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Protected Targets
 
 Prevent accidental deployment of critical services (like databases) by marking them as protected.
 
-<Code
-  code={`
+<Code code={`
   targets:
     postgres:
       protected: true
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 - Skipped by default when using `haloy deploy --all`
 - Deploy explicitly: `haloy deploy -t postgres`
@@ -211,29 +194,23 @@ Prevent accidental deployment of critical services (like databases) by marking t
 
 **Example (multi-target):**
 
-<Code
-  code={`
+<Code code={`
   targets:
     production:   # Container: production-abc123
       server: prod.server.com
     staging:      # Container: staging-abc123
       server: staging.server.com
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 **Constraints for Static Naming:**
 
 - Requires `deployment_strategy: "replace"`
 - Does not support multiple replicas
 
-<Code
-  code={`
+<Code code={`
   naming_strategy: static
   deployment_strategy: replace
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Naming Strategy
 
@@ -249,14 +226,11 @@ Control how container names are generated.
 - Requires `deployment_strategy: "replace"`
 - Does not support multiple replicas
 
-<Code
-  code={`
+<Code code={`
   name: postgres
   naming_strategy: static
   deployment_strategy: replace
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Deployment Strategies
 
@@ -269,22 +243,17 @@ Gradually replaces old containers with new ones, ensuring zero downtime:
   name: "my-app"
   deployment_strategy: "rolling"
   replicas: 3
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ### Replace Deployment
 
 Stops all old containers before starting new ones:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   deployment_strategy: "replace"
   replicas: 3
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Deployment Hooks
 
@@ -297,8 +266,7 @@ Stops all old containers before starting new ones:
 
 Run custom commands before or after deployment:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   pre_deploy:
     - "npm run migrate"
@@ -306,14 +274,11 @@ Run custom commands before or after deployment:
   post_deploy:
     - "curl -X POST https://status.example.com/notify"
     - "echo 'Deployment complete'"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 For multi-target deployments, use global hooks:
 
-<Code
-  code={`
+<Code code={`
   global_pre_deploy:
     - "npm run build"
     - "docker build -t my-app ."
@@ -328,9 +293,7 @@ For multi-target deployments, use global hooks:
       server: staging.haloy.com
       pre_deploy:
         - "npm run test:staging"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Multi-Target Overrides
 
@@ -367,8 +330,7 @@ When using multi-target deployments, each target can override base configuration
 
 ### Example
 
-<Code
-  code={`
+<Code code={`
   # Base configuration - inherited by all targets
   image:
     repository: "ghcr.io/my-org/my-app"
@@ -399,21 +361,16 @@ When using multi-target deployments, each target can override base configuration
         - name: "LOG_LEVEL"
           value: "debug"
         # FEATURE_FLAG is inherited from base
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 ## Custom Docker Network
 
 By default, containers are attached to the `haloy` network. You can override this:
 
-<Code
-  code={`
+<Code code={`
   name: "my-app"
   network: "my-custom-network"
-`}
-  lang="yaml"
-/>
+`} lang="yaml" />
 
 **Important**: If you override the default network (`haloy`), the Haloy proxy will not be able to discover your containers. This means:
 
@@ -428,14 +385,11 @@ Only change the network if you have a specific networking requirement and unders
 
 Validate your configuration file:
 
-<Code
-  code={`
+<Code code={`
   haloy validate-config
   haloy validate-config --config path/to/config.yaml
   haloy validate-config --show-resolved-config  # Display with secrets (use with caution)
-`}
-  lang="bash"
-/>
+`} lang="bash" />
 
 ## Next Steps
 
