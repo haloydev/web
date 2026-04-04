@@ -179,20 +179,13 @@ Both strategies rely on health checks, and can optionally add a stabilization wi
   min_ready_seconds: 10
   port: "8080"
 
-# Your app should respond with 200 OK when healthy
-
-# Example health endpoint response:
-
-# {
-
-# "status": "healthy",
-
-# "uptime": 42,
-
-# "database": "connected"
-
-# }
-
+  # Your app should respond with 200 OK when healthy
+  # Example health endpoint response:
+  # {
+  #   "status": "healthy",
+  #   "uptime": 42,
+  #   "database": "connected"
+  # }
 `} lang="yaml" />
 
 ### Readiness Stabilization
@@ -226,24 +219,25 @@ Your application should:
 
 **Node.js/Express:**
 
-<Code code={`app.get('/health', async (req, res) => {
-  try {
-    // Check database connection
-    await db.ping();
+<Code code={`
+  app.get('/health', async (req, res) => {
+    try {
+      // Check database connection
+      await db.ping();
 
-    // Check other dependencies
-    const cacheConnected = await cache.isConnected();
+      // Check other dependencies
+      const cacheConnected = await cache.isConnected();
 
-    if (cacheConnected) {
-      res.status(200).json({ status: 'healthy' });
-    } else {
-      res.status(503).json({ status: 'unhealthy', reason: 'cache unavailable' });
+      if (cacheConnected) {
+        res.status(200).json({ status: 'healthy' });
+      } else {
+        res.status(503).json({ status: 'unhealthy', reason: 'cache unavailable' });
+      }
+    } catch (error) {
+      res.status(503).json({ status: 'unhealthy', reason: error.message });
     }
-
-} catch (error) {
-res.status(503).json({ status: 'unhealthy', reason: error.message });
-}
-});`} lang="javascript" />
+  });
+`} lang="javascript" />
 
 **Go:**
 
@@ -273,19 +267,16 @@ Monitor your deployment:
 
 <Code code={`
   # Deploy with logs
-   haloy deploy
+  haloy deploy
 
-# Deploy without logs (faster)
+  # Deploy without logs (faster)
+  haloy deploy --no-logs
 
-haloy deploy --no-logs
+  # Check status after deployment
+  haloy status
 
-# Check status after deployment
-
-haloy status
-
-# View application logs
-
-haloy logs
+  # View application logs
+  haloy logs
 `} lang="bash" />
 
 ## Troubleshooting

@@ -24,19 +24,21 @@ Deploy your application to multiple servers with a single configuration file. Pe
     repository: "ghcr.io/your-username/my-app"
     tag: "latest"
 
-targets:
-production:
-server: production.haloy.com
-image:
-tag: "v1.2.3" # Override with stable release
-domains: - domain: "my-app.com"
-replicas: 3
-staging:
-server: staging.haloy.com
-image:
-tag: "main" # Use latest main branch
-domains: - domain: "staging.my-app.com"
-replicas: 1
+  targets:
+    production:
+      server: production.haloy.com
+      image:
+        tag: "v1.2.3" # Override with stable release
+      domains:
+        - domain: "my-app.com"
+      replicas: 3
+    staging:
+      server: staging.haloy.com
+      image:
+        tag: "main" # Use latest main branch
+      domains:
+        - domain: "staging.my-app.com"
+      replicas: 1
 `} lang="yaml" />
 
 ## Deploying to Targets
@@ -113,16 +115,18 @@ Base configuration provides defaults that targets can override:
 <Code code={`
   min_ready_seconds: 5
 
-targets:
-production:
-server: "prod.haloy.com"
-image: "ghcr.io/my-org/my-app:v1.2.3"
-domains: - domain: "my-app.com"
-staging:
-server: "staging.haloy.com"
-image: "ghcr.io/my-org/my-app:main"
-min_ready_seconds: 15
-domains: - domain: "staging.my-app.com"
+  targets:
+    production:
+      server: "prod.haloy.com"
+      image: "ghcr.io/my-org/my-app:v1.2.3"
+      domains:
+        - domain: "my-app.com"
+    staging:
+      server: "staging.haloy.com"
+      image: "ghcr.io/my-org/my-app:main"
+      min_ready_seconds: 15
+      domains:
+        - domain: "staging.my-app.com"
 `} lang="yaml" />
 
 `production` inherits the 5-second stabilization window. `staging` overrides it to 15 seconds.
@@ -141,46 +145,64 @@ Complete setup for production, staging, and development:
   replicas: 1
   port: "8080"
 
-# Global hooks run once before/after all deployments
+  # Global hooks run once before/after all deployments
+  global_pre_deploy:
+    - "echo 'Starting deployment pipeline'"
+    - "npm run build"
+  global_post_deploy:
+    - "echo 'All deployments completed'"
+    - "curl -X POST https://status.io/webhook"
 
-global_pre_deploy: - "echo 'Starting deployment pipeline'" - "npm run build"
-global_post_deploy: - "echo 'All deployments completed'" - "curl -X POST https://status.io/webhook"
-targets:
-production:
-server: prod.haloy.com
-image:
-tag: "v1.2.3"
-domains: - domain: "my-app.com"
-aliases: - "www.my-app.com"
-replicas: 3
-env: - name: "NODE_ENV"
-value: "production" - name: "DATABASE_URL"
-from:
-secret: "onepassword:prod-db.url"
-pre_deploy: - "npm run migrate:production"
-post_deploy: - "echo 'Production deployed'"
-staging:
-server: staging.haloy.com
-image:
-tag: "main"
-domains: - domain: "staging.my-app.com"
-replicas: 2
-env: - name: "NODE_ENV"
-value: "staging" - name: "DATABASE_URL"
-from:
-env: "STAGING_DATABASE_URL"
-pre_deploy: - "npm run migrate:staging"
-development:
-server: dev.haloy.com
-image:
-tag: "develop"
-domains: - domain: "dev.my-app.com"
-replicas: 1
-env: - name: "NODE_ENV"
-value: "development" - name: "DEBUG"
-value: "true" - name: "DATABASE_URL"
-from:
-env: "DEV_DATABASE_URL"
+  targets:
+    production:
+      server: prod.haloy.com
+      image:
+        tag: "v1.2.3"
+      domains:
+        - domain: "my-app.com"
+          aliases:
+            - "www.my-app.com"
+      replicas: 3
+      env:
+        - name: "NODE_ENV"
+          value: "production"
+        - name: "DATABASE_URL"
+          from:
+            secret: "onepassword:prod-db.url"
+      pre_deploy:
+        - "npm run migrate:production"
+      post_deploy:
+        - "echo 'Production deployed'"
+    staging:
+      server: staging.haloy.com
+      image:
+        tag: "main"
+      domains:
+        - domain: "staging.my-app.com"
+      replicas: 2
+      env:
+        - name: "NODE_ENV"
+          value: "staging"
+        - name: "DATABASE_URL"
+          from:
+            env: "STAGING_DATABASE_URL"
+      pre_deploy:
+        - "npm run migrate:staging"
+    development:
+      server: dev.haloy.com
+      image:
+        tag: "develop"
+      domains:
+        - domain: "dev.my-app.com"
+      replicas: 1
+      env:
+        - name: "NODE_ENV"
+          value: "development"
+        - name: "DEBUG"
+          value: "true"
+        - name: "DATABASE_URL"
+          from:
+            env: "DEV_DATABASE_URL"
 `} lang="yaml" />
 
 ## Geographic Distribution
@@ -192,16 +214,18 @@ Deploy to multiple regions:
     repository: "ghcr.io/my-org/api"
     tag: "v2.0.0"
 
-targets:
-us-east:
-server: us-east.haloy.com
-domains: - domain: "us-api.my-app.com"
-replicas: 2
-env: - name: "REGION"
-value: "us-east-1" - name: "DATABASE_URL"
-from:
-secret: "onepassword:us-db.url"
-
+  targets:
+    us-east:
+      server: us-east.haloy.com
+      domains:
+        - domain: "us-api.my-app.com"
+      replicas: 2
+      env:
+        - name: "REGION"
+          value: "us-east-1"
+        - name: "DATABASE_URL"
+          from:
+            secret: "onepassword:us-db.url"
     eu-west:
       server: eu-west.haloy.com
       domains:
@@ -213,7 +237,6 @@ secret: "onepassword:us-db.url"
         - name: "DATABASE_URL"
           from:
             secret: "onepassword:eu-db.url"
-
     asia-pacific:
       server: ap-southeast.haloy.com
       domains:
@@ -225,7 +248,6 @@ secret: "onepassword:us-db.url"
         - name: "DATABASE_URL"
           from:
             secret: "onepassword:ap-db.url"
-
 `} lang="yaml" />
 
 ## Deployment Hooks
@@ -240,13 +262,15 @@ Run once before or after all target deployments:
     - "docker build -t my-app ."
     - "npm run test"
 
-global_post_deploy: - "npm run cleanup" - "echo 'All deployments complete'"
+  global_post_deploy:
+    - "npm run cleanup"
+    - "echo 'All deployments complete'"
 
-targets:
-production:
-server: prod.haloy.com
-staging:
-server: staging.haloy.com
+  targets:
+    production:
+      server: prod.haloy.com
+    staging:
+      server: staging.haloy.com
 `} lang="yaml" />
 
 ### Target-Specific Hooks
@@ -280,22 +304,18 @@ All commands support target selection:
   haloy status --target production
   haloy status -t staging
 
-# View logs from specific target
+  # View logs from specific target
+  haloy logs --target production
 
-haloy logs --target production
+  # Stop specific target
+  haloy stop --target staging
 
-# Stop specific target
+  # Rollback specific target
+  haloy rollback --target production <deployment-id>
 
-haloy stop --target staging
-
-# Rollback specific target
-
-haloy rollback --target production <deployment-id>
-
-# Apply to all targets
-
-haloy status --all
-haloy stop --all
+  # Apply to all targets
+  haloy status --all
+  haloy stop --all
 `} lang="bash" />
 
 ## Managing Multiple Servers
@@ -306,21 +326,17 @@ Add all your servers to the local client:
   # Add production server
   haloy server add production.haloy.com <prod-token>
 
-# Add staging server
+  # Add staging server
+  haloy server add staging.haloy.com <staging-token>
 
-haloy server add staging.haloy.com <staging-token>
+  # Add development server
+  haloy server add dev.haloy.com <dev-token>
 
-# Add development server
+  # List all configured servers
+  haloy server list
 
-haloy server add dev.haloy.com <dev-token>
-
-# List all configured servers
-
-haloy server list
-
-# Remove a server
-
-haloy server delete staging.haloy.com
+  # Remove a server
+  haloy server delete staging.haloy.com
 `} lang="bash" />
 
 ## Build Once, Deploy Everywhere
@@ -335,16 +351,15 @@ When using the image builder, the image is built once and distributed to all tar
       context: "../"
       dockerfile: "Dockerfile-version2"
 
-# Build once before all deployments
+  # Build once before all deployments
+  global_pre_deploy:
+    - "npm run test"
 
-global_pre_deploy: - "npm run test"
-
-targets:
-production:
-server: prod.haloy.com
-
-staging:
-server: staging.haloy.com
+  targets:
+    production:
+      server: prod.haloy.com
+    staging:
+      server: staging.haloy.com
 `} lang="yaml" />
 
 ## Best Practices

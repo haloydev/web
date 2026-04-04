@@ -14,11 +14,13 @@ Scale your application horizontally by running multiple container instances behi
 Set the number of replicas in your configuration:
 
 <Code
-  code={`name: "my-scalable-app"
-image: "my-org/my-app:1.2.0"
-replicas: 3  # Run 3 instances
-domains:
-  - domain: "api.example.com"`}
+  code={`
+  name: "my-scalable-app"
+  image: "my-org/my-app:1.2.0"
+  replicas: 3  # Run 3 instances
+  domains:
+    - domain: "api.example.com"
+`}
   lang="yaml"
 />
 
@@ -51,55 +53,57 @@ All containers receive approximately equal traffic.
 
 Begin with fewer replicas and increase as needed:
 
-<Code code={`# Initial deployment
-name: "my-app"
-replicas: 1
+<Code code={`
+  # Initial deployment
+  name: "my-app"
+  replicas: 1
 
-# After load testing
+  # After load testing
+  replicas: 3
 
-replicas: 3
-
-# Under heavy load
-
-replicas: 10`} lang="yaml" />
+  # Under heavy load
+  replicas: 10
+`} lang="yaml" />
 
 ### Environment-Based Scaling
 
 Scale differently per environment:
 
-<Code code={`name: "my-app"
-replicas: 1  # Default
+<Code code={`
+  name: "my-app"
+  replicas: 1  # Default
 
-targets:
-production:
-server: prod.haloy.com
-replicas: 10 # High capacity
-domains: - domain: "my-app.com"
-
-staging:
-server: staging.haloy.com
-replicas: 2 # Moderate capacity
-domains: - domain: "staging.my-app.com"
-
-development:
-server: dev.haloy.com
-replicas: 1 # Minimal resources
-domains: - domain: "dev.my-app.com"`} lang="yaml" />
+  targets:
+    production:
+      server: prod.haloy.com
+      replicas: 10 # High capacity
+      domains:
+        - domain: "my-app.com"
+    staging:
+      server: staging.haloy.com
+      replicas: 2 # Moderate capacity
+      domains:
+        - domain: "staging.my-app.com"
+    development:
+      server: dev.haloy.com
+      replicas: 1 # Minimal resources
+      domains:
+        - domain: "dev.my-app.com"
+`} lang="yaml" />
 
 ## High Availability
 
 For mission-critical applications, run at least 3 replicas:
 
-<Code code={`name: "critical-app"
-replicas: 3  # Minimum for HA
-deployment_strategy: "rolling"  # Zero-downtime updates
-health_check_path: "/health"
-
-image: "my-org/critical-app:v2.0.0"
-
-domains:
-
-- domain: "critical-app.com"`} lang="yaml" />
+<Code code={`
+  name: "critical-app"
+  replicas: 3  # Minimum for HA
+  deployment_strategy: "rolling"  # Zero-downtime updates
+  health_check_path: "/health"
+  image: "my-org/critical-app:v2.0.0"
+  domains:
+    - domain: "critical-app.com"
+`} lang="yaml" />
 
 ### Why 3 Replicas?
 
@@ -119,26 +123,26 @@ Each replica consumes:
 
 ### Example Resource Planning
 
-<Code code={`# If each container uses:
-# - 512MB RAM
-# - 0.5 CPU cores
+<Code code={`
+  # If each container uses:
+  # - 512MB RAM
+  # - 0.5 CPU cores
 
-# For 5 replicas you need:
-
-# - 2.5GB RAM
-
-# - 2.5 CPU cores (plus overhead)`} lang="bash" />
+  # For 5 replicas you need:
+  # - 2.5GB RAM
+  # - 2.5 CPU cores (plus overhead)
+`} lang="bash" />
 
 Plan server resources accordingly:
 
-<Code code={`name: "resource-intensive-app"
-replicas: 5
+<Code code={`
+  name: "resource-intensive-app"
+  replicas: 5
 
-# Ensure your server has sufficient:
-
-# - At least 4GB RAM available
-
-# - At least 4 CPU cores available`} lang="yaml" />
+  # Ensure your server has sufficient:
+  # - At least 4GB RAM available
+  # - At least 4 CPU cores available
+`} lang="yaml" />
 
 ## Health Checks and Scaling
 
@@ -151,10 +155,8 @@ Health checks are critical for scaling:
   min_ready_seconds: 10
   port: "8080"
 
-# haloyd only routes to healthy containers
-
-# Unhealthy containers are automatically excluded
-
+  # haloyd only routes to healthy containers
+  # Unhealthy containers are automatically excluded
 `} lang="yaml" />
 
 ### Stabilizing New Replicas
@@ -187,77 +189,80 @@ Haloy only adds a new replica to rotation after it is healthy and has remained u
 
 Updates one replica at a time:
 
-<Code code={`name: "my-app"
-replicas: 5
-deployment_strategy: "rolling"
+<Code code={`
+  name: "my-app"
+  replicas: 5
+  deployment_strategy: "rolling"
 
-# Deployment process:
-
-# 1. Start new container 1, wait for health check
-
-# 2. Stop old container 1
-
-# 3. Repeat for containers 2-5
-
-#
-
-# Always have 4-5 containers serving traffic`} lang="yaml" />
+  # Deployment process:
+  # 1. Start new container 1, wait for health check
+  # 2. Stop old container 1
+  # 3. Repeat for containers 2-5
+  #
+  # Always have 4-5 containers serving traffic
+`} lang="yaml" />
 
 ### Replace Deployment
 
 Replaces all containers at once:
 
-<Code code={`name: "my-app"
-replicas: 5
-deployment_strategy: "replace"
+<Code code={`
+  name: "my-app"
+  replicas: 5
+  deployment_strategy: "replace"
 
-# Deployment process:
-
-# 1. Stop all old containers
-
-# 2. Start all new containers
-
-# 3. Brief service interruption`} lang="yaml" />
+  # Deployment process:
+  # 1. Stop all old containers
+  # 2. Start all new containers
+  # 3. Brief service interruption
+`} lang="yaml" />
 
 ## Monitoring Scaled Applications
 
 Check status of all replicas:
 
-<Code code={`# View all containers
-haloy status
+<Code code={`
+  # View all containers
+  haloy status
 
-# View logs from all replicas
-
-haloy logs --all-containers`} lang="bash" />
+  # View logs from all replicas
+  haloy logs --all-containers
+`} lang="bash" />
 
 ## Geographic Scaling
 
 Scale across multiple regions:
 
-<Code code={`name: "global-api"
-image: "my-org/api:v2.0.0"
+<Code code={`
+  name: "global-api"
+  image: "my-org/api:v2.0.0"
 
-targets:
-us-east:
-server: us-east.haloy.com
-replicas: 5
-domains: - domain: "us.api.example.com"
-env: - name: "REGION"
-value: "us-east-1"
-
-eu-west:
-server: eu-west.haloy.com
-replicas: 5
-domains: - domain: "eu.api.example.com"
-env: - name: "REGION"
-value: "eu-west-1"
-
-asia-pacific:
-server: ap-southeast.haloy.com
-replicas: 5
-domains: - domain: "ap.api.example.com"
-env: - name: "REGION"
-value: "ap-southeast-1"`} lang="yaml" />
+  targets:
+    us-east:
+      server: us-east.haloy.com
+      replicas: 5
+      domains:
+        - domain: "us.api.example.com"
+      env:
+        - name: "REGION"
+          value: "us-east-1"
+    eu-west:
+      server: eu-west.haloy.com
+      replicas: 5
+      domains:
+        - domain: "eu.api.example.com"
+      env:
+        - name: "REGION"
+          value: "eu-west-1"
+    asia-pacific:
+      server: ap-southeast.haloy.com
+      replicas: 5
+      domains:
+        - domain: "ap.api.example.com"
+      env:
+        - name: "REGION"
+          value: "ap-southeast-1"
+`} lang="yaml" />
 
 ## Stateless Applications
 
@@ -279,37 +284,32 @@ For best scaling results, design stateless applications:
 
 ### Example Stateless App
 
-<Code code={`name: "stateless-api"
-replicas: 10
-
-env:
-
-# External session store
-
-- name: "REDIS_URL"
-  value: "redis://redis-server:6379"
-
-# External file storage
-
-- name: "S3_BUCKET"
-  value: "my-app-uploads"
-
-# External cache
-
-- name: "MEMCACHED_SERVERS"
-  value: "memcached-1:11211,memcached-2:11211"
-
-# No volumes needed - fully stateless`} lang="yaml" />
+<Code code={`
+  name: "stateless-api"
+  replicas: 10
+  env:
+    # External session store
+    - name: "REDIS_URL"
+      value: "redis://redis-server:6379"
+    # External file storage
+    - name: "S3_BUCKET"
+      value: "my-app-uploads"
+    # External cache
+    - name: "MEMCACHED_SERVERS"
+      value: "memcached-1:11211,memcached-2:11211"
+  # No volumes needed - fully stateless
+`} lang="yaml" />
 
 ## Stopping Scaled Applications
 
 Stop all replicas:
 
-<Code code={`haloy stop
+<Code code={`
+  haloy stop
 
-# Remove containers after stopping
-
-haloy stop --remove-containers`} lang="bash" />
+  # Remove containers after stopping
+  haloy stop --remove-containers
+`} lang="bash" />
 
 ## Best Practices
 
@@ -340,31 +340,29 @@ If some containers get more traffic:
 
 If deployment fails due to resources:
 
-<Code code={`# Reduce replica count
-replicas: 3  # Down from 10
+<Code code={`
+  # Reduce replica count
+  replicas: 3  # Down from 10
 
-# Or upgrade server resources
-
-# - Add more RAM
-
-# - Add more CPU cores`} lang="yaml" />
+  # Or upgrade server resources
+  # - Add more RAM
+  # - Add more CPU cores
+`} lang="yaml" />
 
 ### Container Crash Loops
 
 If containers keep restarting:
 
-<Code code={`# Check logs from all replicas
-haloy logs --all-containers
+<Code code={`
+  # Check logs from all replicas
+  haloy logs --all-containers
 
-# Common issues:
-
-# - Missing environment variables
-
-# - Database connection failures
-
-# - Port conflicts
-
-# - Resource limits (OOM)`} lang="bash" />
+  # Common issues:
+  # - Missing environment variables
+  # - Database connection failures
+  # - Port conflicts
+  # - Resource limits (OOM)
+`} lang="bash" />
 
 ## Next Steps
 

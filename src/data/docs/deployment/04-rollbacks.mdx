@@ -160,14 +160,12 @@ Disables rollback capability entirely.
 <Code code={`
   name: "web-app"
   server: "prod.haloy.com"
-
   image:
     repository: "my-org/web-app"
     tag: "latest"
     history:
       strategy: "local"
       count: 5 # Keep last 5 deployments
-
   replicas: 3
   deployment_strategy: "rolling"
   domains:
@@ -190,7 +188,6 @@ Disables rollback capability entirely.
   haloy rollback-targets
 
   # Shows: dep_v3_abc, dep_v2_xyz, dep_v1_def, ...
-
   # Rollback to v2
   haloy rollback dep_v2_xyz
 `} lang="bash" />
@@ -200,7 +197,6 @@ Disables rollback capability entirely.
 <Code code={`
   name: "api-service"
   server: "prod.haloy.com"
-
   image:
     repository: "ghcr.io/my-org/api-service"
     tag: "v2.5.1" # Use semantic versioning
@@ -215,7 +211,6 @@ Disables rollback capability entirely.
       strategy: "registry"
       count: 10 # Track 10 versions
       pattern: "v\*" # Match v1.0.0, v2.3.4, etc.
-
   domains:
     - domain: "api.example.com"
 `} lang="yaml" />
@@ -256,7 +251,6 @@ Roll back specific deployment targets independently:
       server: prod.haloy.com
       domains:
         - domain: "my-app.com"
-
     staging:
       server: staging.haloy.com
       domains:
@@ -320,27 +314,24 @@ Combine rollback capability with other safety measures:
 
 **Safe deployment workflow:**
 
-<Code code={`# 1. Deploy to staging
-haloy deploy --target staging
+<Code code={`
+  # 1. Deploy to staging
+  haloy deploy --target staging
 
-# 2. Test staging thoroughly
+  # 2. Test staging thoroughly
+  curl https://staging.safe-app.com/health
 
-curl https://staging.safe-app.com/health
+  # Run integration tests, manual testing, etc.
+  # 3. Deploy to production
+  haloy deploy --target production
 
-# Run integration tests, manual testing, etc.
+  # 4. Monitor production
+  haloy logs --target production
+  haloy status --target production
 
-# 3. Deploy to production
-
-haloy deploy --target production
-
-# 4. Monitor production
-
-haloy logs --target production
-haloy status --target production
-
-# 5. If issues arise, rollback immediately
-
-haloy rollback --target production dep_previous`} lang="bash" />
+  # 5. If issues arise, rollback immediately
+  haloy rollback --target production dep_previous
+`} lang="bash" />
 
 ## Troubleshooting
 
