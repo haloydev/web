@@ -50,6 +50,31 @@ These options are **only** available at the top level of the configuration file.
 | `global_pre_deploy`  | array  | Commands to run once before **any** deployment starts                                               |
 | `global_post_deploy` | array  | Commands to run once after **all** deployments finish                                               |
 
+### Secret Providers
+
+`secret_providers` defines reusable secret sources for `from.secret` references. Haloy currently supports `onepassword` and `sops`, and secret references use the `provider:source:key` format.
+
+<Code code={`
+  secret_providers:
+    onepassword:
+      production-db:
+        vault: "Production"
+        item: "Database Credentials"
+    sops:
+      production:
+        file: "./secrets.production.yaml"
+
+  env:
+    - name: "DB_PASSWORD"
+      from:
+        secret: "onepassword:production-db:password"
+    - name: "API_SECRET"
+      from:
+        secret: "sops:production:api.secret"
+`} lang="yaml" />
+
+1Password sources support `account` (optional), `vault`, and `item`. SOPS sources support `file` and optional `format` (`yaml`, `json`, or `dotenv`). SOPS file paths are resolved relative to the Haloy config file.
+
 ## Target Configuration
 
 These options define a deployment unit.

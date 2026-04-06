@@ -30,7 +30,7 @@ Haloy consists of two main parts:
 - **Build locally or use registries**: Build Docker images on your machine and either upload them or push to registries.
 - **Rollbacks**: Roll back instantly using local images or registry tags.
 - **Horizontal scaling**: Define replicas to run multiple instances of your app.
-- **Secret management**: Integrates with environment variables and secret providers like 1Password.
+- **Secret management**: Integrates with environment variables and secret providers like 1Password and SOPS.
 - **Zero vendor lock‑in**: Everything runs on your own Linux servers using Docker.
 
 ## When to Use Haloy

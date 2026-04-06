@@ -172,10 +172,10 @@ Then set the environment variables:
     registry:
       username:
         from:
-          secret: "onepassword:registry-credentials.username"
+          secret: "onepassword:registry-credentials:username"
       password:
         from:
-          secret: "onepassword:registry-credentials.password"
+          secret: "onepassword:registry-credentials:password"
 
   secret_providers:
     onepassword:
@@ -350,7 +350,7 @@ Pass build-time variables:
         # From secret provider
         - name: "NPM_TOKEN"
           from:
-            secret: "onepassword:build-secrets.npm-token"
+            secret: "onepassword:build-secrets:npm-token"
 
         # Pass through from shell environment
         - name: "GITHUB_TOKEN"
@@ -528,10 +528,10 @@ Notes:
     registry:
       username:
         from:
-          secret: "onepassword:registry.username"
+          secret: "onepassword:registry:username"
       password:
         from:
-          secret: "onepassword:registry.token"
+          secret: "onepassword:registry:token"
     # Local build configuration
     build_config:
       context: "."
@@ -545,7 +545,7 @@ Notes:
           value: "v1.5.2"
         - name: "NPM_TOKEN"
           from:
-            secret: "onepassword:build.npm-token"
+            secret: "onepassword:build:npm-token"
 
     # Rollback configuration
     history:

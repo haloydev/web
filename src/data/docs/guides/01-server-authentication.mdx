@@ -120,14 +120,15 @@ You can also use [environment files](/docs/environment-variables#environment-fil
   server: "api.haloy.dev"
   api_token:
     from:
-      secret: "onepassword:api-tokens.production"
+      secret: "sops:deploy-tokens:HALOY_API_TOKEN"
 
   secret_providers:
-    onepassword:
-      api-tokens:
-        vault: "Infrastructure"
-        item: "Haloy API Tokens"
- image:
+    sops:
+      deploy-tokens:
+        file: "./deploy.tokens.env"
+        format: "dotenv"
+
+  image:
     repository: "my-app"
     tag: "latest"
 `} lang="yaml" />
@@ -238,7 +239,7 @@ Deploy to different environments:
       server: prod.haloy.com
       api_token:
         from:
-          secret: "onepassword:prod-tokens.haloy-api"
+          secret: "onepassword:prod-tokens:haloy-api"
       domains:
         - domain: "my-app.com"
 

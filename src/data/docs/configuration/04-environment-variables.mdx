@@ -55,28 +55,28 @@ Set these in your shell before deploying:
 
 ## From Secret Providers
 
-Use external secret management services like 1Password:
+Use external secret management services like 1Password and SOPS. Secret references use the `provider:source:key` format.
 
 <Code code={`
   name: "my-app"
   secret_providers:
     onepassword:
-      production-db:
-        vault: "Production"
-        item: "Database Credentials"
       api-keys:
         vault: "API Services"
         item: "Third-party APIs"
+    sops:
+      production:
+        file: "./secrets.production.yaml"
   env:
     - name: "DATABASE_PASSWORD"
       from:
-        secret: "onepassword:production-db.password"
+        secret: "sops:production:database.password"
     - name: "API_SECRET"
       from:
-        secret: "onepassword:api-keys.secret-key"
+        secret: "onepassword:api-keys:secret-key"
     - name: "STRIPE_KEY"
       from:
-        secret: "onepassword:api-keys.stripe-key"
+        secret: "onepassword:api-keys:stripe-key"
 `} lang="yaml" />
 
 See [Secret Providers](/docs/secret-providers) for more details.
@@ -164,7 +164,7 @@ Combine different methods in a single configuration:
     # From secret providers
     - name: "API_SECRET"
       from:
-        secret: "onepassword:api-keys.secret"
+        secret: "onepassword:api-keys:secret"
 `} lang="yaml" />
 
 ## Env Var Interpolation
@@ -175,7 +175,7 @@ Reference other env vars within `value:` strings using `${VAR_NAME}` syntax to c
   env:
     - name: "DB_PASSWORD"
       from:
-        secret: "onepassword:db-creds.password"
+        secret: "onepassword:db-creds:password"
     - name: "DATABASE_URL"
       value: "postgres://admin:\${DB_PASSWORD}@db:5432/myapp"
 `} lang="yaml" />
@@ -277,7 +277,7 @@ Merge environment variables per target:
           value: "warn"  # Overrides base LOG_LEVEL
         - name: "DATABASE_URL"
           from:
-            secret: "onepassword:prod-db.url"
+            secret: "onepassword:prod-db:url"
       # Result: NODE_ENV=production, LOG_LEVEL=warn, FEATURE_FLAG=false, DATABASE_URL=<from secret>
     staging:
       env:  # Merges with base env

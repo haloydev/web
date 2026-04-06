@@ -558,11 +558,16 @@ Copy the generated key and replace `your-production-secret-key-change-this` in y
 
 For production deployments, consider using Haloy's built-in [secret management](/docs/secret-providers) instead of hardcoding secrets in `haloy.yaml`. This is especially important for sensitive values like `DJANGO_SECRET_KEY` and `DJANGO_SUPERUSER_PASSWORD`.
 
-Haloy supports 1Password integration to securely manage credentials:
+Haloy supports secret providers like 1Password and SOPS to securely manage credentials. Here is a 1Password example:
 
 <Code code={`
   name: my-django-app
   server: your-server.haloy.dev
+  secret_providers:
+    onepassword:
+      django-app:
+        vault: "Private"
+        item: "django-app"
   domains:
     - domain: my-app.example.com
   port: 8000
@@ -570,9 +575,8 @@ Haloy supports 1Password integration to securely manage credentials:
     - name: DJANGO_DEBUG
       value: "False"
     - name: DJANGO_SECRET_KEY
-      secret:
-        provider: 1password
-        reference: "op://Private/django-app/secret_key"
+      from:
+        secret: "onepassword:django-app:secret_key"
     - name: DJANGO_ALLOWED_HOSTS
       value: "my-app.example.com,localhost,127.0.0.1"
     - name: DATABASE_PATH
@@ -582,18 +586,17 @@ Haloy supports 1Password integration to securely manage credentials:
     - name: DJANGO_SUPERUSER_EMAIL
       value: "admin@example.com"
     - name: DJANGO_SUPERUSER_PASSWORD
-      secret:
-        provider: 1password
-        reference: "op://Private/django-app/superuser_password"
+      from:
+        secret: "onepassword:django-app:superuser_password"
   volumes:
     - "db-data:/app/data"
 `} lang="yaml" />
 
-**Prerequisites for secret management:**
+**Prerequisites for this 1Password example:**
 - 1Password CLI (`op`) installed and authenticated
 - Secrets stored in a 1Password vault with the referenced field names
 
-See the [Secret Providers](/docs/secret-providers) documentation for complete setup instructions.
+SOPS-backed secrets are also supported. See the [Secret Providers](/docs/secret-providers) documentation for complete setup instructions.
 
 
 ### Volume Configuration

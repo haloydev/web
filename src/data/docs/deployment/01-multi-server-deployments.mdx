@@ -168,7 +168,7 @@ Complete setup for production, staging, and development:
           value: "production"
         - name: "DATABASE_URL"
           from:
-            secret: "onepassword:prod-db.url"
+            secret: "onepassword:prod-db:url"
       pre_deploy:
         - "npm run migrate:production"
       post_deploy:
@@ -225,7 +225,7 @@ Deploy to multiple regions:
           value: "us-east-1"
         - name: "DATABASE_URL"
           from:
-            secret: "onepassword:us-db.url"
+            secret: "onepassword:us-db:url"
     eu-west:
       server: eu-west.haloy.com
       domains:
@@ -236,7 +236,7 @@ Deploy to multiple regions:
           value: "eu-west-1"
         - name: "DATABASE_URL"
           from:
-            secret: "onepassword:eu-db.url"
+            secret: "onepassword:eu-db:url"
     asia-pacific:
       server: ap-southeast.haloy.com
       domains:
@@ -247,7 +247,7 @@ Deploy to multiple regions:
           value: "ap-southeast-1"
         - name: "DATABASE_URL"
           from:
-            secret: "onepassword:ap-db.url"
+            secret: "onepassword:ap-db:url"
 `} lang="yaml" />
 
 ## Deployment Hooks
