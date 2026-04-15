@@ -36,5 +36,5 @@ async function main() {
 
 main().catch((error) => {
   console.error('Failed to fetch version:', error.message);
-  process.exit(1);
+  console.log('Using existing version.json');
 });
