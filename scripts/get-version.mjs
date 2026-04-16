@@ -34,7 +34,16 @@ async function main() {
   console.log(`Wrote version ${version} to src/data/version.json`);
 }
 
-main().catch((error) => {
+main().catch(async (error) => {
   console.error('Failed to fetch version:', error.message);
-  console.log('Using existing version.json');
+
+  const { existsSync } = await import('node:fs');
+  if (existsSync(OUTPUT_PATH)) {
+    console.log('Using existing version.json');
+  } else {
+    const { writeFile } = await import('node:fs/promises');
+    const fallback = { version: '0.0.0' };
+    await writeFile(OUTPUT_PATH, JSON.stringify(fallback, null, 2) + '\n');
+    console.log('Wrote fallback version.json with version 0.0.0');
+  }
 });
