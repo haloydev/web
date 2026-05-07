@@ -67,6 +67,8 @@ Create a DNS A record pointing your chosen domain to the server's IP address.
 
 **Cloudflare users:** Set the proxy status to **"DNS only"** (grey cloud), or ensure your SSL/TLS encryption mode is set to **"Full (Strict)"**. See [Troubleshooting](#redirect-loop-err_too_many_redirects) if you experience redirect loops.
 
+This domain is for the Haloy server API. Application domains are configured separately in `haloy.yaml`; see [Domain Configuration](/docs/domain-configuration).
+
 ### 2. Configure haloy
 
 <Code code={`sudo haloyd config set api-domain YOUR_DOMAIN

@@ -1,0 +1,107 @@
+---
+title: 'Domain Configuration'
+slug: 'domain-configuration'
+section: configuration
+description: 'Configure application domains, aliases, DNS records, HTTPS, and multi-target domain routing in haloy.yaml.'
+---
+
+import Code from '@/components/code.astro';
+
+Configure the public hostnames that route to your deployed application. These are application domains in `haloy.yaml`, not the Haloy server API domain used in the `server` field.
+
+## Basic Domain
+
+Use `domains` as an array of domain objects. There is no `host` field.
+
+<Code code={`
+  name: "my-app"
+  server: "haloy.yourserver.com"
+  domains:
+    - domain: "my-app.com"
+`} lang="yaml" />
+
+The `domain` value is the canonical hostname for the route. Haloy routes HTTPS traffic for that hostname to the target's container port, which defaults to `8080`.
+
+## DNS Requirements
+
+Before deploying, every `domain` and `aliases` entry must resolve to the Haloy server.
+
+| Record | Use for | Example |
+| ------ | ------- | ------- |
+| `A` | Root domains and subdomains pointing directly to the server IPv4 address | `my-app.com -> 203.0.113.10` |
+| `AAAA` | Servers with IPv6 | `my-app.com -> 2001:db8::10` |
+| `CNAME` | Subdomains pointing to another hostname | `www.my-app.com -> my-app.com` |
+
+Haloy listens on ports `80` and `443`, handles HTTP to HTTPS redirects, and requests TLS certificates automatically. Do not include a protocol, path, or port in `domain`; use only the hostname.
+
+Cloudflare users: DNS-only mode is the simplest setup. If you proxy through Cloudflare, use **Full (Strict)** SSL/TLS mode, not Flexible mode.
+
+## Aliases
+
+Use `aliases` when additional hostnames should redirect to the canonical domain:
+
+<Code code={`
+  domains:
+    - domain: "my-app.com"
+      aliases:
+        - "www.my-app.com"
+        - "app.my-app.com"
+`} lang="yaml" />
+
+Requests to aliases are redirected permanently to the canonical domain. In this example, `www.my-app.com` and `app.my-app.com` redirect to `https://my-app.com`.
+
+## Multiple Canonical Domains
+
+Use multiple `domain` entries when the hostnames should remain distinct instead of redirecting to one canonical domain:
+
+<Code code={`
+  domains:
+    - domain: "my-app.com"
+    - domain: "my-other-app-domain.com"
+`} lang="yaml" />
+
+Both domains route to the same target. If you want one hostname to redirect to another, put it under `aliases` instead.
+
+## Multi-Target Domains
+
+Each target can define its own domains:
+
+<Code code={`
+  targets:
+    production:
+      server: "prod.haloy.com"
+      domains:
+        - domain: "my-app.com"
+          aliases:
+            - "www.my-app.com"
+
+    staging:
+      server: "staging.haloy.com"
+      domains:
+        - domain: "staging.my-app.com"
+`} lang="yaml" />
+
+Root `domains` are inherited by targets that do not define their own `domains`. When a target defines `domains`, it replaces the root domain list for that target. Domain arrays are not merged.
+
+## Validation
+
+Validate the config before deploying:
+
+<Code code={`
+  haloy validate-config
+  haloy deploy
+  haloy status
+`} lang="bash" />
+
+Common issues:
+
+- `404 Not Found`: The hostname is not configured in `domains`, or the updated config has not been deployed yet.
+- Certificate errors: DNS does not point to the Haloy server, ports `80` or `443` are blocked, or Cloudflare is using Flexible SSL/TLS mode.
+- App does not respond on the domain: Make sure `port` matches the port your container listens on.
+
+## Next Steps
+
+- [Basic Configuration](/docs/basic-configuration)
+- [Configuration Reference](/docs/configuration-reference)
+- [Multi-Server Deployments](/docs/multi-server-deployments)
+- [Server Installation](/docs/server-installation)
