@@ -397,6 +397,64 @@ Remove a server from your local configuration.
 - `<server-domain>` - Server domain to remove
 </div>
 
+### server registry login
+
+Store registry credentials on a Haloy server. haloyd uses these credentials when pulling images from that registry during deploys and rollbacks.
+
+<Code code={`
+  # Docker Hub
+  echo "$DOCKERHUB_TOKEN" | haloy server registry login haloy.example.com docker.io --username your-dockerhub-username --password-stdin
+
+  # GitHub Container Registry
+  echo "$GHCR_TOKEN" | haloy server registry login haloy.example.com ghcr.io --username your-github-username --password-stdin
+
+  # Custom registry
+  haloy server registry login haloy.example.com registry.example.com --username deploy-bot --password-stdin
+`} lang="bash" />
+
+**Syntax:**
+<Code code="haloy server registry login <server-url> <registry> --username <username> (--password <password> | --password-stdin)" lang="bash" />
+
+**Arguments:**
+
+<div class="list-unstyled">
+- `<server-url>` - Haloy server URL
+- `<registry>` - Registry host, for example `docker.io`, `ghcr.io`, or `registry.example.com`
+</div>
+
+**Options:**
+
+<div class="list-unstyled">
+- `--username, -u <username>` - Registry username
+- `--password, -p <password>` - Registry password or access token
+- `--password-stdin` - Read the registry password or access token from stdin
+</div>
+
+Use `--password-stdin` in scripts to avoid leaving tokens in shell history.
+
+These credentials are stored on the server and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence.
+
+### server registry list
+
+List registry credentials configured on a Haloy server. The password/token is never shown.
+
+<Code code="haloy server registry list haloy.example.com" lang="bash" />
+
+**Syntax:**
+<Code code="haloy server registry list <server-url>" lang="bash" />
+
+### server registry logout
+
+Remove registry credentials from a Haloy server.
+
+<Code code={`
+  haloy server registry logout haloy.example.com docker.io
+  haloy server registry logout haloy.example.com ghcr.io
+`} lang="bash" />
+
+**Syntax:**
+<Code code="haloy server registry logout <server-url> <registry>" lang="bash" />
+
 ### server version
 
 Get the version from a haloyd server.

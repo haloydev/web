@@ -15,6 +15,7 @@ Configure Docker images, registry authentication, local building, and rollback s
 | -------------- | ------- | -------- | -------------------------------------------------------------------------------------- |
 | `repository`   | string  | No       | Docker image name (defaults to the target/app name when omitted)                       |
 | `tag`          | string  | No       | Image tag (default: "latest"). Can also be included in repository (e.g., nginx:alpine) |
+| `pull_policy`  | string  | No       | When to pull from the registry: "always", "if_missing", or "never"                    |
 | `build`        | boolean | No       | Whether to build the image locally                                                     |
 | `registry`     | object  | No       | Private registry authentication                                                        |
 | `history`      | object  | No       | Image history and rollback strategy                                                    |
@@ -93,7 +94,7 @@ You can mix shorthand and object forms in the same file:
             secret: "registry-pass"
 `} lang="yaml" />
 
-Tags embedded in the string (e.g., `"nginx:1.21"`) work the same way as in the `repository` field. All other image fields (`tag`, `registry`, `history`, `build`, `build_config`) require the object form.
+Tags embedded in the string (e.g., `"nginx:1.21"`) work the same way as in the `repository` field. All other image fields (`tag`, `pull_policy`, `registry`, `history`, `build`, `build_config`) require the object form.
 
 ## Simple Configuration
 
@@ -116,9 +117,62 @@ Pull from a public registry using the object form:
 
 If no tag is specified (and none is included in the repository), it defaults to latest.
 
+## Pull Policy
+
+`pull_policy` controls when haloyd contacts the registry before starting a container.
+
+| Value        | Behavior                                                                                  |
+| ------------ | ----------------------------------------------------------------------------------------- |
+| `always`     | Check the registry and pull when the local image is missing or outdated. This is default. |
+| `if_missing` | Use the local image if it already exists on the server. Pull only when it is missing.     |
+| `never`      | Never pull. The image must already exist on the server.                                   |
+
+<Code code={`
+  image:
+    repository: "postgres"
+    tag: "18"
+    pull_policy: "if_missing"
+`} lang="yaml" />
+
+Use `if_missing` for stable service images where you do not need Haloy to check the registry on every deploy. This is especially useful for Docker Hub images because registry checks can count against rate limits even when the image already exists locally.
+
+The `database` and `service` presets default to `pull_policy: "if_missing"` when an image is configured. You can override it per target:
+
+<Code code={`
+  targets:
+    postgres:
+      preset: "database"
+      image:
+        repository: "postgres"
+        tag: "18"
+        pull_policy: "always"
+`} lang="yaml" />
+
 ## Registry Authentication
 
 Authenticate with private Docker registries including Docker Hub, GitHub Container Registry (GHCR), Azure Container Registry (ACR), AWS ECR, and self-hosted registries.
+
+### Server-Level Registry Credentials
+
+For credentials that should be available to haloyd on a server, use `haloy server registry login`. The CLI sends the credentials to the haloyd API, and haloyd uses them for future deploys and rollbacks that pull from that registry.
+
+<Code code={`
+  echo "$DOCKERHUB_TOKEN" | haloy server registry login haloy.example.com docker.io --username your-dockerhub-username --password-stdin
+
+  haloy server registry list haloy.example.com
+`} lang="bash" />
+
+This is the recommended fix when a server hits Docker Hub anonymous pull rate limits. A local `docker login` on your laptop is not sent to remote deployments, and logging in manually on the VPS can fail if Docker is run by a different user or environment than haloyd.
+
+Server-level registry credentials are used only when the target does not define `image.registry`. Direct `image.registry` credentials in `haloy.yaml` take precedence.
+
+Use server-level credentials when:
+
+- Many targets on the same server pull from the same registry
+- You want Docker Hub authentication without repeating credentials in every `haloy.yaml`
+- You want to manage registry credentials from your local machine instead of SSHing into the server
+
+Use `image.registry` when credentials should be specific to one image or target, or when you want credentials resolved from local environment variables or secret providers during `haloy deploy`.
 
 ### Basic Authentication
 

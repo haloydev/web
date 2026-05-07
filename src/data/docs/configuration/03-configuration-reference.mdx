@@ -191,6 +191,7 @@ Use `preset: "database"` for stateful database services. This automatically appl
 - `deployment_strategy: "replace"` (safer for databases)
 - `naming_strategy: "static"` (predictable container names)
 - `protected: true` (prevents accidental deployment)
+- `image.pull_policy: "if_missing"` (reuse the local image when already present)
 - `image.history.strategy: "none"` (no rollback history)
 
 <Code code={`
@@ -209,6 +210,7 @@ Use `preset: "service"` for stateful services that share similar requirements to
 
 - `deployment_strategy: "replace"`
 - `naming_strategy: "static"`
+- `image.pull_policy: "if_missing"` (reuse the local image when already present)
 - `image.history.strategy: "none"`
 
 <Code code={`
