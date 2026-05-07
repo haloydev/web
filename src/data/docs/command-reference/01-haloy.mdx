@@ -425,7 +425,9 @@ The pipe before `haloy` is required when using `--password-stdin`. Running `halo
 
 In CI, create `DOCKERHUB_TOKEN` or `GHCR_TOKEN` as a secret or environment variable in your CI provider, then use the same pipe command.
 
-For Docker Hub, use a Docker Hub access token with your Docker Hub username. Docker's browser one-time-code login is a Docker CLI flow and is not used by `haloy server registry login`.
+For Docker Hub, replace `your-dockerhub-username` with your actual Docker Hub username, not your email address, and use a Docker Hub access token. Docker's browser one-time-code login is a Docker CLI flow and is not used by `haloy server registry login`.
+
+haloyd verifies the credentials with the server's Docker daemon before saving them. If Docker rejects the username or token, the command fails and no credentials are written.
 
 **Syntax:**
 <Code code="haloy server registry login <registry> --username <username> (--password <password> | --password-stdin) [--server <url>] [--targets <targets> | --all]" lang="bash" />
@@ -452,7 +454,7 @@ Use `--password-stdin` in scripts to avoid passing tokens as command-line argume
 
 For multi-target config files that resolve to one Haloy server, no target selector is required. If targets resolve to multiple servers, use `--targets` or `--all`.
 
-These credentials are stored on the server at `/var/lib/haloy/registries.yaml` and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence.
+These credentials are stored on the server at `/var/lib/haloy/registries.yaml` and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence, so a stale or incorrect `image.registry` block can override valid server-level credentials.
 
 ### server registry list
 
