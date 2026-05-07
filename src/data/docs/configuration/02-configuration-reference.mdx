@@ -75,6 +75,25 @@ These options are **only** available at the top level of the configuration file.
 
 1Password sources support `account` (optional), `vault`, and `item`. SOPS sources support `file` and optional `format` (`yaml`, `json`, or `dotenv`). SOPS file paths are resolved relative to the Haloy config file.
 
+## Value Sources
+
+A value source provides a string either directly with `value` or by reference with `from`. Use exactly one of these forms:
+
+<Code code={`
+  # Inline value
+  value: "plain-text-value"
+
+  # From your local environment
+  from:
+    env: "MY_ENV_VAR"
+
+  # From a configured secret provider
+  from:
+    secret: "sops:deploy-tokens:HALOY_API_TOKEN"
+`} lang="yaml" />
+
+Haloy uses this same shape for `api_token`, environment variable values, build arguments, and registry credentials. A `from` block must contain exactly one source, either `env` or `secret`.
+
 ## Target Configuration
 
 These options define a deployment unit.
@@ -91,7 +110,7 @@ These options define a deployment unit.
 | `image`               | string/object  | No          | Docker image configuration. A string is shorthand for `repository`. When omitted or partially specified, `repository` defaults to the target/app name. (see [Image Configuration](/docs/image-configuration)) |
 | `image_key`           | string         | No          | Reference a named image from the top-level `images` map. Cannot be used together with `image`.                                                                                                                |
 | `server`              | string         | No          | Haloy server API URL                                                                                                                                                                                          |
-| `api_token`           | object         | No          | API token configuration (see [Authentication](/docs/server-authentication))                                                                                                                                   |
+| `api_token`           | value source   | No          | API token value source using `value`, `from.env`, or `from.secret` (see [Authentication](/docs/server-authentication))                                                                                        |
 | `deployment_strategy` | string         | No          | Deployment strategy: "rolling" (default) or "replace"                                                                                                                                                         |
 | `domains`             | array          | No          | Domain configuration                                                                                                                                                                                          |
 | `replicas`            | integer        | No          | Number of container instances (default: 1)                                                                                                                                                                    |
@@ -327,7 +346,7 @@ When using multi-target deployments, each target can override base configuration
 | Key                   | Type          | Description                                          |
 | --------------------- | ------------- | ---------------------------------------------------- |
 | `server`              | string        | Override the server for this target                  |
-| `api_token`           | object        | Override the API token configuration                 |
+| `api_token`           | value source  | Override the API token value source                  |
 | `image`               | string/object | Override image configuration (repository, tag, etc.) |
 | `image_key`           | string        | Select a named image from top-level `images`         |
 | `domains`             | array         | Override domain configuration                        |
