@@ -399,26 +399,32 @@ Remove a server from your local configuration.
 
 ### server registry login
 
-Store registry credentials on a Haloy server. haloyd uses these credentials when pulling images from that registry during deploys and rollbacks.
+Store registry credentials on a Haloy server. By default, the server URL and API token are read from `haloy.yaml`. haloyd uses these credentials when pulling images from that registry during deploys and rollbacks.
 
 <Code code={`
-  # Docker Hub
-  echo "$DOCKERHUB_TOKEN" | haloy server registry login haloy.example.com docker.io --username your-dockerhub-username --password-stdin
+  # Docker Hub, using the server from haloy.yaml
+  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --username your-dockerhub-username --password-stdin
 
   # GitHub Container Registry
-  echo "$GHCR_TOKEN" | haloy server registry login haloy.example.com ghcr.io --username your-github-username --password-stdin
+  echo "$GHCR_TOKEN" | haloy server registry login ghcr.io --username your-github-username --password-stdin
 
-  # Custom registry
-  haloy server registry login haloy.example.com registry.example.com --username deploy-bot --password-stdin
+  # Multi-target config
+  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --targets staging --username your-dockerhub-username --password-stdin
+
+  # Direct server override
+  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --server haloy.example.com --username your-dockerhub-username --password-stdin
 `} lang="bash" />
 
+The pipe before `haloy` is required when using `--password-stdin`. Running `haloy server registry login ... --password-stdin` by itself has no token to read; Haloy exits with an error instead of waiting for terminal input.
+
+For Docker Hub, use a Docker Hub access token with your Docker Hub username. Docker's browser one-time-code login is a Docker CLI flow and is not used by `haloy server registry login`.
+
 **Syntax:**
-<Code code="haloy server registry login <server-url> <registry> --username <username> (--password <password> | --password-stdin)" lang="bash" />
+<Code code="haloy server registry login <registry> --username <username> (--password <password> | --password-stdin) [--server <url>] [--targets <targets> | --all]" lang="bash" />
 
 **Arguments:**
 
 <div class="list-unstyled">
-- `<server-url>` - Haloy server URL
 - `<registry>` - Registry host, for example `docker.io`, `ghcr.io`, or `registry.example.com`
 </div>
 
@@ -428,9 +434,15 @@ Store registry credentials on a Haloy server. haloyd uses these credentials when
 - `--username, -u <username>` - Registry username
 - `--password, -p <password>` - Registry password or access token
 - `--password-stdin` - Read the registry password or access token from stdin
+- `--server, -s <url>` - Server URL (overrides config file)
+- `--config, -c <path>` - Path to config file or directory
+- `--targets, -t <targets>` - Apply to specific target(s) in a multi-target config
+- `--all, -a` - Apply to all targets in a multi-target config
 </div>
 
-Use `--password-stdin` in scripts to avoid leaving tokens in shell history.
+Use `--password-stdin` in scripts to avoid leaving tokens in shell history. Set the token in an environment variable first, then pipe it into Haloy.
+
+For multi-target config files, use `--targets` or `--all`.
 
 These credentials are stored on the server and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence.
 
@@ -438,22 +450,51 @@ These credentials are stored on the server and are used only when the target doe
 
 List registry credentials configured on a Haloy server. The password/token is never shown.
 
-<Code code="haloy server registry list haloy.example.com" lang="bash" />
+<Code code={`
+  haloy server registry list
+  haloy server registry list --targets staging
+  haloy server registry list --server haloy.example.com
+`} lang="bash" />
 
 **Syntax:**
-<Code code="haloy server registry list <server-url>" lang="bash" />
+<Code code="haloy server registry list [--server <url>] [--targets <targets> | --all]" lang="bash" />
+
+**Options:**
+
+<div class="list-unstyled">
+- `--server, -s <url>` - Server URL (overrides config file)
+- `--config, -c <path>` - Path to config file or directory
+- `--targets, -t <targets>` - List credentials for specific target server(s)
+- `--all, -a` - List credentials for all target servers
+</div>
 
 ### server registry logout
 
 Remove registry credentials from a Haloy server.
 
 <Code code={`
-  haloy server registry logout haloy.example.com docker.io
-  haloy server registry logout haloy.example.com ghcr.io
+  haloy server registry logout docker.io
+  haloy server registry logout ghcr.io --targets staging
+  haloy server registry logout docker.io --server haloy.example.com
 `} lang="bash" />
 
 **Syntax:**
-<Code code="haloy server registry logout <server-url> <registry>" lang="bash" />
+<Code code="haloy server registry logout <registry> [--server <url>] [--targets <targets> | --all]" lang="bash" />
+
+**Arguments:**
+
+<div class="list-unstyled">
+- `<registry>` - Registry host, for example `docker.io`, `ghcr.io`, or `registry.example.com`
+</div>
+
+**Options:**
+
+<div class="list-unstyled">
+- `--server, -s <url>` - Server URL (overrides config file)
+- `--config, -c <path>` - Path to config file or directory
+- `--targets, -t <targets>` - Apply to specific target(s) in a multi-target config
+- `--all, -a` - Apply to all targets in a multi-target config
+</div>
 
 ### server version
 
