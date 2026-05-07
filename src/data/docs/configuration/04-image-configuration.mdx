@@ -156,17 +156,22 @@ Authenticate with private Docker registries including Docker Hub, GitHub Contain
 
 For credentials that should be available to haloyd on a server, use `haloy server registry login`. The CLI reads the server URL and API token from `haloy.yaml`, sends the credentials to the haloyd API, and haloyd uses them for future deploys and rollbacks that pull from that registry.
 
+`$DOCKERHUB_TOKEN` below is an example environment variable name. Set it yourself before running the command; Haloy only reads the token from stdin.
+
 <Code code={`
-  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --username your-dockerhub-username --password-stdin
+  export DOCKERHUB_TOKEN="paste-your-docker-hub-access-token"
+  printf '%s' "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --username your-dockerhub-username --password-stdin
 
   haloy server registry list
 `} lang="bash" />
 
 The pipe is required with `--password-stdin`; it reads the token from stdin and will error if run from an interactive terminal without piped input.
 
+In CI, create `DOCKERHUB_TOKEN` as a secret or environment variable in your CI provider, then use the same pipe command.
+
 For Docker Hub, use a Docker Hub access token with your Docker Hub username. Docker's browser one-time-code login is specific to the Docker CLI and is not used by Haloy.
 
-For multi-target config files, add `--targets <name>` or `--all`. To connect directly without using `haloy.yaml`, add `--server haloy.example.com`.
+For multi-target config files that resolve to one Haloy server, no target selector is required. If targets resolve to multiple servers, add `--targets <name>` or `--all`. To connect directly without using `haloy.yaml`, add `--server haloy.example.com`.
 
 This is the recommended fix when a server hits Docker Hub anonymous pull rate limits. A local `docker login` on your laptop is not sent to remote deployments, and logging in manually on the VPS can fail if Docker is run by a different user or environment than haloyd.
 

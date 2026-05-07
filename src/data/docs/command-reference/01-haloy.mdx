@@ -401,21 +401,29 @@ Remove a server from your local configuration.
 
 Store registry credentials on a Haloy server. By default, the server URL and API token are read from `haloy.yaml`. haloyd uses these credentials when pulling images from that registry during deploys and rollbacks.
 
+`$DOCKERHUB_TOKEN` and `$GHCR_TOKEN` below are example environment variable names. Set them yourself before running the command; Haloy only reads the token from stdin.
+
 <Code code={`
+  # Set the token in your local shell first
+  export DOCKERHUB_TOKEN="paste-your-docker-hub-access-token"
+
   # Docker Hub, using the server from haloy.yaml
-  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --username your-dockerhub-username --password-stdin
+  printf '%s' "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --username your-dockerhub-username --password-stdin
 
   # GitHub Container Registry
-  echo "$GHCR_TOKEN" | haloy server registry login ghcr.io --username your-github-username --password-stdin
+  export GHCR_TOKEN="paste-your-github-container-registry-token"
+  printf '%s' "$GHCR_TOKEN" | haloy server registry login ghcr.io --username your-github-username --password-stdin
 
   # Multi-target config
-  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --targets staging --username your-dockerhub-username --password-stdin
+  printf '%s' "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --targets staging --username your-dockerhub-username --password-stdin
 
   # Direct server override
-  echo "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --server haloy.example.com --username your-dockerhub-username --password-stdin
+  printf '%s' "$DOCKERHUB_TOKEN" | haloy server registry login docker.io --server haloy.example.com --username your-dockerhub-username --password-stdin
 `} lang="bash" />
 
 The pipe before `haloy` is required when using `--password-stdin`. Running `haloy server registry login ... --password-stdin` by itself has no token to read; Haloy exits with an error instead of waiting for terminal input.
+
+In CI, create `DOCKERHUB_TOKEN` or `GHCR_TOKEN` as a secret or environment variable in your CI provider, then use the same pipe command.
 
 For Docker Hub, use a Docker Hub access token with your Docker Hub username. Docker's browser one-time-code login is a Docker CLI flow and is not used by `haloy server registry login`.
 
@@ -440,9 +448,9 @@ For Docker Hub, use a Docker Hub access token with your Docker Hub username. Doc
 - `--all, -a` - Apply to all targets in a multi-target config
 </div>
 
-Use `--password-stdin` in scripts to avoid leaving tokens in shell history. Set the token in an environment variable first, then pipe it into Haloy.
+Use `--password-stdin` in scripts to avoid passing tokens as command-line arguments.
 
-For multi-target config files, use `--targets` or `--all`.
+For multi-target config files that resolve to one Haloy server, no target selector is required. If targets resolve to multiple servers, use `--targets` or `--all`.
 
 These credentials are stored on the server and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence.
 
