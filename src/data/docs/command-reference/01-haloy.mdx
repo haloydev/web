@@ -452,7 +452,7 @@ Use `--password-stdin` in scripts to avoid passing tokens as command-line argume
 
 For multi-target config files that resolve to one Haloy server, no target selector is required. If targets resolve to multiple servers, use `--targets` or `--all`.
 
-These credentials are stored on the server and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence.
+These credentials are stored on the server at `/var/lib/haloy/registries.yaml` and are used only when the target does not define `image.registry`. Credentials in `haloy.yaml` take precedence.
 
 ### server registry list
 

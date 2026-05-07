@@ -175,7 +175,7 @@ For multi-target config files that resolve to one Haloy server, no target select
 
 This is the recommended fix when a server hits Docker Hub anonymous pull rate limits. A local `docker login` on your laptop is not sent to remote deployments, and logging in manually on the VPS can fail if Docker is run by a different user or environment than haloyd.
 
-Server-level registry credentials are used only when the target does not define `image.registry`. Direct `image.registry` credentials in `haloy.yaml` take precedence.
+Server-level registry credentials are stored on the server at `/var/lib/haloy/registries.yaml` and are used only when the target does not define `image.registry`. Direct `image.registry` credentials in `haloy.yaml` take precedence.
 
 Use server-level credentials when:
 
