@@ -553,7 +553,7 @@ Before deploying your application, you need to set up the database schema. Haloy
 
 <Code code={`
   # In one terminal, open a tunnel to the database
-  haloy tunnel 5432 -t postgres
+  haloy tunnel --port 5432 -t postgres
 `} lang="bash" />
 
 The tunnel forwards the remote PostgreSQL port to your local machine. Now, in a separate terminal, push your schema:
@@ -591,7 +591,7 @@ Drizzle Studio provides a visual interface for browsing and editing your databas
 
 <Code code={`
   # Terminal 1: Open the tunnel
-  haloy tunnel 5432 -t postgres
+  haloy tunnel --port 5432 -t postgres
 
   # Terminal 2: Start Drizzle Studio
   pnpm db:studio
@@ -605,7 +605,7 @@ When you modify your schema in `src/db/schema.ts`, push the changes to productio
 
 <Code code={`
   # Terminal 1: Open the tunnel (if not already open)
-  haloy tunnel 5432 -t postgres
+  haloy tunnel --port 5432 -t postgres
 
   # Terminal 2: Push schema changes
   pnpm db:push
