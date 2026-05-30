@@ -84,7 +84,9 @@ SSH into your server and run the upgrade script:
 
 <Code code="curl -fsSL https://sh.haloy.dev/upgrade-server.sh | sh" lang="bash" />
 
-**Note:** Do not re-run the original `install-haloyd.sh` script to upgrade. While it won't overwrite your configuration or data, it will replace your systemd/OpenRC service file, discarding any manual customizations.
+**Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
+
+Do not re-run the original `install-haloyd.sh` script to upgrade. While it won't overwrite your configuration or data, it will replace your systemd/OpenRC service file, discarding any manual customizations.
 
 This script supports systemd, OpenRC, and SysVinit. It will:
 1. Download the latest `haloyd` binary
