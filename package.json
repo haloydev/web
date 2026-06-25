@@ -4,7 +4,7 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "node scripts/get-version.mjs && astro build",
+    "build": "astro build",
     "preview": "astro preview",
     "astro": "NODE_OPTIONS=--disable-warning=DEP0040 astro",
     "clean": "rm -fr .astro node_modules"

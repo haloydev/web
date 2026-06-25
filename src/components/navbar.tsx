@@ -14,16 +14,49 @@ import {
 } from './ui/dropdown-menu';
 import { TextLogo } from './text-logo';
 import { VersionBadge } from './version-badge';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type NavbarProps = {
   showLinks?: boolean;
-  version?: string;
 };
 
-export function Navbar({ showLinks = true, version }: NavbarProps) {
+type LatestVersion = {
+  version: string;
+  url: string;
+};
+
+export function Navbar({ showLinks = true }: NavbarProps) {
   const { setTheme } = useTheme();
   const [newsletterOpen, setNewsletterOpen] = useState(false);
+  const [latestVersion, setLatestVersion] = useState<LatestVersion | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadLatestVersion() {
+      try {
+        const response = await fetch('/api/latest-version', {
+          headers: { Accept: 'application/json' },
+          signal: controller.signal,
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        if (typeof data?.version === 'string' && typeof data?.url === 'string') {
+          setLatestVersion({ version: data.version, url: data.url });
+        }
+      } catch (error) {
+        if (!controller.signal.aborted) {
+          console.error('Failed to load latest Haloy version:', error);
+        }
+      }
+    }
+
+    loadLatestVersion();
+
+    return () => controller.abort();
+  }, []);
 
   return (
     <nav className="flex justify-center py-4 pr-6 pl-2">
@@ -60,7 +93,9 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
             </div>
           )}
 
-          {version && <VersionBadge version={version} />}
+          <div className="flex min-w-[7.75rem] justify-end">
+            {latestVersion && <VersionBadge version={latestVersion.version} href={latestVersion.url} />}
+          </div>
           <ModeToggle />
           <ButtonLink
             href="https://github.com/haloydev/haloy"
@@ -103,10 +138,10 @@ export function Navbar({ showLinks = true, version }: NavbarProps) {
                   GitHub
                 </a>
               </DropdownMenuItem>
-              {version && (
+              {latestVersion && (
                 <DropdownMenuItem asChild>
-                  <a href="https://github.com/haloydev/haloy/releases" target="_blank" rel="noopener noreferrer">
-                    v{version}
+                  <a href={latestVersion.url} target="_blank" rel="noopener noreferrer">
+                    v{latestVersion.version}
                   </a>
                 </DropdownMenuItem>
               )}

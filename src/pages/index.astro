@@ -4,7 +4,6 @@ import { IconBrandGithub } from '@tabler/icons-react';
 import BaseLayout from '@/layouts/base.astro';
 import pinkBurst from '../assets/pink-burst.svg';
 import blueBurst from '../assets/blue-burst.svg';
-import { TextLogo } from '@/components/text-logo';
 import { ButtonLink } from '@/components/ui/button-link';
 import { IconArrowRight } from '@tabler/icons-react';
 import { Navbar } from '@/components/navbar';
@@ -15,9 +14,6 @@ import AiWorkflow from '@/components/ai-workflow.astro';
 import ConfigPreview from '@/components/config-preview.astro';
 import { DeployFlow } from '@/components/deploy-flow/deploy-flow';
 import Footer from '@/components/footer.astro';
-import versionData from '@/data/version.json';
-
-const { version } = versionData;
 ---
 
 <BaseLayout
@@ -35,7 +31,7 @@ const { version } = versionData;
   </div>
 
   <div class="relative min-h-screen pb-20">
-    <Navbar client:load version={version} />
+    <Navbar client:load />
     <div class="flex justify-center">
       <div class="mt-28 flex max-w-4xl flex-col items-center px-6 sm:mt-20 sm:px-12">
         <h1 class="max-w-5xl text-center">
