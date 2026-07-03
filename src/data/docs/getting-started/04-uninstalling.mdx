@@ -102,6 +102,8 @@ rm -rf ~/.local/share/haloy/
 
 Remove Haloy components from your server.
 
+Server-side examples in this section assume you're logged in as root. If you're using a sudo user, run `sudo -i` before following these commands.
+
 ### Complete Server Removal
 
 Remove all Haloy components, data, and configurations:
@@ -190,15 +192,15 @@ Stop the service but preserve data for later reinstallation:
 
 <Code code={`
 # Stop service (systemd)
-sudo systemctl stop haloyd
-sudo systemctl disable haloyd
+systemctl stop haloyd
+systemctl disable haloyd
 
 # Or for OpenRC
-sudo rc-service haloyd stop
-sudo rc-update del haloyd
+rc-service haloyd stop
+rc-update del haloyd
 
 # Remove only the binary
-sudo rm /usr/local/bin/haloyd
+rm /usr/local/bin/haloyd
 
 # Data remains in /var/lib/haloy/ and /etc/haloy/
 # Can be restored by reinstalling haloyd
@@ -216,7 +218,7 @@ Remove Haloy but keep applications running:
 # - Direct access to container ports needed
 
 # Stop haloyd service
-sudo systemctl stop haloyd
+systemctl stop haloyd
 
 # Remove Haloy components
 curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
@@ -284,8 +286,8 @@ docker rm -f $(docker ps -qa --filter "label=dev.haloy.role=app")
 ### Permission Denied Errors
 
 <Code code={`
-# Ensure using sudo for server operations
-sudo su
+# Start a root shell for server operations
+sudo -i
 
 # Then run uninstall script
 curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
@@ -296,9 +298,9 @@ curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 <Code
   code={`
 # Manually remove remaining files
-sudo rm -rf /etc/haloy/
-sudo rm -rf /var/lib/haloy/
-sudo rm -f /usr/local/bin/haloyd
+rm -rf /etc/haloy/
+rm -rf /var/lib/haloy/
+rm -f /usr/local/bin/haloyd
 `}
   lang="bash"
 />
@@ -307,13 +309,13 @@ sudo rm -f /usr/local/bin/haloyd
 
 <Code code={`
 # For systemd
-sudo systemctl stop haloyd
-sudo systemctl disable haloyd
-sudo rm /etc/systemd/system/haloyd.service
-sudo systemctl daemon-reload
+systemctl stop haloyd
+systemctl disable haloyd
+rm /etc/systemd/system/haloyd.service
+systemctl daemon-reload
 
 # For OpenRC
-sudo rc-service haloyd stop
-sudo rc-update del haloyd
-sudo rm /etc/init.d/haloyd
+rc-service haloyd stop
+rc-update del haloyd
+rm /etc/init.d/haloyd
 `} lang="bash" />

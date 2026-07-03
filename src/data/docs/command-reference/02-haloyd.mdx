@@ -9,7 +9,7 @@ import Code from '@/components/code.astro';
 
 Complete reference for haloyd server commands.
 
-These commands run on the server to manage the Haloy daemon.
+These commands run on the server to manage the Haloy daemon. Examples assume a root shell; if you're using a sudo user, run `sudo -i` first or prefix privileged commands with `sudo`.
 
 ## Commands
 
@@ -39,13 +39,13 @@ Initialize haloyd configuration and directories. Run this during first-time setu
 
 <Code code={`
   # Initialize with API domain and TLS
-  sudo haloyd init --api-domain haloy.example.com
+  haloyd init --api-domain haloy.example.com
 
   # Initialize without API domain (localhost only)
-  sudo haloyd init
+  haloyd init
 
   # Initialize with custom directories
-  sudo haloyd init --data-dir /custom/data --config-dir /custom/config
+  haloyd init --data-dir /custom/data --config-dir /custom/config
 `} lang="bash" />
 
 **Options:**
@@ -69,11 +69,11 @@ Get or set configuration values.
 
 <Code code={`
   # Get a configuration value
-  sudo haloyd config get api-domain
-  sudo haloyd config get api-token
+  haloyd config get api-domain
+  haloyd config get api-token
 
   # Set a configuration value
-  sudo haloyd config set api-domain haloy.newdomain.com
+  haloyd config set api-domain haloy.newdomain.com
 `} lang="bash" />
 
 **Subcommands:**
@@ -94,7 +94,7 @@ Get or set configuration values.
 
 Verify the haloyd installation and check system health.
 
-<Code code="sudo haloyd verify" lang="bash" />
+<Code code="haloyd verify" lang="bash" />
 
 **Checks performed:**
 
@@ -159,35 +159,35 @@ haloyd runs as a system service. Use your init system to manage it:
 
 <Code code={`
   # Start
-  sudo systemctl start haloyd
+  systemctl start haloyd
 
   # Stop
-  sudo systemctl stop haloyd
+  systemctl stop haloyd
 
   # Restart
-  sudo systemctl restart haloyd
+  systemctl restart haloyd
 
   # Status
-  sudo systemctl status haloyd
+  systemctl status haloyd
 
   # View logs
-  sudo journalctl -u haloyd -f
+  journalctl -u haloyd -f
 `} lang="bash" />
 
 ### OpenRC
 
 <Code code={`
   # Start
-  sudo rc-service haloyd start
+  rc-service haloyd start
 
   # Stop
-  sudo rc-service haloyd stop
+  rc-service haloyd stop
 
   # Restart
-  sudo rc-service haloyd restart
+  rc-service haloyd restart
 
   # Status
-  sudo rc-service haloyd status
+  rc-service haloyd status
 `} lang="bash" />
 
 ## Exit Codes

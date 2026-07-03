@@ -57,7 +57,7 @@ If you already have a domain pointing to your server:
   </CodeTabPanel>
 </CodeTabs>
 
-**Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
+**Note:** Server-side examples in this guide assume you're logged in as root. If you're using a sudo user, use `| sudo sh` for the install command, then run `sudo -i` before following the remaining server commands.
 
 After installation, the script will display your server's public IP address. You'll need to:
 
@@ -71,10 +71,10 @@ This domain is for the Haloy server API. Application domains are configured sepa
 
 ### 2. Configure haloy
 
-<Code code={`sudo haloyd config set api-domain YOUR_DOMAIN
-sudo systemctl restart haloyd`} lang="bash" />
+<Code code={`haloyd config set api-domain YOUR_DOMAIN
+systemctl restart haloyd`} lang="bash" />
 
-**Alpine Linux (OpenRC):** Use `sudo rc-service haloyd restart` instead of `systemctl restart`.
+**Alpine Linux (OpenRC):** Use `rc-service haloyd restart` instead of `systemctl restart`.
 
 ### 3. Add the server to your local CLI
 
@@ -84,7 +84,7 @@ On your local machine, run the command shown at the end of installation:
 
 You can retrieve the API token later by running on the server:
 
-<Code code="sudo haloyd config get api-token" lang="bash" />
+<Code code="haloyd config get api-token" lang="bash" />
 
 ## Options
 
@@ -150,7 +150,7 @@ usermod -aG docker haloy
 
 Run the init command to create configuration and directories:
 
-<Code code="sudo haloyd init --api-domain haloy.yourserver.com" lang="bash" />
+<Code code="haloyd init --api-domain haloy.yourserver.com" lang="bash" />
 
 This creates:
 - `/etc/haloy/haloyd.yaml` - Daemon configuration
@@ -227,35 +227,35 @@ rc-service haloyd start
 
 <Code code={`
 # Start the service
-sudo systemctl start haloyd
+systemctl start haloyd
 
 # Stop the service
-sudo systemctl stop haloyd
+systemctl stop haloyd
 
 # Restart the service
-sudo systemctl restart haloyd
+systemctl restart haloyd
 
 # Check service status
-sudo systemctl status haloyd
+systemctl status haloyd
 
 # View logs
-sudo journalctl -u haloyd -f
+journalctl -u haloyd -f
 `} lang="bash" />
 
 ### OpenRC
 
 <Code code={`
 # Start the service
-sudo rc-service haloyd start
+rc-service haloyd start
 
 # Stop the service
-sudo rc-service haloyd stop
+rc-service haloyd stop
 
 # Restart the service
-sudo rc-service haloyd restart
+rc-service haloyd restart
 
 # Check service status
-sudo rc-service haloyd status
+rc-service haloyd status
 `} lang="bash" />
 
 ## Configuration
@@ -276,13 +276,13 @@ The haloyd configuration file is located at `/etc/haloy/haloyd.yaml`:
 
 <Code code={`
 # View a configuration value
-sudo haloyd config get api-domain
+haloyd config get api-domain
 
 # Set a configuration value
-sudo haloyd config set api-domain haloy.newdomain.com
+haloyd config set api-domain haloy.newdomain.com
 
 # Get the API token
-sudo haloyd config get api-token
+haloyd config get api-token
 `} lang="bash" />
 
 ## Directory Structure
@@ -301,7 +301,7 @@ sudo haloyd config get api-token
 
 Run the verify command to check that everything is working:
 
-<Code code="sudo haloyd verify" lang="bash" />
+<Code code="haloyd verify" lang="bash" />
 
 This checks:
 - Configuration directory and files
@@ -339,11 +339,11 @@ See [Docker Installation](#docker-installation) for installation options.
 
 Check the logs:
 
-<Code code="sudo journalctl -u haloyd -n 50" lang="bash" />
+<Code code="journalctl -u haloyd -n 50" lang="bash" />
 
 Common issues:
-- Docker not running: `sudo systemctl start docker`
-- Port 80/443 in use: Check with `sudo ss -tlnp | grep -E ':80|:443'`
+- Docker not running: `systemctl start docker`
+- Port 80/443 in use: Check with `ss -tlnp | grep -E ':80|:443'`
 - Permission issues: Ensure the `haloy` user is in the `docker` group
 
 ### Cannot Connect to API
@@ -352,10 +352,10 @@ Verify the service is running and listening:
 
 <Code code={`
 # Check service status
-sudo systemctl status haloyd
+systemctl status haloyd
 
 # Check if ports are open
-sudo ss -tlnp | grep haloyd
+ss -tlnp | grep haloyd
 
 # Test API locally
 curl -k https://localhost/health
@@ -414,13 +414,13 @@ If the output shows `127.0.1.1` instead of your server's public IP, `/etc/hosts`
 To prevent cloud-init from restoring the old entry on reboot, make the same change in the template:
 
 <Code lang="bash" code={`
-  sudo nano /etc/cloud/templates/hosts.debian.tmpl
+  nano /etc/cloud/templates/hosts.debian.tmpl
   # Remove the FQDN from the 127.0.1.1 line
 `} />
 
 Then restart haloyd:
 
-<Code code="sudo systemctl restart haloyd" lang="bash" />
+<Code code="systemctl restart haloyd" lang="bash" />
 
 ## Uninstalling
 

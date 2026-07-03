@@ -25,7 +25,7 @@ Get API tokens from each server and add them to your local client:
 
 <Code code={`
   # Get token on the server
-  sudo haloyd config get api-token
+  haloyd config get api-token
 
   # Add server on your local machine
   haloy server add production.haloy.com <production-token>
@@ -325,7 +325,7 @@ When adding servers:
 
 <Code code={`
   # Get the current token on server (or generate new one via haloyd init)
-  sudo haloyd config get api-token
+  haloyd config get api-token
 
   # Update local config
   haloy server add <server-domain> <new-token> --force
