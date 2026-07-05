@@ -2,7 +2,7 @@
 title: 'Architecture'
 slug: 'architecture'
 section: introduction
-description: 'How Haloy components work together: the CLI, server daemon, Docker orchestration, and automatic HTTPS via reverse proxy.'
+description: 'How Haloy components work together: the CLI, server daemons, Docker orchestration, and automatic HTTPS via reverse proxy.'
 ---
 
 import Code from '@/components/code.astro';
@@ -11,11 +11,12 @@ Understand how Haloy's components work together to manage your deployments.
 
 ## System Components
 
-Haloy consists of several components working in harmony:
+Haloy consists of several components working together:
 
 1. **Haloy CLI (`haloy`)** - Command-line interface for deployments from your local machine
-2. **Haloy Daemon (`haloyd`)** - Service running on your server that handles orchestration, routing, and SSL
-3. **Application Containers** - Your deployed applications orchestrated by `haloyd`
+2. **Haloy Daemon (`haloyd`)** - Control-plane service running on your server
+3. **Haloy Proxy (`haloy-proxy`)** - Data-plane service running on your server
+4. **Application Containers** - Your deployed applications orchestrated by `haloyd`
 
 ## Component Overview
 
@@ -41,7 +42,7 @@ See the [haloy CLI command reference](/docs/haloy) for available commands.
 
 **Runs on**: Your server (as a native systemd service)
 
-**Purpose**: Container orchestration, reverse proxy, and SSL management
+**Purpose**: Container orchestration, deployment API, certificate management, and routing snapshots
 
 **Key Functions**:
 
@@ -49,19 +50,21 @@ See the [haloy CLI command reference](/docs/haloy) for available commands.
 - Pull or load Docker images
 - Start and stop application containers
 - Monitor container health
-- Route traffic via built-in reverse proxy with host-based routing
-- Terminate SSL/TLS with automatic certificate management via ACME (Let's Encrypt)
+- Manage certificates via ACME (Let's Encrypt)
+- Push routing and certificate updates to `haloy-proxy`
 - Track deployment history for rollbacks
 
 **Configuration**: `/etc/haloy/haloyd.yaml`
 
 **Data storage**: `/var/lib/haloy/`
 
+**API listener**: Loopback only. `haloy-proxy` terminates HTTPS and forwards API traffic (the API domain and localhost) to `haloyd`, so API access requires both services to be running.
+
 See the [haloyd command reference](/docs/haloyd) for available commands.
 
-### Built-in Reverse Proxy
+### Haloy Proxy (haloy-proxy)
 
-The `haloyd` daemon includes a purpose-built reverse proxy that handles all traffic routing:
+`haloy-proxy` is a purpose-built reverse proxy that handles public traffic routing:
 
 **Key Features**:
 
@@ -72,9 +75,15 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
 - ACME challenge passthrough for Let's Encrypt
 - WebSocket support with bidirectional tunneling
 - Connection pooling for backend connections
-- Atomic configuration updates without restarts
+- Atomic routing snapshot updates without restarts
+- Boots from the last known good snapshot if `haloyd` is down
+- Forwards Haloy API traffic to `haloyd`'s loopback listener
 
 **Listens on**: Ports 80 (HTTP) and 443 (HTTPS)
+
+**Control API**: Unix socket at `/var/lib/haloy/proxy/haloy-proxy.sock`
+
+**Snapshot file**: `/var/lib/haloy/proxy/snapshot.json`
 
 ### Application Containers
 
@@ -106,16 +115,23 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
 │              Server                     │
 │                                         │
 │  ┌──────────────────┐                   │
-│  │ haloyd (systemd) │                   │
-│  │                  │                   │
-│  │ - API Server     │                   │
-│  │ - Orchestration  │                   │
+│  │ haloy-proxy      │                   │
 │  │ - Reverse Proxy  │                   │
-│  │ - SSL/TLS        │                   │
+│  │ - TLS Termination│                   │
 │  │ Ports: 80, 443   │                   │
-│  └────┬─────────────┘                   │
-│       │ Routes traffic                  │
+│  └────┬────────┬────┘                   │
+│       │        │ API calls (loopback)   │
+│       │        ▼                        │
+│       │  ┌──────────────────┐           │
+│       │  │ haloyd           │           │
+│       │  │ - API Server     │           │
+│       │  │ - Orchestration  │           │
+│       │  │ - Certificates   │           │
+│       │  └──────────────────┘           │
+│       │   (pushes routing snapshots     │
+│       │    back to haloy-proxy)         │
 │       │                                 │
+│       │ Routes app traffic              │
 │       ├──────────┬──────────┐           │
 │       ▼          ▼          ▼           │
 │  ┌────────┐ ┌────────┐ ┌────────┐       │
@@ -137,11 +153,12 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
    Internet
    │
    ├─ HTTP (port 80)
-   │  └─► haloyd → Redirects to HTTPS
+   │  └─► haloy-proxy → Redirects to HTTPS
    │
    └─ HTTPS (port 443)
-      └─► haloyd
+      └─► haloy-proxy
           ├─ SSL Termination
+          ├─ API Domain (api.example.com → haloyd API on loopback)
           ├─ Domain Routing (my-app.com → my-app)
           └─► Load Balance
               ├─► App Container 1 (port 8080)
@@ -165,7 +182,7 @@ The `haloyd` daemon includes a purpose-built reverse proxy that handles all traf
                    ├─► haloyd pulls/loads image
                    ├─► haloyd starts new containers
                    ├─► haloyd waits for health checks/readiness window
-                   ├─► haloyd updates proxy routes
+                   ├─► haloyd pushes routes to haloy-proxy
                    └─► haloyd stops old containers`}
   lang="text"
 />
@@ -183,7 +200,7 @@ The standard approach is to use `haloy deploy` which handles labeling automatica
 
 ### Using Container Labels Directly
 
-You can start containers manually (using `docker run`, Docker Compose, or other orchestration tools) and `haloyd` will automatically discover and route traffic to them:
+You can start containers manually (using `docker run`, Docker Compose, or other orchestration tools) and `haloyd` will automatically discover them and push routes to `haloy-proxy`:
 
 <Code
   code={`
@@ -243,8 +260,8 @@ You can start containers manually (using `docker run`, Docker Compose, or other 
 
 1. `haloyd` monitors Docker for labeled containers
 2. Extracts routing information from labels
-3. Updates proxy routes atomically
-4. Routes traffic with zero downtime
+3. Pushes a routing snapshot to `haloy-proxy`
+4. `haloy-proxy` routes traffic with zero downtime
 
 This allows you to integrate Haloy's routing and SSL management with your existing deployment workflows.
 
@@ -260,7 +277,7 @@ Haloy creates and uses Docker networks:
 ### Port Mapping
 
 <Code code={`
-  haloyd:
+  haloy-proxy:
     - 80:80   (HTTP)
     - 443:443 (HTTPS)
 
@@ -268,7 +285,7 @@ Application Containers:
 
 - No direct port exposure
 - Internal network only
-- haloyd routes traffic
+- haloy-proxy routes traffic
   `} lang="text" />
 
 ## Data Storage
@@ -279,8 +296,9 @@ Application Containers:
   └── .env                 # API tokens
 
 /var/lib/haloy/
-├── certs/ # SSL certificates
-└── db/ # Deployment database
+├── cert-storage/ # SSL certificates
+├── db/ # Deployment database
+└── proxy/ # Proxy socket and routing snapshot
 `} lang="text" />
 
 ## SSL/TLS Certificates
@@ -288,7 +306,7 @@ Application Containers:
 **Certificate Management**:
 
 - Automatic via ACME (Let's Encrypt)
-- Certificates stored in `certs/`
+- Certificates stored in `cert-storage/`
 - Auto-renewal before expiration
 - Per-domain certificates
 - SNI-based certificate selection with wildcard support
@@ -299,7 +317,7 @@ Application Containers:
 2. `haloyd` requests certificate from Let's Encrypt
 3. ACME challenge validation (HTTP-01)
 4. Certificate issued and stored
-5. Certificate hot-reloaded without restart
+5. `haloyd` signals `haloy-proxy` to reload the certificate without restart
 6. Auto-renewal 30 days before expiration
 
 ## Health Checks
@@ -315,7 +333,7 @@ Haloy includes a unified health checking system with configurable monitoring:
      │                              ├─ 200 OK → Healthy
      │                              └─ Other → Unhealthy
      │
-     └─ Routes traffic only to healthy containers
+     └─ Pushes routes only for healthy containers
 `}
   lang="text"
 />
@@ -407,14 +425,14 @@ Haloy achieves HA through:
 - Dedicated `haloy` system user
 - `NoNewPrivileges=true`
 - `PrivateTmp=true`, `ProtectHome=true`, `ProtectSystem=strict`
-- `CapabilityBoundingSet=CAP_NET_BIND_SERVICE` (allows binding ports 80/443)
+- `haloy-proxy` receives `CAP_NET_BIND_SERVICE` so it can bind ports 80/443
 - Kernel and control group protection
 
 **Container Isolation**:
 
 - Docker network isolation
 - No direct container exposure to internet
-- All traffic through haloyd proxy
+- All traffic through `haloy-proxy`
 
 **SSL/TLS**:
 

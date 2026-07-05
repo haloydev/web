@@ -20,12 +20,12 @@ Still, both tools run containers, so the comparison is fair. Here's a practical 
 
 | | Kubernetes | Haloy |
 |---|---|---|
-| **Architecture** | Distributed control plane (API server, etcd, scheduler, kubelet, kube-proxy) | Single binary CLI + lightweight server daemon |
+| **Architecture** | Distributed control plane (API server, etcd, scheduler, kubelet, kube-proxy) | Single binary CLI + lightweight server daemons |
 | **Configuration** | YAML manifests, Helm charts, Kustomize overlays | Single YAML file per app |
 | **Scaling model** | Auto-scaling across multi-node clusters | Manual replicas on individual servers |
 | **SSL/TLS** | Requires cert-manager or similar add-on | Built-in via Let's Encrypt |
 | **Registry requirement** | Yes, always | Optional (direct upload or registry) |
-| **Resource overhead** | Significant (control plane needs 2+ GB RAM minimum) | Minimal (single Go binary) |
+| **Resource overhead** | Significant (control plane needs 2+ GB RAM minimum) | Minimal (small Go binaries) |
 | **Learning curve** | Steep (weeks to months for proficiency) | Low (minutes to first deploy) |
 | **Best for** | Microservice architectures, large teams, auto-scaling, HA | Indie devs, small teams, single/few servers, simple Docker apps |
 
@@ -39,9 +39,9 @@ Kubernetes is genuinely powerful. It can scale workloads automatically based on 
 
 ## What Haloy Is
 
-Haloy is a CLI deployment tool paired with a lightweight server daemon. You write a YAML config file in your project root, run `haloy deploy`, and it builds a Docker image locally, uploads the changed layers to your server, and does a zero-downtime swap. The server daemon handles reverse proxying, automatic HTTPS via Let's Encrypt, health checks, and container management.
+Haloy is a CLI deployment tool paired with lightweight server daemons. You write a YAML config file in your project root, run `haloy deploy`, and it builds a Docker image locally, uploads the changed layers to your server, and does a zero-downtime swap. `haloyd` handles deployments, certificates, health checks, and container management; `haloy-proxy` handles public HTTP/HTTPS traffic.
 
-There's no cluster, no control plane, no distributed state. One binary on your laptop, one binary on your server.
+There's no cluster, no distributed state, and no heavyweight platform. One binary runs on your laptop, and small native services run on your server.
 
 ## Key Differences
 
@@ -86,7 +86,7 @@ Haloy scales vertically (bigger server) or by manually configuring replicas. It 
 
 Kubernetes networking is powerful but complex. Pods get their own IP addresses within a virtual network. Services provide stable endpoints for groups of pods. Ingress controllers (Nginx, Traefik, or others) handle external HTTP traffic. TLS termination requires installing cert-manager and configuring Certificate resources. Each of these is a separate component to install, configure, and maintain.
 
-Haloy's server daemon includes a built-in reverse proxy with automatic Let's Encrypt certificate provisioning. Point your DNS at the server, set your `domains` in config, and HTTPS works on the first deploy. No extra components needed.
+Haloy includes a built-in reverse proxy with automatic Let's Encrypt certificate provisioning. Point your DNS at the server, set your `domains` in config, and HTTPS works on the first deploy. No external proxy stack is needed.
 
 ### Ecosystem and extensibility
 

@@ -516,9 +516,16 @@ Remove registry credentials from a Haloy server.
 
 ### server version
 
-Get the version from a haloyd server.
+Get the component versions from a Haloy server.
 
 <Code code="haloy server version" lang="bash" />
+
+Current servers report both the control plane and proxy when `haloy-proxy` is installed:
+
+<Code code={`
+  haloyd version: v0.1.0-beta.66
+  haloy-proxy version: v0.1.0-beta.66
+`} lang="text" />
 
 **Flags:**
 
@@ -531,7 +538,7 @@ Get the version from a haloyd server.
 
 ### server logs
 
-Stream platform-level operational logs from the haloyd server daemon in real-time. These are internal logs showing deployments, health checks, proxy routing, etc. Proxy HTTP access logs (GET/POST requests) are hidden by default to keep the output focused on important platform events.
+Stream platform-level operational logs from the `haloyd` server daemon in real-time. These are internal logs showing deployments, health checks, routing snapshot updates, etc. Proxy HTTP access logs (GET/POST requests) are hidden by default to keep the output focused on important platform events.
 
 <Code code={`
   # Stream platform logs using config

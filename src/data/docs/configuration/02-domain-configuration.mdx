@@ -32,7 +32,7 @@ Before deploying, every `domain` and `aliases` entry must resolve to the Haloy s
 | `AAAA` | Servers with IPv6 | `my-app.com -> 2001:db8::10` |
 | `CNAME` | Subdomains pointing to another hostname | `www.my-app.com -> my-app.com` |
 
-Haloy listens on ports `80` and `443`, handles HTTP to HTTPS redirects, and requests TLS certificates automatically. Do not include a protocol, path, or port in `domain`; use only the hostname.
+`haloy-proxy` listens on ports `80` and `443`, handles HTTP to HTTPS redirects, and serves TLS certificates requested by `haloyd`. Do not include a protocol, path, or port in `domain`; use only the hostname.
 
 Cloudflare users: DNS-only mode is the simplest setup. If you proxy through Cloudflare, use **Full (Strict)** SSL/TLS mode, not Flexible mode.
 

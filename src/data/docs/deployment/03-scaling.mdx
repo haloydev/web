@@ -27,19 +27,19 @@ Set the number of replicas in your configuration:
 Haloy automatically:
 
 - Starts the specified number of containers
-- Configures load balancing in the built-in reverse proxy
+- Configures load balancing in `haloy-proxy`
 - Distributes traffic across all healthy instances
 - Waits for any configured readiness stabilization window before routing to new replicas
 - Monitors health checks
 
 ## Load Balancing
 
-The built-in reverse proxy distributes traffic using round-robin by default, sending requests to each healthy container in turn.
+`haloy-proxy` distributes traffic using round-robin by default, sending requests to each healthy container in turn.
 
 ### Traffic Flow
 
 <Code
-  code={`Internet → haloyd (80/443) → Container 1 (8080)
+  code={`Internet → haloy-proxy (80/443) → Container 1 (8080)
                          → Container 2 (8080)
                          → Container 3 (8080)`}
   lang="bash"
@@ -155,7 +155,7 @@ Health checks are critical for scaling:
   min_ready_seconds: 10
   port: "8080"
 
-  # haloyd only routes to healthy containers
+  # haloy-proxy only routes to healthy containers
   # Unhealthy containers are automatically excluded
 `} lang="yaml" />
 

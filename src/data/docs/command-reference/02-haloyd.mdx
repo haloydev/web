@@ -2,12 +2,12 @@
 title: 'haloyd'
 slug: 'haloyd'
 section: command-reference
-description: 'Complete reference for the haloyd server daemon. Covers starting the server, configuration, and management commands.'
+description: 'Complete reference for the haloyd control-plane daemon. Covers starting the server, configuration, and management commands.'
 ---
 
 import Code from '@/components/code.astro';
 
-Complete reference for haloyd server commands.
+Complete reference for `haloyd` server commands. `haloyd` is the control plane: it handles deployments, Docker discovery, health checks, certificates, and the API. Public HTTP/HTTPS traffic is served by the separate `haloy-proxy` service.
 
 These commands run on the server to manage the Haloy daemon. Examples assume a root shell; if you're using a sudo user, run `sudo -i` first or prefix privileged commands with `sudo`.
 
@@ -15,7 +15,7 @@ These commands run on the server to manage the Haloy daemon. Examples assume a r
 
 ### serve
 
-Start the haloyd daemon. This is typically run by systemd or another init system.
+Start the `haloyd` control-plane daemon. This is typically run by systemd or another init system.
 
 <Code code={`
   # Start the daemon (foreground)
@@ -62,6 +62,8 @@ Initialize haloyd configuration and directories. Run this during first-time setu
 - `/etc/haloy/.env` - API token
 - `/var/lib/haloy/` - Data directory
 - `haloy` Docker network
+
+`haloyd init` does not install the `haloy-proxy` service. Use the install script for normal server setup, or install both services manually as described in [Server Installation](/docs/server-installation).
 
 ### config
 
@@ -126,6 +128,8 @@ Display the haloyd version.
 
 Outputs only the version number in plaintext (e.g., `1.0.0`).
 
+To check both server components from your local machine, use [`haloy server version`](/docs/haloy#server-version).
+
 ## Configuration File
 
 The haloyd configuration file is located at `/etc/haloy/haloyd.yaml`:
@@ -153,41 +157,47 @@ The haloyd configuration file is located at `/etc/haloy/haloyd.yaml`:
 
 ## Service Management
 
-haloyd runs as a system service. Use your init system to manage it:
+`haloyd` and `haloy-proxy` run as separate system services. Restarting `haloyd` does not restart the proxy, so application traffic keeps flowing while the control plane restarts.
 
 ### Systemd
 
 <Code code={`
   # Start
-  systemctl start haloyd
+  systemctl start haloy-proxy haloyd
 
   # Stop
-  systemctl stop haloyd
+  systemctl stop haloyd haloy-proxy
 
-  # Restart
+  # Restart only the control plane
   systemctl restart haloyd
 
   # Status
-  systemctl status haloyd
+  systemctl status haloyd haloy-proxy
 
-  # View logs
+  # View control-plane logs
   journalctl -u haloyd -f
+
+  # View proxy logs
+  journalctl -u haloy-proxy -f
 `} lang="bash" />
 
 ### OpenRC
 
 <Code code={`
   # Start
+  rc-service haloy-proxy start
   rc-service haloyd start
 
   # Stop
   rc-service haloyd stop
+  rc-service haloy-proxy stop
 
-  # Restart
+  # Restart only the control plane
   rc-service haloyd restart
 
   # Status
   rc-service haloyd status
+  rc-service haloy-proxy status
 `} lang="bash" />
 
 ## Exit Codes

@@ -56,7 +56,7 @@ That is the design, not a missing feature.
 
 Kamal does not try to make three servers feel like one private cluster. It treats them as three servers. That keeps the mental model simple. You know where workloads run, how traffic gets in, and what is doing the routing.
 
-Haloy lands in a similar place, even though the implementation is different. It uses a [built-in daemon and reverse proxy](/docs/architecture), and its docs describe application containers as being attached to a Docker network on each server. It supports [multi-server deployments through explicit targets](/docs/multi-server-deployments), but it is not trying to flatten those machines into one shared service network.
+Haloy lands in a similar place, even though the implementation is different. It uses [built-in server daemons and a reverse proxy](/docs/architecture), and its docs describe application containers as being attached to a Docker network on each server. It supports [multi-server deployments through explicit targets](/docs/multi-server-deployments), but it is not trying to flatten those machines into one shared service network.
 
 For a lot of apps, that is enough. A web app, API, worker, cron process, and a couple of backing services usually do not need a virtual private fabric spanning multiple boxes. Traffic comes in through a domain, the reverse proxy forwards it locally, and anything stateful is often a managed service anyway. In that setup, an overlay solves very little.
 

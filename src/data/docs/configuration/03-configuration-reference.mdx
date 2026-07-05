@@ -418,7 +418,7 @@ By default, containers are attached to the `haloy` network. You can override thi
   network: "my-custom-network"
 `} lang="yaml" />
 
-**Important**: If you override the default network (`haloy`), the Haloy proxy will not be able to discover your containers. This means:
+**Important**: If you override the default network (`haloy`), `haloyd` cannot resolve your containers' addresses and will not include them in the routing snapshot it pushes to `haloy-proxy`. This means:
 
 - Your application containers will not be included in the proxy routing
 - Traffic will not be routed to your application

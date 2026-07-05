@@ -9,23 +9,25 @@ description: 'Haloy is a lightweight, open-source deployment platform for Docker
 
 **Haloy is open source, MIT licensed, and completely free.**
 
-Haloy consists of two main parts:
+Haloy consists of three main parts:
 
 1. **haloy:** CLI tool that runs on your local machine and handles deployments, build workflows, logs, rollbacks, and multi‑server targeting.
-2. **haloyd:** A lightweight daemon that runs on your server and handles container orchestration, service discovery, SSL certificates, reverse proxy routing, and deployment logic.
+2. **haloyd:** A lightweight control-plane daemon that runs on your server and handles container orchestration, service discovery, SSL certificates, routing configuration, and deployment logic.
+3. **haloy-proxy:** A small data-plane daemon that owns ports `80` and `443`, terminates HTTPS, and keeps serving traffic while `haloyd` restarts or upgrades.
 
 ## How Haloy Works
 
 - You write a **haloy.yaml** (or whatever you want to call it) file describing how your app should be built and deployed.
 - The Haloy CLI builds your image (if configured), uploads or pushes it, and triggers deployment on the server.
-- haloyd launches and monitors your application containers, updates routing automatically, and manages SSL with Let's Encrypt.
-- The built‑in reverse proxy handles load balancing and HTTPS termination.
+- `haloyd` launches and monitors your application containers, manages SSL with Let's Encrypt, and pushes routing snapshots to `haloy-proxy`.
+- `haloy-proxy` handles load balancing and HTTPS termination, and can keep serving the last known good routes if `haloyd` is temporarily down.
 
 ## Key Features
 
 - **Simple deployments**: One command deploys your app with zero infrastructure setup beyond the initial install.
 - **Built‑in HTTPS**: Automatic TLS certificates via ACME/Let’s Encrypt.
-- **Automatic routing**: Domains and aliase redirects are managed for you.
+- **Automatic routing**: Domains and alias redirects are managed for you.
+- **Control-plane safe upgrades**: Normal `haloyd` upgrades do not interrupt application traffic because `haloy-proxy` keeps serving.
 - **Multi‑server support**: Deploy to staging, production, and regional servers from one config.
 - **Build locally or use registries**: Build Docker images on your machine and either upload them or push to registries.
 - **Rollbacks**: Roll back instantly using local images or registry tags.

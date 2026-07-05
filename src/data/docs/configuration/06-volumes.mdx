@@ -83,9 +83,9 @@ lang="yaml" />
 
 ### Why No Relative Paths?
 
-Since `haloyd` runs inside a Docker container, relative paths would be resolved relative to the daemon container's filesystem, not your local machine. This causes:
+Volume paths are resolved on the server where Docker runs, not on your local machine. Relative host paths would be ambiguous and can create data in unexpected locations. This causes:
 
-- Unexpected directory creation inside the daemon container
+- Unexpected directory creation on the server
 - Data appearing lost or inaccessible
 - Inconsistent behavior across deployments
 

@@ -25,7 +25,7 @@ If you want the short version first:
 | **Dokku** | Mini-Heroku | Go | Nginx, Caddy, Traefik | CLI only | No (single server) | No | Early-stage MCP | Solo devs wanting git-push simplicity |
 | **Komodo** | Server management platform | Rust | User-configured | Web GUI | Yes (agent-based) | Yes | None | Teams managing many servers and resources |
 | **Uncloud** | Multi-host Docker orchestrator | Go | Caddy | CLI only | Yes (WireGuard mesh) | No (built-in registry) | None | Teams scaling Docker Compose across machines |
-| **Haloy** | CLI deployment tool | Go | Built-in | CLI only | Yes (REST API) | Optional | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
+| **Haloy** | CLI deployment tool | Go | haloy-proxy | CLI only | Yes (REST API) | Optional | Agent skills, CLI-native | Devs wanting simple Docker deploys without extras |
 
 ## Coolify
 
@@ -143,7 +143,7 @@ The community is small (around 4,800 GitHub stars) and documentation is limited.
 
 ## Haloy
 
-[Haloy](https://haloy.dev) takes a different approach from both the PaaS tools and the SSH-based tools. It's a CLI that communicates with a lightweight server daemon (`haloyd`) over HTTPS. You configure your application with a YAML file, run `haloy deploy`, and it builds a Docker image locally, uploads only the changed layers to the server, and does a zero-downtime swap.
+[Haloy](https://haloy.dev) takes a different approach from both the PaaS tools and the SSH-based tools. It's a CLI that communicates with a lightweight server daemon (`haloyd`) over HTTPS, paired with a dedicated reverse proxy daemon (`haloy-proxy`) that serves public traffic. You configure your application with a YAML file, run `haloy deploy`, and it builds a Docker image locally, uploads only the changed layers to the server, and does a zero-downtime swap.
 
 **What it does well:**
 
@@ -151,11 +151,11 @@ The direct-upload approach eliminates the need for a Docker registry. Haloy buil
 
 Configuration is a single YAML file in your project root. Automatic HTTPS via Let's Encrypt, built-in health checks, rolling deployments, instant rollbacks, and secret management (including 1Password integration) are included. Multi-server deployments are supported natively, so you can define staging and production targets in the same config.
 
-The server daemon approach means the server can actively monitor your containers, handle health checks, auto-recover crashed containers, and serve as a reverse proxy, all without external dependencies. The CLI is designed to work well with AI coding assistants, with agent skills for generating Dockerfiles and configuration.
+The server daemon approach means the server can actively monitor your containers, handle health checks, and auto-recover crashed containers, all without external dependencies. Traffic routing and HTTPS termination are handled by Haloy's own `haloy-proxy` daemon, which keeps serving traffic even while `haloyd` restarts or upgrades. The CLI is designed to work well with AI coding assistants, with agent skills for generating Dockerfiles and configuration.
 
 **Where it falls short:**
 
-Haloy is the newest tool on this list, which means the smallest community, fewest tutorials, and least battle-testing in production. There's no web dashboard, so everything is done through the CLI. The server daemon, while lightweight, is an additional process running on your server that needs to be maintained and updated.
+Haloy is the newest tool on this list, which means the smallest community, fewest tutorials, and least battle-testing in production. There's no web dashboard, so everything is done through the CLI. The server daemons, while lightweight, are additional processes running on your server that need to be maintained and updated.
 
 **Best for:** Developers who want simple Docker deployments to their own servers without the overhead of a full PaaS or the requirement of a Docker registry. Particularly well-suited for indie developers, small teams, and anyone who prefers a CLI-first workflow with minimal configuration.
 

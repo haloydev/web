@@ -28,7 +28,7 @@ My goal with Haloy was simple: zero-downtime deploys to my own server without dr
 
 This works, but it's wasteful. A typical Dockerized Node.js app is 200-400MB. A Next.js production build can be 400-600MB. Uploading that whole tar on every deploy is mostly redundant because the heavy layers rarely change. Usually only your app code changed, maybe 5MB.
 
-The obvious fix is a Docker registry: push once, pull anywhere. I considered running a private registry on the same server, but that reintroduced complexity I was trying to avoid (auth, storage, ports, and more moving pieces). I wanted to keep Haloy as a single binary with minimal dependencies.
+The obvious fix is a Docker registry: push once, pull anywhere. I considered running a private registry on the same server, but that reintroduced complexity I was trying to avoid (auth, storage, ports, and more moving pieces). I wanted to keep Haloy as small native services with minimal dependencies.
 
 After some thinking (and prompting), I realized the answer was simpler: extract just the layer caching mechanism from a registry and build it into the server itself.
 

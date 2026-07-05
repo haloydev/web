@@ -2,7 +2,7 @@
 title: Upgrading
 slug: upgrading
 section: getting-started
-description: 'Upgrade the Haloy CLI and haloyd server daemon to the latest version.'
+description: 'Upgrade the Haloy CLI and server daemons to the latest version.'
 ---
 
 import Code from '@/components/code.astro';
@@ -78,7 +78,7 @@ Check that the upgrade was successful:
 
 <Code code="haloy version" lang="bash" />
 
-## Upgrading Haloyd on the Server
+## Upgrading Haloy on the Server
 
 SSH into your server and run the upgrade script:
 
@@ -86,16 +86,62 @@ SSH into your server and run the upgrade script:
 
 **Note:** If you're not logged in as root, use `| sudo sh` instead of `| sh`.
 
-Do not re-run the original `install-haloyd.sh` script to upgrade. While it won't overwrite your configuration or data, it will replace your systemd/OpenRC service file, discarding any manual customizations.
+Do not re-run the original `install-haloyd.sh` script to upgrade. While it won't overwrite your configuration or data, it will replace your systemd/OpenRC service files, discarding any manual customizations.
 
-This script supports systemd, OpenRC, and SysVinit. It will:
+This script supports systemd, OpenRC, and SysVinit. On current split-proxy installs, the default upgrade updates `haloyd` only:
+
 1. Download the latest `haloyd` binary
-2. Stop the service
+2. Stop `haloyd`
 3. Replace the binary
-4. Restart the service
+4. Restart `haloyd`
+
+`haloy-proxy` keeps serving application traffic while `haloyd` is stopped.
+
+### First Upgrade From a Pre-Split Install
+
+Older installs ran the proxy inside `haloyd`. The first upgrade to the split-proxy architecture performs a one-time migration:
+
+1. Download the latest `haloyd` and `haloy-proxy` binaries
+2. Install the `haloy-proxy` service
+3. Move ports `80` and `443` from `haloyd` to `haloy-proxy`
+4. Restart `haloyd` as the control plane
+
+Expect a brief traffic gap during this one-time migration while the public ports move. If migration fails, the script rolls back the partial proxy install and restores the previous `haloyd` service.
+
+Future `haloyd` upgrades do not interrupt traffic.
+
+## Upgrading haloy-proxy
+
+Most upgrades only need the default `haloyd` path. Upgrade the proxy separately when a release specifically changes the proxy, the proxy wire format, or the upgrade output tells you to do it later:
+
+<Code code="curl -fsSL https://sh.haloy.dev/upgrade-server.sh | sh -s -- --component=proxy" lang="bash" />
+
+If you already have the script locally, the equivalent command is:
+
+<Code code="upgrade-server.sh --component=proxy" lang="bash" />
+
+After a successful one-time migration, the upgrade script prints this reminder: `To upgrade the proxy itself later: upgrade-server.sh --component=proxy`.
+
+Upgrading `haloy-proxy` briefly pauses public traffic because the proxy owns ports `80` and `443`.
+
+In rare releases the routing snapshot format changes. `haloy-proxy` rejects snapshots with a newer schema version than it understands and keeps serving its last known routes, so when release notes mention a snapshot schema change, upgrade `haloy-proxy` first, then `haloyd`.
 
 ### Verify Server Upgrade
 
-Check the server version:
+Check the server versions from your local machine:
 
-<Code code="haloyd version" lang="bash" />
+<Code code="haloy server version" lang="bash" />
+
+Current servers report both components when the proxy is installed:
+
+<Code code={`
+  haloyd version: v0.1.0-beta.66
+  haloy-proxy version: v0.1.0-beta.66
+`} lang="text" />
+
+On the server, you can also check each binary directly:
+
+<Code code={`
+  haloyd version
+  haloy-proxy version
+`} lang="bash" />

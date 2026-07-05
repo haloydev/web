@@ -19,7 +19,7 @@ Haloy is for a narrower use case: production-grade deploys on your own servers, 
 
 - No heavy control plane
 - No dashboard maze
-- A small daemon focused on deploy orchestration, reverse proxying, and TLS
+- Small server daemons focused on deploy orchestration, reverse proxying, and TLS
 
 ### CLI-first workflow
 

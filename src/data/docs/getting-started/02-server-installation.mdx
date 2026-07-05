@@ -2,7 +2,7 @@
 title: 'Server Installation'
 slug: 'server-installation'
 section: getting-started
-description: 'Install and configure the haloyd server daemon on your Linux server. Handles Docker orchestration, HTTPS certificates, and deployments.'
+description: 'Install and configure the Haloy server daemons on your Linux server. Handles Docker orchestration, HTTPS certificates, proxy routing, and deployments.'
 ---
 
 import Code from '@/components/code.astro';
@@ -10,7 +10,10 @@ import CodeTabs from '@/components/code-tabs/code-tabs.astro';
 import CodeTabTrigger from '@/components/code-tabs/code-tab-trigger.astro';
 import CodeTabPanel from '@/components/code-tabs/code-tab-panel.astro';
 
-The Haloy daemon (`haloyd`) runs on your server and manages container deployments, service discovery, and traffic routing.
+Haloy installs two server daemons:
+
+- `haloyd` manages deployments, Docker discovery, health checks, API access, certificates, and routing snapshots.
+- `haloy-proxy` owns ports `80` and `443`, terminates HTTPS, and keeps serving traffic while `haloyd` restarts or upgrades.
 
 After running the installation script, you'll need to configure your server with a domain for remote access.
 
@@ -94,7 +97,7 @@ The install script accepts both command-line flags and environment variables:
 |------|---------------------|-------------|
 | `--api-domain=DOMAIN` | `API_DOMAIN` | Domain for the haloy API (e.g., api.example.com) |
 | `--version=VERSION` | `VERSION` | Install a specific version (default: latest) |
-| `--skip-start` | `SKIP_START=true` | Don't start the service after installation |
+| `--skip-start` | `SKIP_START=true` | Don't start the services after installation |
 | `--skip-docker-install` | `SKIP_DOCKER_INSTALL=true` | Skip automatic Docker installation |
 
 Examples:
@@ -128,15 +131,21 @@ The script enables and starts the Docker daemon automatically.
 
 If you prefer to install manually or the script doesn't work for your system:
 
-### 1. Install haloyd Binary
+### 1. Install Server Binaries
 
-Download and install the binary:
+Download and install the binaries:
 
 <Code code={`
 # Download latest release (adjust architecture as needed: amd64, arm64)
 curl -fsSL -o /usr/local/bin/haloyd https://releases.haloy.dev/haloyd-linux-amd64
+curl -fsSL -o /usr/local/bin/haloy-proxy https://releases.haloy.dev/haloy-proxy-linux-amd64
 chmod +x /usr/local/bin/haloyd
+chmod +x /usr/local/bin/haloy-proxy
 `} lang="bash" />
+
+For OpenRC or SysVinit installs, grant the proxy binary permission to bind ports `80` and `443`. Systemd installs use the service unit capability instead.
+
+<Code code="setcap cap_net_bind_service=+ep /usr/local/bin/haloy-proxy" lang="bash" />
 
 ### 2. Create System User
 
@@ -163,12 +172,45 @@ This creates:
 #### Systemd
 
 <Code code={`
+cat > /etc/systemd/system/haloy-proxy.service << 'EOF'
+[Unit]
+Description=Haloy Proxy
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=haloy
+Group=haloy
+ExecStart=/usr/local/bin/haloy-proxy serve
+Restart=always
+RestartSec=5
+Environment=HALOY_DATA_DIR=/var/lib/haloy
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/haloy
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
 cat > /etc/systemd/system/haloyd.service << 'EOF'
 [Unit]
 Description=Haloy Daemon
-After=network-online.target docker.service
-Wants=network-online.target
+After=network-online.target docker.service haloy-proxy.service
 Requires=docker.service
+Wants=network-online.target haloy-proxy.service
 
 [Service]
 Type=simple
@@ -177,6 +219,8 @@ Group=haloy
 ExecStart=/usr/local/bin/haloyd serve
 Restart=always
 RestartSec=5
+Environment=HALOY_DATA_DIR=/var/lib/haloy
+Environment=HALOY_CONFIG_DIR=/etc/haloy
 
 # Security hardening
 NoNewPrivileges=true
@@ -185,20 +229,49 @@ ProtectHome=true
 ProtectSystem=strict
 ReadWritePaths=/var/lib/haloy
 ReadOnlyPaths=/etc/haloy
-CapabilityBoundingSet=CAP_NET_BIND_SERVICE
-AmbientCapabilities=CAP_NET_BIND_SERVICE
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LimitNOFILE=65536
 
 [Install]
 WantedBy=multi-user.target
 EOF
 
 systemctl daemon-reload
-systemctl enable --now haloyd
+systemctl enable --now haloy-proxy haloyd
 `} lang="bash" />
 
 #### OpenRC
 
 <Code code={`
+cat > /etc/init.d/haloy-proxy << 'EOF'
+#!/sbin/openrc-run
+
+name="haloy-proxy"
+description="Haloy Proxy"
+command="/usr/local/bin/haloy-proxy"
+command_args="serve"
+command_user="haloy:haloy"
+pidfile="/run/haloy-proxy/haloy-proxy.pid"
+command_background="yes"
+output_log="/var/log/haloy-proxy.log"
+error_log="/var/log/haloy-proxy.log"
+
+export HALOY_DATA_DIR="/var/lib/haloy"
+
+depend() {
+    need net
+    after firewall
+}
+
+start_pre() {
+    checkpath --directory --owner haloy:haloy --mode 0755 /run/haloy-proxy
+    checkpath --file --owner haloy:haloy --mode 0644 /var/log/haloy-proxy.log
+}
+EOF
+
 cat > /etc/init.d/haloyd << 'EOF'
 #!/sbin/openrc-run
 
@@ -207,17 +280,31 @@ description="Haloy Daemon"
 command="/usr/local/bin/haloyd"
 command_args="serve"
 command_user="haloy:haloy"
-pidfile="/run/haloyd.pid"
-command_background=true
+pidfile="/run/haloyd/haloyd.pid"
+command_background="yes"
+output_log="/var/log/haloyd.log"
+error_log="/var/log/haloyd.log"
+
+export HALOY_DATA_DIR="/var/lib/haloy"
+export HALOY_CONFIG_DIR="/etc/haloy"
 
 depend() {
     need net docker
-    after firewall
+    use haloy-proxy
+    after firewall haloy-proxy
+}
+
+start_pre() {
+    checkpath --directory --owner haloy:haloy --mode 0755 /run/haloyd
+    checkpath --file --owner haloy:haloy --mode 0644 /var/log/haloyd.log
 }
 EOF
 
+chmod +x /etc/init.d/haloy-proxy
 chmod +x /etc/init.d/haloyd
+rc-update add haloy-proxy default
 rc-update add haloyd default
+rc-service haloy-proxy start
 rc-service haloyd start
 `} lang="bash" />
 
@@ -227,35 +314,41 @@ rc-service haloyd start
 
 <Code code={`
 # Start the service
-systemctl start haloyd
+systemctl start haloy-proxy haloyd
 
 # Stop the service
-systemctl stop haloyd
+systemctl stop haloyd haloy-proxy
 
-# Restart the service
+# Restart only the control plane; traffic keeps flowing through haloy-proxy
 systemctl restart haloyd
 
 # Check service status
-systemctl status haloyd
+systemctl status haloyd haloy-proxy
 
-# View logs
+# View control-plane logs
 journalctl -u haloyd -f
+
+# View proxy logs
+journalctl -u haloy-proxy -f
 `} lang="bash" />
 
 ### OpenRC
 
 <Code code={`
 # Start the service
+rc-service haloy-proxy start
 rc-service haloyd start
 
 # Stop the service
 rc-service haloyd stop
+rc-service haloy-proxy stop
 
-# Restart the service
+# Restart only the control plane; traffic keeps flowing through haloy-proxy
 rc-service haloyd restart
 
 # Check service status
 rc-service haloyd status
+rc-service haloy-proxy status
 `} lang="bash" />
 
 ## Configuration
@@ -293,8 +386,9 @@ haloyd config get api-token
 └── .env                 # API token
 
 /var/lib/haloy/          # Data
-├── certs/               # SSL certificates
-└── db/                  # Deployment database
+├── cert-storage/        # SSL certificates
+├── db/                  # Deployment database
+└── proxy/               # Proxy socket and routing snapshot
 `} lang="bash" />
 
 ## Verify Installation
@@ -339,23 +433,28 @@ See [Docker Installation](#docker-installation) for installation options.
 
 Check the logs:
 
-<Code code="journalctl -u haloyd -n 50" lang="bash" />
+<Code code={`
+journalctl -u haloyd -n 50
+journalctl -u haloy-proxy -n 50
+`} lang="bash" />
 
 Common issues:
 - Docker not running: `systemctl start docker`
-- Port 80/443 in use: Check with `ss -tlnp | grep -E ':80|:443'`
+- Port 80/443 in use: Check with `ss -tlnp | grep -E ':80|:443'`; these ports should belong to `haloy-proxy`
 - Permission issues: Ensure the `haloy` user is in the `docker` group
 
 ### Cannot Connect to API
 
-Verify the service is running and listening:
+`haloyd` serves its API on a loopback port only. `haloy-proxy` terminates HTTPS and forwards API traffic to it, so the API is unreachable if `haloy-proxy` is down, even when `haloyd` is running.
+
+Verify both services are running and listening:
 
 <Code code={`
 # Check service status
-systemctl status haloyd
+systemctl status haloyd haloy-proxy
 
 # Check if ports are open
-ss -tlnp | grep haloyd
+ss -tlnp | grep -E 'haloyd|haloy-proxy'
 
 # Test API locally
 curl -k https://localhost/health
@@ -429,17 +528,17 @@ To completely remove Haloy from your server:
 <Code code="curl -sL https://sh.haloy.dev/uninstall-server.sh | sh" lang="bash" />
 
 This will:
-- Stop and remove the haloyd service
+- Stop and remove the `haloyd` and `haloy-proxy` services
 - Optionally back up your data
 - Remove configuration and data directories
-- Remove the haloyd binary
+- Remove the server binaries
 - Optionally remove the haloy user
 
 See [Uninstalling](/docs/uninstalling) for more details.
 
 ## Upgrading
 
-To upgrade an existing `haloyd` installation, use one of the dedicated upgrade methods described in [Upgrading](/docs/upgrading). Do not re-run the install script to upgrade, as it will overwrite your systemd/OpenRC service file and discard any manual customizations you've made to it.
+To upgrade an existing server installation, use one of the dedicated upgrade methods described in [Upgrading](/docs/upgrading). Do not re-run the install script to upgrade, as it will overwrite your systemd/OpenRC service files and discard any manual customizations you've made to them.
 
 ## Next Steps
 

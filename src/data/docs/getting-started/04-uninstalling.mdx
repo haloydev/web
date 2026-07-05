@@ -2,7 +2,7 @@
 title: 'Uninstalling'
 slug: 'uninstalling'
 section: getting-started
-description: 'Remove the Haloy CLI from your local machine and uninstall the haloyd server daemon from your server.'
+description: 'Remove the Haloy CLI from your local machine and uninstall the Haloy server daemons from your server.'
 ---
 
 import Code from '@/components/code.astro';
@@ -112,14 +112,14 @@ Remove all Haloy components, data, and configurations:
 
 The uninstall script will:
 - Detect what's installed before removing
-- Stop and remove the service
+- Stop and remove the `haloyd` and `haloy-proxy` services
 - Remove the binary, config, and data directories
 - Remove the `haloy` system user
 - Support all init systems (systemd, OpenRC, SysVinit)
 
 This removes:
 
-- `haloyd` service and binary
+- `haloyd` and `haloy-proxy` services and binaries
 - All Haloy configuration files (`/etc/haloy/`)
 - All Haloy data (databases, certificates) (`/var/lib/haloy/`)
 - Docker network
@@ -193,17 +193,22 @@ Stop the service but preserve data for later reinstallation:
 <Code code={`
 # Stop service (systemd)
 systemctl stop haloyd
+systemctl stop haloy-proxy
 systemctl disable haloyd
+systemctl disable haloy-proxy
 
 # Or for OpenRC
 rc-service haloyd stop
+rc-service haloy-proxy stop
 rc-update del haloyd
+rc-update del haloy-proxy
 
-# Remove only the binary
+# Remove only the binaries
 rm /usr/local/bin/haloyd
+rm /usr/local/bin/haloy-proxy
 
 # Data remains in /var/lib/haloy/ and /etc/haloy/
-# Can be restored by reinstalling haloyd
+# Can be restored by reinstalling the server daemons
 `} lang="bash" />
 
 ### Remove Everything Except Applications
@@ -217,8 +222,9 @@ Remove Haloy but keep applications running:
 # - No domain routing
 # - Direct access to container ports needed
 
-# Stop haloyd service
+# Stop Haloy services
 systemctl stop haloyd
+systemctl stop haloy-proxy
 
 # Remove Haloy components
 curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
@@ -245,7 +251,9 @@ docker ps --filter "label=dev.haloy.role=app"
 | Item                   | Location                  | Removed        |
 | ---------------------- | ------------------------- | -------------- |
 | `haloyd` binary        | `/usr/local/bin/haloyd`   | Yes            |
+| `haloy-proxy` binary   | `/usr/local/bin/haloy-proxy` | Yes         |
 | `haloyd` service       | systemd/OpenRC/SysVinit   | Yes            |
+| `haloy-proxy` service  | systemd/OpenRC/SysVinit   | Yes            |
 | Configuration          | `/etc/haloy/`             | Yes            |
 | Data                   | `/var/lib/haloy/`         | Yes            |
 | Docker network         | `haloy`                   | Yes            |
@@ -264,7 +272,7 @@ After uninstallation, you can reinstall Haloy:
 ### Reinstall Server
 
 <Code code={`
-# Install haloyd
+# Install server daemons
 curl -fsSL https://sh.haloy.dev/install-haloyd.sh | sh
 
 # If you preserved /etc/haloy/ and /var/lib/haloy/,
@@ -301,6 +309,7 @@ curl -sL https://sh.haloy.dev/uninstall-server.sh | sh
 rm -rf /etc/haloy/
 rm -rf /var/lib/haloy/
 rm -f /usr/local/bin/haloyd
+rm -f /usr/local/bin/haloy-proxy
 `}
   lang="bash"
 />
@@ -310,12 +319,18 @@ rm -f /usr/local/bin/haloyd
 <Code code={`
 # For systemd
 systemctl stop haloyd
+systemctl stop haloy-proxy
 systemctl disable haloyd
+systemctl disable haloy-proxy
 rm /etc/systemd/system/haloyd.service
+rm /etc/systemd/system/haloy-proxy.service
 systemctl daemon-reload
 
 # For OpenRC
 rc-service haloyd stop
+rc-service haloy-proxy stop
 rc-update del haloyd
+rc-update del haloy-proxy
 rm /etc/init.d/haloyd
+rm /etc/init.d/haloy-proxy
 `} lang="bash" />
