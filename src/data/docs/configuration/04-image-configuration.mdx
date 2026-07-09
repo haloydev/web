@@ -309,7 +309,7 @@ Haloy can build Docker images locally and distribute them to your servers, elimi
 | Key          | Type   | Required | Description                                                         |
 | ------------ | ------ | -------- | --------------------------------------------------------------------|
 | `context`    | string | No       | Build context directory, relative to config file (default: ".")     |
-| `dockerfile` | string | No       | Path to Dockerfile, relative to config file (default: "Dockerfile") |
+| `dockerfile` | string | No       | Path to Dockerfile, relative to context (default: "Dockerfile")     |
 | `platform`   | string | No       | Target platform (default: "linux/amd64")                            |
 | `args`       | array  | No       | Build arguments                                                     |
 | `push`       | string | No       | Where to push: "registry" or "server" (auto-detected)               |
@@ -333,21 +333,21 @@ Haloy can build Docker images locally and distribute them to your servers, elimi
 
 #### Dockerfile and Context
 
-Both context and dockerfile paths are resolved relative to the config file's directory.
+Paths are resolved the same way as in Docker Compose: the context is relative to the config file's directory, and the dockerfile is relative to the context.
 
 <Code code={`
   # Dockerfile inside context directory
   build_config:
     context: "./dockerfiles/static"
-    dockerfile: "./dockerfiles/static/Dockerfile-static"
-  # Shared Dockerfile with different context
+    dockerfile: "Dockerfile-static"
+  # Shared Dockerfile outside the context
   build_config:
     context: "./apps/frontend"
-    dockerfile: "./dockerfiles/Dockerfile-node"
+    dockerfile: "../../dockerfiles/Dockerfile-node"
   # Dockerfile at root, context is a subdirectory
   build_config:
     context: "./src"
-    dockerfile: "./Dockerfile"
+    dockerfile: "../Dockerfile"
 `} lang="yaml" />
 
 ### Push to Server (No Registry Required)
