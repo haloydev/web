@@ -157,7 +157,7 @@ Stop running application containers.
 
 ### logs
 
-Stream application container logs (stdout/stderr) in real-time, similar to `docker logs -f`. Shows the last N lines of history first, then follows new output until Ctrl+C.
+Stream application container logs (stdout/stderr) in real-time, similar to `docker logs -f`. Shows the last N lines of history first, then follows new output until Ctrl+C (unless `--no-follow` is used).
 
 <Code code={`
   # Stream from the default container
@@ -175,6 +175,12 @@ Stream application container logs (stdout/stderr) in real-time, similar to `dock
   # Multi-target: stream from prod target
   haloy logs --target prod
 
+  # Print existing logs and exit without following
+  haloy logs --no-follow
+
+  # Raw logs, no container names, no extra formatting
+  haloy logs --raw
+
   # Specify config file
   haloy logs --config path/to/config.yaml
 `} lang="bash" />
@@ -190,6 +196,8 @@ When `--all-containers` is used, each line is prefixed with `[<container-id>]`. 
 - `--tail <n>` - Number of historical log lines to show (default: 100)
 - `--container <id>` - Stream logs from a specific container ID
 - `--all-containers` - Stream logs from all containers (shows container ID prefix per line)
+- `--no-follow` - Print existing logs and exit without following
+- `--raw` - Raw log lines with no prefixes or extra formatting
 </div>
 
 Requires a `haloy.yaml` config file. The server is determined from the config (no `--server` flag).
