@@ -111,7 +111,7 @@ These options define a deployment unit.
 | `image_key`           | string         | No          | Reference a named image from the top-level `images` map. Cannot be used together with `image`.                                                                                                                |
 | `server`              | string         | No          | Haloy server API URL                                                                                                                                                                                          |
 | `api_token`           | value source   | No          | API token value source using `value`, `from.env`, or `from.secret` (see [Authentication](/docs/server-authentication))                                                                                        |
-| `deployment_strategy` | string         | No          | Deployment strategy: "rolling" (default) or "replace"                                                                                                                                                         |
+| `deployment_strategy` | string         | No          | Deployment strategy: "rolling" or "replace". Defaults to "rolling" when domains are set and "replace" otherwise. "rolling" requires at least one domain (see [Deployment Strategies](/docs/deployment-strategies)) |
 | `domains`             | array          | No          | Domain routing configuration (see [Domain Configuration](/docs/domain-configuration))                                                                                                                         |
 | `replicas`            | integer        | No          | Number of container instances (default: 1)                                                                                                                                                                    |
 | `port`                | string/integer | No          | Container port to expose (default: "8080"). The port your application listens on inside the container.                                                                                                        |
@@ -250,7 +250,7 @@ Prevent accidental deployment of critical services (like databases) by marking t
 
 **Constraints for Static Naming:**
 
-- Requires `deployment_strategy: "replace"`
+- Requires `deployment_strategy: "replace"` (the default for targets without domains)
 - Does not support multiple replicas
 
 <Code code={`
@@ -269,7 +269,7 @@ Control how container names are generated.
 
 **Constraints for Static Naming:**
 
-- Requires `deployment_strategy: "replace"`
+- Requires `deployment_strategy: "replace"` (the default for targets without domains)
 - Does not support multiple replicas
 
 <Code code={`

@@ -13,6 +13,8 @@ Haloy supports two deployment strategies: rolling deployment (default) and repla
 
 Gradually replaces old containers with new ones, ensuring zero downtime.
 
+Rolling is the default for targets that have at least one domain, and it requires one. The cutover happens in the proxy, which routes by domain: new containers are added to the route once healthy, then old containers are removed. A target without domains has no route to hand over and no stable address under dynamic container names, so it uses the replace strategy instead. Setting `deployment_strategy: "rolling"` on a target without domains, directly or through the root config, fails validation.
+
 ### How It Works
 
 1. Start new container(s)
@@ -77,6 +79,8 @@ Stops all old containers before starting new ones.
 
 This strategy is required when using `naming_strategy: "static"`, as it ensures the old container name is freed before the new one starts.
 
+It is also the default, and the only supported strategy, for targets without domains: databases, queues, workers and other internal services that are reached by other containers over the `haloy` network rather than through the proxy. Pair it with `naming_strategy: "static"` (or the `database` and `service` presets, which set both) so the service keeps a fixed container name that other apps can use as its hostname.
+
 ### Configuration
 
 <Code
@@ -108,6 +112,7 @@ This strategy is required when using `naming_strategy: "static"`, as it ensures 
 - Services where brief downtime is acceptable
 - Applications requiring clean state between versions
 - Single-replica deployments
+- Internal services without domains (databases, queues, workers)
 
 ### Example
 
