@@ -271,7 +271,7 @@ This allows you to integrate Haloy's routing and SSL management with your existi
 
 Haloy creates and uses Docker networks:
 
-- **haloy** (default): Application containers connect to this network
+- **haloy** (default): Application containers connect to this network and can reach each other by container name. Internal services without domains use static naming and the `replace` strategy so that name stays fixed
 - Custom networks: Via `network` configuration option
 
 ### Port Mapping

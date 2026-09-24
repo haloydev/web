@@ -151,6 +151,8 @@ Health checks are critical for scaling:
 <Code code={`
   name: "my-app"
   replicas: 5
+  domains:
+    - domain: "my-app.com"
   health_check_path: "/health"
   min_ready_seconds: 10
   port: "8080"
@@ -168,6 +170,8 @@ If new replicas sometimes pass health checks and then crash shortly afterward, a
   name: "my-app"
   replicas: 5
   deployment_strategy: "rolling"
+  domains:
+    - domain: "my-app.com"
   health_check_path: "/health"
   min_ready_seconds: 10
 `}
@@ -193,6 +197,8 @@ Updates one replica at a time:
   name: "my-app"
   replicas: 5
   deployment_strategy: "rolling"
+  domains:
+    - domain: "my-app.com"
 
   # Deployment process:
   # 1. Start new container 1, wait for health check

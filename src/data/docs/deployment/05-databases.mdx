@@ -19,6 +19,8 @@ For stateful services, start with `preset: database`. It applies safer defaults:
 - `protected: true`
 - `image.history.strategy: "none"`
 
+A database has no domains, so other containers reach it by its static container name rather than through the proxy. Targets without domains always use the `replace` strategy.
+
 Use named volumes for persistent storage and deploy databases explicitly:
 
 <Code code={`

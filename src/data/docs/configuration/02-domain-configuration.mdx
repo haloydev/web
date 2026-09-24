@@ -83,6 +83,8 @@ Each target can define its own domains:
 
 Root `domains` are inherited by targets that do not define their own `domains`. When a target defines `domains`, it replaces the root domain list for that target. Domain arrays are not merged.
 
+The `deployment_strategy` default is resolved per target from its final domain list: targets with domains default to `rolling`, targets without domains default to `replace`.
+
 ## Validation
 
 Validate the config before deploying:
@@ -98,6 +100,7 @@ Common issues:
 - `404 Not Found`: The hostname is not configured in `domains`, or the updated config has not been deployed yet.
 - Certificate errors: DNS does not point to the Haloy server, ports `80` or `443` are blocked, or Cloudflare is using Flexible SSL/TLS mode.
 - App does not respond on the domain: Make sure `port` matches the port your container listens on.
+- `deployment_strategy 'rolling' requires at least one domain`: A target without domains is set to `rolling`, either directly or through a root `deployment_strategy: "rolling"`. Set `deployment_strategy: "replace"` on that target, or remove the root setting.
 
 ## Next Steps
 

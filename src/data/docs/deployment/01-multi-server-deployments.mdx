@@ -107,6 +107,7 @@ Base configuration provides defaults that targets can override:
 - Most target values completely override base values (no merging)
 - Only specified fields in targets override the base
 - Readiness settings like `min_ready_seconds` inherit the same way as `replicas` or `deployment_strategy`
+- A root `deployment_strategy: "rolling"` inherited by a target without domains fails validation. Set `replace` on that target, or leave the root value unset so each target gets its own default
 - **Exception:** Environment variables (`env`) are merged - target values override base values with the same name, while preserving other base variables
 - Other arrays (like `domains`, `volumes`) are replaced entirely, not merged. See [Domain Configuration](/docs/domain-configuration) for domain examples.
 

@@ -7,9 +7,9 @@ description: 'Choose between rolling deployments for zero-downtime updates and r
 
 import Code from '@/components/code.astro';
 
-Haloy supports two deployment strategies: rolling deployment (default) and replace deployment.
+Haloy supports two deployment strategies: rolling deployment, the default for targets with domains, and replace deployment, the default for targets without domains.
 
-## Rolling Deployment (Default)
+## Rolling Deployment (Default with domains)
 
 Gradually replaces old containers with new ones, ensuring zero downtime.
 
@@ -28,7 +28,7 @@ Rolling is the default for targets that have at least one domain, and it require
 <Code
   code={`
   name: "my-app"
-  deployment_strategy: "rolling"  # Default, can be omitted
+  deployment_strategy: "rolling"  # Default when domains are set, can be omitted
   replicas: 3
   domains:
     - domain: "my-app.com"
@@ -65,7 +65,7 @@ Rolling is the default for targets that have at least one domain, and it require
   lang="yaml"
 />
 
-## Replace Deployment
+## Replace Deployment (Default without domains)
 
 Stops all old containers before starting new ones.
 
@@ -201,6 +201,8 @@ Use `min_ready_seconds` when a container often passes health checks and then fai
   code={`
   name: "my-app"
   deployment_strategy: "rolling"
+  domains:
+    - domain: "my-app.com"
   health_check_path: "/health"
   min_ready_seconds: 10
 `}
@@ -309,11 +311,11 @@ If replace deployment takes too long:
 2. Use health checks to detect readiness faster
 3. Keep `min_ready_seconds` only as high as needed
 4. Pre-warm caches and connections on startup
-5. Consider switching to rolling deployment
+5. Consider switching to rolling deployment (requires a domain)
 
 ## Best Practices
 
-1. **Use rolling for production**: Ensures high availability
+1. **Use rolling for domain-routed production apps**: Ensures high availability
 2. **Implement robust health checks**: Critical for safe deployments
 3. **Test in staging first**: Verify deployment strategy works
 4. **Monitor during deployment**: Watch logs and health metrics

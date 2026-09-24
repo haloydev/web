@@ -280,7 +280,7 @@ Control how container names are generated.
 
 ## Deployment Strategies
 
-### Rolling Deployment (Default)
+### Rolling Deployment (Default with domains)
 
 Gradually replaces old containers with new ones, ensuring zero downtime:
 
@@ -289,9 +289,11 @@ Gradually replaces old containers with new ones, ensuring zero downtime:
   name: "my-app"
   deployment_strategy: "rolling"
   replicas: 3
+  domains:
+    - domain: "my-app.com"
 `} lang="yaml" />
 
-### Replace Deployment
+### Replace Deployment (Default without domains)
 
 Stops all old containers before starting new ones:
 
@@ -373,6 +375,7 @@ When using multi-target deployments, each target can override base configuration
 - Only specified fields in targets override the base
 - **Exception:** Environment variables (`env`) are merged - target values override base values with the same name, while preserving other base variables
 - `global_pre_deploy` and `global_post_deploy` run once regardless of targets
+- The `deployment_strategy` default is resolved per target after inheritance: a target whose final configuration has no domains defaults to `replace`. A root `deployment_strategy: "rolling"` inherited by such a target fails validation, so set `replace` on that target instead
 
 ### Example
 

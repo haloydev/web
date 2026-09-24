@@ -42,6 +42,8 @@ For multi-target setups, define reusable images at the root with `images`, then 
       image_key: "worker"
 `} lang="yaml" />
 
+The `jobs` target has no domains, so it is not routed through the proxy and deploys with the `replace` strategy.
+
 When to use:
 
 - Use root `image` when every target should share one default image
@@ -580,6 +582,7 @@ You can define shared images once at the root and let targets choose with `image
 
 Notes:
 
+- A target without domains, like `jobs`, deploys with the `replace` strategy
 - For a target, use either `image` or `image_key` (not both)
 - Resolution priority is: target `image` -> target `image_key` -> root `image`
 
