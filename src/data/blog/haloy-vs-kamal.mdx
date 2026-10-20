@@ -1,0 +1,194 @@
+---
+title: 'Haloy vs Kamal: Two Ways to Deploy Docker to Your Own Servers'
+slug: 'haloy-vs-kamal'
+description: 'Kamal and Haloy both deploy Docker containers to your own servers with a YAML file and one command. Where they differ is how the CLI reaches the server, how the image gets there, and what runs on the box.'
+pubDate: 2026-10-20
+author: 'Andreas Meistad'
+tags: ['kamal', 'deployment', 'docker', 'devops', 'comparison']
+draft: false
+---
+
+import Code from '@/components/code.astro';
+
+If you've read the [deployment tools comparison](/blog/self-hosted-deployment-tools-compared), you already know Kamal is the tool I'd put closest to Haloy. Same shape: a YAML file, one command, Docker containers on servers you own, a small reverse proxy in front, and no dashboard. People ask about this comparison more than any other, so here is a proper look.
+
+Short version: the difference is where the work happens. Kamal is a CLI that SSHes into your servers and runs Docker commands. Nothing lives on the server except your app and kamal-proxy. Haloy puts a small daemon on the server and talks to it over HTTPS. Most of the practical differences between the two fall out of that one decision.
+
+## Quick Comparison
+
+| | Kamal | Haloy |
+|---|---|---|
+| **Written in** | Ruby | Go |
+| **CLI install** | Ruby gem, or a Docker wrapper | Single binary via curl, Homebrew, npm, or go install |
+| **How the CLI reaches the server** | SSH, root by default | HTTPS API with a token |
+| **What runs on the server** | Docker, kamal-proxy, your containers | Docker, haloyd, haloy-proxy, your containers |
+| **Getting the image there** | Push to a registry, servers pull | Upload missing layers directly; registry optional |
+| **Let's Encrypt** | Built in, single server only | Built in, one certificate per server |
+| **Multi-server** | Roles and hosts, load balancer in front for HTTPS | Targets, each server with its own proxy and certs |
+| **Rollback retention** | Old containers kept for 3 days | Last N images kept, count-based |
+| **Secret providers** | 1Password, Bitwarden, LastPass, AWS, GCP, Doppler, Passbolt | 1Password, SOPS |
+| **Databases and services** | Accessories in the same file | Separate targets with volumes |
+| **Best for** | Rails teams, registry-based workflows | Registry-free deploys, mixed toolchains, several servers |
+
+## What Kamal Is
+
+[Kamal](https://kamal-deploy.org) is 37signals' deployment tool. It ships as the default deploy path in Rails 8 and runs HEY in production, so it has had real traffic through it for a while.
+
+The flow from the [installation docs](https://kamal-deploy.org/docs/installation/) is straightforward. `kamal setup` connects to your servers over SSH, installs Docker if it's missing, builds your image, pushes it to a registry, pulls it on each server, and boots kamal-proxy on ports 80 and 443. It then starts a container tagged with your current git hash, waits for `GET /up` to return 200, tells the proxy to switch traffic, stops the old container, and prunes what's left. After that first run, `kamal deploy` does the same thing without the setup steps.
+
+There is no server-side state beyond Docker and the proxy. If you can SSH in and run `docker`, Kamal can deploy there.
+
+The current release is 2.12, from June 2026, which added OpenTelemetry output for deploy logs, a `--raw` flag on `exec`, and `--lock-wait` for retrying the deploy lock.
+
+## What Haloy Is
+
+Haloy is a Go CLI paired with two daemons on the server. `haloyd` handles deployments, health checks, certificates, and container discovery. `haloy-proxy` owns ports 80 and 443 and keeps serving traffic while `haloyd` restarts or upgrades. The [architecture page](/docs/architecture) has the full picture.
+
+`haloy deploy` builds the image on your machine, asks `haloyd` which layers it already has, uploads the ones it doesn't, starts the new container, waits for it to pass health checks, and swaps the route. The CLI never opens an SSH session. It authenticates to the daemon's HTTPS API with a token.
+
+## What They Agree On
+
+Before the differences, it's worth being clear about how much overlap there is. Both tools:
+
+- Use one YAML file per app and one command to deploy
+- Treat a Docker image as the unit of deployment
+- Ship their own reverse proxy instead of asking you to configure Nginx or Traefik
+- Do zero-downtime swaps by starting the new container before stopping the old one
+- Are CLI only, with no web dashboard
+- Run several apps on one server with host-based routing
+- Skip overlay networks entirely (I wrote about [why that's a feature](/blog/overlay-networks-when-you-need-them))
+- Have deploy hooks for notifications and custom build steps
+
+If you like the Kamal model, you will probably like Haloy, and the other way round. The rest of this post is about the trade-offs inside that shared shape.
+
+## Key Differences
+
+### SSH versus a daemon
+
+This is the root of most other differences.
+
+Kamal needs root SSH access from every machine that deploys. For a solo developer that's your laptop. For a team it's every laptop plus CI, each with a key that can do anything on the box. In return, the server has nothing extra on it. There is no agent to upgrade and no API to secure.
+
+Haloy needs an API token and HTTPS access to `haloyd`. Tokens are scoped to the Haloy API, which is a smaller surface than a root shell, and they're easy to rotate and hand to CI. The cost is that `haloyd` and `haloy-proxy` are two more processes you run and keep updated.
+
+What you get for running them is a server that does things between deploys. `haloyd` watches Docker events, restarts failed containers, pulls unhealthy replicas out of rotation, and renews certificates before they expire. With Kamal, your container restart policy and whatever monitoring you bring are what's looking after the app once the deploy finishes. That is the design, and for a lot of people it's the right one. It's just a different answer to who is responsible for the server at 3am.
+
+### Getting the image to the server
+
+Kamal requires a registry. Build, push, pull. If your CI already pushes to GitHub Container Registry or Docker Hub this is zero extra work, and it has one nice side effect: Kamal builds from a clean git clone by default and tags the image with the commit hash, so the thing on the server always matches a commit. You can opt out with `context: .` in the builder config if you want uncommitted changes to ship.
+
+Haloy skips the registry. The CLI parses the image tar, checks which layers the server already has, and uploads the rest. After the first deploy, most deploys move a few megabytes. I wrote up the mechanics in [Docker Deploys Without a Registry](/blog/docker-deploys-without-registry). If you'd rather keep a registry in the loop, Haloy will pull from one instead. That's a config change, not a different workflow.
+
+### One config file, two shapes
+
+A typical `config/deploy.yml` from `kamal init`, trimmed:
+
+<Code lang="yaml" code={`
+  service: my-app
+  image: my-user/my-app
+  servers:
+    web:
+      - 192.168.0.1
+    job:
+      hosts:
+        - 192.168.0.1
+      cmd: bin/jobs
+  proxy:
+    ssl: true
+    host: app.example.com
+  registry:
+    username: my-user
+    password:
+      - KAMAL_REGISTRY_PASSWORD
+  env:
+    secret:
+      - RAILS_MASTER_KEY
+    clear:
+      DB_HOST: 192.168.0.2
+  builder:
+    arch: amd64
+`} />
+
+The equivalent `haloy.yaml`:
+
+<Code lang="yaml" code={`
+  name: my-app
+  server: haloy.example.com
+  domains:
+    - domain: app.example.com
+  env:
+    - name: RAILS_MASTER_KEY
+      from:
+        env: RAILS_MASTER_KEY
+    - name: DB_HOST
+      value: 192.168.0.2
+`} />
+
+Both are short. The Kamal file carries a registry block and a builder block because the registry is part of the flow. The Haloy file carries a `server` field because the CLI talks to an API rather than an IP address over SSH.
+
+The bigger structural difference is roles versus targets. Kamal's `servers` block defines roles, and a role can override `cmd`, so the same image runs as a web server on one role and a job runner on another. Haloy uses [targets](/docs/multi-server-deployments): named deployments that inherit from the root config and override what they need. A target without `domains` isn't routed through the proxy and deploys with the `replace` strategy, which is how you run workers. Haloy has no per-target command override, so a worker usually gets its own image through `images` and `image_key`, or a Dockerfile whose default command is the worker.
+
+Targets also cover what Kamal calls destinations. Staging and production live in one file as two targets, each with its own server, domains, image tag, and replica count.
+
+### TLS on more than one server
+
+This is the clearest functional gap, and it goes Haloy's way.
+
+Kamal's `ssl: true` [requires a single server](https://kamal-deploy.org/docs/configuration/proxy/). The proxy on that one host handles the Let's Encrypt exchange. Once you have two web hosts, the docs tell you to put a load balancer in front and either terminate TLS there or hand kamal-proxy a certificate through `certificate_pem` and `private_key_pem`. That works, but it means the moment you add a second server you also add a load balancer and a certificate workflow.
+
+Haloy runs a proxy on every server, and each `haloyd` requests its own certificates. Two targets on two servers with two domains each get HTTPS on the first deploy with nothing in front of them. If you want them behind one domain, you do DNS-level balancing and each server still manages its own certificate.
+
+For a single box there's no difference. Both just work.
+
+### Health checks and replicas
+
+Kamal polls `GET /up` every second until `deploy_timeout`, which defaults to 30 seconds, and stops checking once the container is up. The path and interval are configurable, but `/up` is the convention and Rails provides it out of the box.
+
+Haloy checks `health_check_path`, which defaults to `/`, and adds `min_ready_seconds`: a container has to stay healthy for that long after its first passing check before it takes traffic. That catches the app that boots, passes one check, and falls over when the first real request hits the database. Haloy also has `replicas`, so one target can run three copies behind the built-in load balancer and roll them one at a time. Kamal scales by adding hosts to a role rather than running copies on the same host.
+
+### Rollbacks
+
+`kamal rollback <version>` restarts a container from an image that is still on the host. Nothing is downloaded. The catch is retention: old containers are [pruned after 3 days](https://kamal-deploy.org/docs/commands/rollback/) when you deploy, so a bad release discovered on Monday from a Friday deploy may have nothing to roll back to.
+
+Haloy keeps the last few images per app, six by default, and `haloy rollback` picks from those. Retention is count-based rather than time-based, so it doesn't matter how long ago the previous deploy was. There's also a registry strategy if you'd rather roll back from tags and save disk. Details in [Rollbacks](/docs/rollbacks).
+
+### Secrets
+
+Kamal covers more providers, and I'd rather say that plainly than dance around it. Its [secrets helpers](https://kamal-deploy.org/docs/commands/secrets/) read from 1Password, Bitwarden, Bitwarden Secrets Manager, LastPass, AWS Secrets Manager, GCP Secret Manager, Doppler, and Passbolt. You wire them into `.kamal/secrets` with command substitution, Kamal fetches them on your machine, and the values are written to an env file on the host that the container reads.
+
+Haloy supports [1Password and SOPS](/docs/secret-providers). The CLI resolves the references before it calls the server, so secrets travel inside the deploy request over HTTPS and the server never needs provider credentials. Same client-side model as Kamal, fewer adapters. If you live in Doppler or AWS Secrets Manager today, Kamal has you covered and Haloy doesn't yet.
+
+### Databases and supporting services
+
+Kamal has [accessories](https://kamal-deploy.org/docs/configuration/accessories/): a Postgres or Redis defined in the same `deploy.yml`, booted with `kamal accessory boot`, with files, directories, and volumes managed for you. They're deliberately outside the deploy cycle. A normal `kamal deploy` doesn't touch them, and they don't get zero-downtime updates.
+
+Haloy has no special concept for this. A database is a target like any other, with a volume and the `replace` strategy, and you deploy it with the same command. The [databases guide](/docs/databases) walks through Postgres, MySQL, Redis, and a backup setup. Accessories are more integrated; targets are more uniform. I don't think either is obviously right.
+
+### Installing the CLI
+
+Kamal is a Ruby gem. On a Rails team that's already there. On a Go or Node project it means a Ruby toolchain for one tool, or the Docker wrapper that the Kamal docs note has some limitations.
+
+Haloy is a single Go binary. Install it with the curl script, Homebrew, npm, or `go install`, and that's the whole dependency.
+
+## When Kamal Makes Sense
+
+- **Rails applications.** It's the default, the `/up` endpoint is already there, and the whole ecosystem assumes it.
+- **You already push to a registry from CI.** The registry requirement costs you nothing.
+- **You want nothing on the server but your app.** If that's a hard rule, Kamal honors it and Haloy doesn't.
+- **You need a secrets provider Haloy doesn't support.** Doppler, AWS, GCP, Bitwarden, LastPass, Passbolt.
+- **You want the track record.** Kamal has been running HEY in production and has a large user base behind it.
+
+## When Haloy Makes Sense
+
+- **You don't have a registry and don't want one.** Build locally, upload the layers, done.
+- **Several servers, each with its own HTTPS.** No load balancer and no certificate juggling.
+- **Your stack isn't Ruby.** One binary, no toolchain.
+- **You want the server to look after containers between deploys.** Restarts, health-based rotation, and certificate renewal are handled by `haloyd`.
+- **Staging and production in one file.** Targets with inheritance instead of separate destination files.
+- **You work with AI coding agents.** Haloy ships [agent skills](/docs/agent-skills) for generating Dockerfiles and config.
+
+## The Honest Take
+
+Kamal is older, more widely used, and backed by a company that runs its own products on it. Its "nothing on the server" model is a legitimate design choice, not a gap, and if you've already got a registry and CI pushing to it, Kamal fits right in. Add that it covers more secret providers, and there's a real case for it well beyond the Rails world.
+
+Haloy exists for the case Kamal doesn't optimize for: you'd rather not run a registry, you have more than one server and want each to handle its own HTTPS, and you're fine with a small daemon on the box in exchange for it doing more of the work. If that's you, Haloy is the shorter path. If it isn't, Kamal is a good tool and I'd happily point you at it.
